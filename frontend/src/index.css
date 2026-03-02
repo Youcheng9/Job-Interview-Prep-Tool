@@ -1,70 +1,187 @@
-/* :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+@import "tailwindcss";
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&family=Exo+2:ital,wght@0,100..900;1,100..900&display=swap');
 
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+/* ── Design Tokens ─────────────────────────────────────────────────── */
+:root {
+  --bg:        #030712;
+  --surface:   #0a0f1e;
+  --surface2:  #0f1629;
+  --border:    #1e2d4a;
+  --border2:   #0d9488;
+  --cyan:      #0d9488;
+  --cyan-dim:  #0f766e;
+  --cyan-glow: rgba(13,148,136,0.25);
+  --amber:     #f59e0b;
+  --amber-dim: rgba(245,158,11,0.15);
+  --red:       #ef4444;
+  --green:     #22c55e;
+  --text:      #e2e8f0;
+  --muted:     #64748b;
+  --font-head: 'Rajdhani', sans-serif;
+  --font-mono: 'Share Tech Mono', monospace;
+  --font-body: 'Exo 2', sans-serif;
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
-}
+/* ── Base ───────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
 
 body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.6;
   min-height: 100vh;
+  overflow-x: hidden;
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+/* Scanline overlay */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.05) 2px,
+    rgba(0,0,0,0.05) 4px
+  );
+  pointer-events: none;
+  z-index: 9999;
 }
 
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
+/* ── Typography ─────────────────────────────────────────────────────── */
+h1,h2,h3,h4 {
+  font-family: var(--font-head);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.mono { font-family: var(--font-mono); }
+
+/* ── Glitch animation ───────────────────────────────────────────────── */
+@keyframes glitch {
+  0%,100% { clip-path: inset(0 0 100% 0); transform: translate(0); }
+  10%      { clip-path: inset(10% 0 85% 0); transform: translate(-2px, 1px); }
+  20%      { clip-path: inset(40% 0 50% 0); transform: translate(2px, -1px); }
+  30%      { clip-path: inset(70% 0 20% 0); transform: translate(-1px, 2px); }
+  40%      { clip-path: inset(20% 0 70% 0); transform: translate(1px, -2px); }
+  50%      { clip-path: inset(60% 0 35% 0); transform: translate(0); }
+}
+
+@keyframes flicker {
+  0%,100% { opacity: 1; }
+  92%     { opacity: 1; }
+  93%     { opacity: 0.6; }
+  94%     { opacity: 1; }
+  96%     { opacity: 0.8; }
+  97%     { opacity: 1; }
+}
+
+@keyframes pulse-border {
+  0%,100% { border-color: var(--border); }
+  50%     { border-color: var(--cyan); box-shadow: 0 0 12px var(--cyan-glow); }
+}
+
+@keyframes scan-line {
+  0%   { transform: translateY(-100%); }
+  100% { transform: translateY(100vh); }
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes score-fill {
+  from { width: 0%; }
+  to   { width: var(--target); }
+}
+
+.animate-fade-up { animation: fade-up 0.5s ease both; }
+.animate-flicker { animation: flicker 8s infinite; }
+
+/* ── Utility classes ────────────────────────────────────────────────── */
+.glow-cyan  { text-shadow: 0 0 12px var(--cyan), 0 0 24px rgba(13,148,136,0.4); }
+.glow-amber { text-shadow: 0 0 12px var(--amber), 0 0 24px rgba(245,158,11,0.4); }
+
+.border-glow {
+  border: 1px solid var(--border);
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+.border-glow:hover {
+  border-color: var(--cyan);
+  box-shadow: 0 0 20px var(--cyan-glow), inset 0 0 20px rgba(13,148,136,0.03);
+}
+
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  position: relative;
+}
+
+/* Corner brackets */
+.panel::before, .panel::after {
+  content: '';
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-color: var(--cyan);
+  border-style: solid;
+}
+.panel::before { top: -1px; left: -1px; border-width: 2px 0 0 2px; }
+.panel::after  { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; }
+
+/* ── Scrollbar ──────────────────────────────────────────────────────── */
+::-webkit-scrollbar       { width: 4px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--cyan-dim); border-radius: 2px; }
+
+/* ── Buttons ────────────────────────────────────────────────────────── */
+.btn-primary {
+  font-family: var(--font-head);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  background: transparent;
+  border: 1px solid var(--cyan);
+  color: var(--cyan);
+  padding: 10px 28px;
   cursor: pointer;
-  transition: border-color 0.25s;
+  position: relative;
+  overflow: hidden;
+  transition: color 0.2s;
+  clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
 }
-button:hover {
-  border-color: #646cff;
+.btn-primary::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--cyan);
+  transform: translateX(-100%);
+  transition: transform 0.25s ease;
+  z-index: -1;
 }
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
-}
+.btn-primary:hover { color: var(--bg); }
+.btn-primary:hover::before { transform: translateX(0); }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
-} */
-
-@import "tailwindcss";
+.btn-ghost {
+  font-family: var(--font-head);
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  padding: 8px 20px;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
+  clip-path: polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%);
+}
+.btn-ghost:hover { color: var(--text); border-color: var(--border2); }
