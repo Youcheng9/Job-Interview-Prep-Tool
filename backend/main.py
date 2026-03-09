@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from backend.routers.dbcheck import router as db_router
 
 app = FastAPI(title="InterviewPrep API")
 
@@ -23,3 +24,5 @@ async def health_check():
 from .routers.questions import router as questions_router
 
 app.include_router(questions_router)
+
+app.include_router(db_router)
