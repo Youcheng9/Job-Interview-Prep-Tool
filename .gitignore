@@ -1,2 +1,13 @@
-.venv
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Environment variables
 backend/.env
+
+# Database
+*.db
+
+# Alembic cache
+backend/migrations/__pycache__/

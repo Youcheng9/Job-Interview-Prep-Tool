@@ -1,0 +1,10 @@
+[
+  {
+    "role": "SWE",
+    "prompt": "Explain the difference between a process and a thread.",
+    "rubric": {
+      "ideal_answer": "A process has its own address space; a thread is a lightweight execution unit within a process sharing memory.",
+      "keywords": ["address space", "memory", "context switch", "shared", "lightweight"]
+    }
+  }
+]

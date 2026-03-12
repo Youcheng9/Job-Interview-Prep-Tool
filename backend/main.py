@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from backend.routers.dbcheck import router as db_router
+from backend.routers.scoring import router as scoring_router
 
 app = FastAPI(title="InterviewPrep API")
 
@@ -26,3 +27,5 @@ from .routers.questions import router as questions_router
 app.include_router(questions_router)
 
 app.include_router(db_router)
+
+app.include_router(scoring_router)
