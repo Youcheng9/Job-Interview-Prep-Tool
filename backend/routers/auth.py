@@ -2,6 +2,7 @@
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from fastapi.security import OAuth2PasswordRequestForm
 
 from backend.models.db import get_db
 from backend.models.models import User
@@ -54,26 +55,24 @@ def register(payload: RegisterRequest, db: Session = Depends(get_db)):
 
 
 @router.post("/login", response_model=AuthResponse)
-def login(payload: LoginRequest, db: Session = Depends(get_db)):
+def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     """
-    Login an existing user.
+    OAuth2-compatible login endpoint.
 
-    Steps:
-    1. Find user by email
-    2. Verify password
-    3. If valid → return JWT
+    Swagger UI's Authorize button uses this flow:
+    - It sends form fields: username, password
+    - We treat username as the user's email
     """
+    # Swagger calls it "username", but we're using email as the username
+    email = form_data.username
+    password = form_data.password
 
-    # 1️. Find user
-    user = db.query(User).filter(User.email == payload.email).first()
+    user = db.query(User).filter(User.email == email).first()
     if not user:
         raise HTTPException(status_code=401, detail="Invalid email or password")
 
-    # 2️. Verify password
-    if not verify_password(payload.password, user.password_hash):
+    if not verify_password(password, user.password_hash):
         raise HTTPException(status_code=401, detail="Invalid email or password")
 
-    # 3️. Generate token
     token = create_access_token(user.email)
-
     return AuthResponse(access_token=token)

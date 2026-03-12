@@ -8,3 +8,8 @@ alembic
 bcrypt
 python-jose[cryptography]
 pydantic[email]
+python-multipart
+
+sentence-transformers
+numpy
+scikit-learn
