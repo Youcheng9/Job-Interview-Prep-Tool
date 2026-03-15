@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 
 from backend.models.db import get_db
 from backend.models.models import Question
+from backend.schemas.questions import QuestionItem, QuestionsResponse
 
 # the code explanantion:
 # 'prefix' means all URLs in this file start with /questions 
@@ -18,7 +19,7 @@ router = APIRouter(prefix="/questions", tags=["questions"])
 # # the URL is just "/questions"
 # 'role: str | None = None' makes 'role' an OPTIONAL query 
 # #parameter (e.g., /questions?role=admin)
-@router.get("")
+@router.get("", response_model=QuestionsResponse)
 def list_questions(role: str | None = None, db: Session = Depends(get_db)):
     q = db.query(Question)
     if role:
@@ -27,15 +28,14 @@ def list_questions(role: str | None = None, db: Session = Depends(get_db)):
     rows = q.order_by(Question.id.asc()).all()
 
     # Return a simple JSON shape
-    return {
-        "items": [
-            {
-                "id": r.id,
-                "role": r.role,
-                "prompt": r.prompt,
-                "rubric": r.rubric,
-            }
-            for r in rows
-        ]
-    }
+    return QuestionsResponse(
+    items=[
+        QuestionItem(
+            id=r.id,
+            role=r.role,
+            prompt=r.prompt
+        )
+        for r in rows
+    ]
+)
                                        

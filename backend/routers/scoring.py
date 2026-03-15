@@ -22,29 +22,42 @@ def submit_answer(
 
     if q.role != payload.role:
         raise HTTPException(status_code=400, detail="Role does not match question role")
+    try:
+        # 1) Save the user's answer first so we have an answer_id to attach a score to
+        ans = Answer(user_id=user.id, question_id=q.id, answer_text=payload.answer_text)
+        db.add(ans)
+        db.flush()  # assigns ans.id without committing yet
 
-    # 1) Save the user's answer first so we have an answer_id to attach a score to
-    ans = Answer(user_id=user.id, question_id=q.id, answer_text=payload.answer_text)
-    db.add(ans)
-    db.flush()  # assigns ans.id without committing yet
+        # 2) Compute real scores using the question's rubric
+        # This returns a per-dimension dict, an overall score (0-100), and a feedback dict.
+        
+        scores_dict, overall_int, feedback = compute_scores(payload.answer_text, q.rubric)
 
-    # 2) Compute real scores using the question's rubric
-    # This returns a per-dimension dict, an overall score (0-100), and a feedback dict.
-    scores_dict, overall_int, feedback = compute_scores(payload.answer_text, q.rubric)
+        # 3) Save the score linked to this answer
+        sc = Score(answer_id=ans.id, scores=scores_dict, overall=overall_int, feedback=feedback)
+        db.add(sc)
 
-    # 3) Save the score linked to this answer
-    sc = Score(answer_id=ans.id, scores=scores_dict, overall=overall_int, feedback=feedback)
-    db.add(sc)
+        # 4) Commit once at the end (saves Answer + Score together)
+        db.commit()
 
-    # 4) Commit once at the end (saves Answer + Score together)
-    db.commit()
-
-    # 5) Return the computed score to the client
-    return SubmitAnswerResponse(
-        answer_id=ans.id,
-        question_id=q.id,
-        role=payload.role,
-        overall=overall_int,
-        scores=scores_dict,
-        feedback=feedback,
-    )
+        # 5) Return the computed score to the client
+        return SubmitAnswerResponse(
+            answer_id=ans.id,
+            question_id=q.id,
+            role=payload.role,
+            overall=overall_int,
+            scores=scores_dict,
+            feedback=feedback,
+        )
+    
+    except Exception:
+        # if anything fails, rollback to prevents half-finished DB writes
+        db.rollback()
+        
+        # Return a clean error message instead of exposing an internal traceback
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to score answer",
+        )
+        
+        
