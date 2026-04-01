@@ -163,7 +163,18 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 
   if (!res.ok) {
     const err = await res.text();
-    throw new Error(err || `HTTP ${res.status}`);
+    let message = err || `HTTP ${res.status}`;
+
+    try {
+      const parsed = JSON.parse(err) as { detail?: string };
+      if (parsed.detail) {
+        message = parsed.detail;
+      }
+    } catch {
+      // Keep the raw text when the backend does not return JSON.
+    }
+
+    throw new Error(message);
   }
 
   return res.json() as Promise<T>;
@@ -175,6 +186,10 @@ export function setToken(token: string) {
 
 export function getToken() {
   return localStorage.getItem(TOKEN_KEY);
+}
+
+export function isAuthenticated() {
+  return Boolean(getToken());
 }
 
 export function clearToken() {

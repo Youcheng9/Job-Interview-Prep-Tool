@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import { getHistory, type AnswerRecord, type Role } from "../../lib/api";
+import { Link, useNavigate } from "react-router-dom";
+import { clearToken, getHistory, isAuthenticated, type AnswerRecord, type Role } from "../../lib/api";
 
 const ROLE_COLORS: Record<Role, string> = {
   swe: "#0d9488",
@@ -234,15 +234,35 @@ function HistoryRow({ record, index }: { record: AnswerRecord; index: number }) 
 }
 
 export default function HistoryPage() {
+  const navigate = useNavigate();
   const [records, setRecords] = useState<AnswerRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<Role | "all">("all");
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!isAuthenticated()) {
+      navigate("/auth?next=%2Fhistory", { replace: true });
+      return;
+    }
+
     getHistory()
       .then(setRecords)
+      .catch((err) => {
+        const message = err instanceof Error ? err.message : "Failed to load history.";
+        const normalizedMessage = message.toLowerCase();
+        if (
+          normalizedMessage.includes("not authenticated") ||
+          normalizedMessage.includes("could not validate credentials")
+        ) {
+          clearToken();
+          navigate("/auth?next=%2Fhistory", { replace: true });
+          return;
+        }
+        setError(message);
+      })
       .finally(() => setLoading(false));
-  }, []);
+  }, [navigate]);
 
   const filtered =
     filter === "all" ? records : records.filter((r) => r.question.role === filter);
@@ -414,6 +434,33 @@ export default function HistoryPage() {
             }}
           >
             FETCHING SESSION DATA...
+          </div>
+        ) : error ? (
+          <div
+            style={{
+              textAlign: "center",
+              padding: "48px 24px",
+              border: "1px solid rgba(239,68,68,0.3)",
+              background: "rgba(239,68,68,0.08)",
+            }}
+          >
+            <div
+              className="mono"
+              style={{
+                fontSize: "12px",
+                letterSpacing: "0.15em",
+                color: "#fca5a5",
+                marginBottom: "14px",
+              }}
+            >
+              HISTORY UNAVAILABLE
+            </div>
+            <div style={{ color: "var(--muted)", marginBottom: "16px" }}>{error}</div>
+            <Link to="/auth?next=%2Fhistory" style={{ textDecoration: "none" }}>
+              <button className="btn-primary" style={{ fontSize: "12px" }}>
+                Reauthenticate
+              </button>
+            </Link>
           </div>
         ) : filtered.length === 0 ? (
           <div

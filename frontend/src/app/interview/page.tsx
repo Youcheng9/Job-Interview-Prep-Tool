@@ -2,7 +2,14 @@ import { useState, useEffect, useRef } from "react";
 import { useSearchParams, useNavigate, Link } from "react-router-dom";
 import { ScoreCard } from "../../components/ScoreCard";
 import { FeedbackPanel } from "../../components/FeedbackPanel";
-import { getQuestions, submitAnswer, type Question, type ScoreResult, type Role } from "../../lib/api";
+import {
+  clearToken,
+  getQuestions,
+  isAuthenticated,
+  submitAnswer,
+  type Question,
+  type ScoreResult,
+} from "../../lib/api";
 
 // Typing animation for question text
 function TypedText({ text }: { text: string }) {
@@ -73,7 +80,8 @@ type Phase = "question" | "submitting" | "result";
 export default function InterviewPage() {
   const [params] = useSearchParams();
   const navigate = useNavigate();
-  const role = (params.get("role") ?? "swe") as Role;
+  const roleParam = params.get("role");
+  const role = roleParam === "data" || roleParam === "pm" || roleParam === "behavioral" ? roleParam : "swe";
 
   const [questions, setQuestions] = useState<Question[]>([]);
   const [qIndex, setQIndex] = useState(0);
@@ -82,6 +90,7 @@ export default function InterviewPage() {
   const [score, setScore] = useState<ScoreResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [charCount, setCharCount] = useState(0);
+  const [authed, setAuthed] = useState(isAuthenticated());
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
@@ -95,14 +104,29 @@ export default function InterviewPage() {
 
   async function handleSubmit() {
     if (!question || answer.trim().length < 20) return;
+    if (!authed) {
+      navigate(`/auth?next=${encodeURIComponent(`/interview?role=${role}`)}`);
+      return;
+    }
     setPhase("submitting");
     setError(null);
     try {
-      const result = await submitAnswer(question.id, answer);
+      const result = await submitAnswer(question.id, answer, role);
       setScore(result);
       setPhase("result");
-    } catch {
-      setError("Scoring failed. Please retry.");
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Scoring failed. Please retry.";
+      const normalizedMessage = message.toLowerCase();
+      if (
+        normalizedMessage.includes("not authenticated") ||
+        normalizedMessage.includes("could not validate credentials")
+      ) {
+        clearToken();
+        setAuthed(false);
+        navigate(`/auth?next=${encodeURIComponent(`/interview?role=${role}`)}`);
+        return;
+      }
+      setError(message);
       setPhase("question");
     }
   }
@@ -270,6 +294,44 @@ export default function InterviewPage() {
             }}
           >
             ERROR: {error}
+          </div>
+        )}
+
+        {!authed && (
+          <div
+            className="panel animate-fade-up"
+            style={{
+              marginBottom: "20px",
+              padding: "18px 20px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: "18px",
+            }}
+          >
+            <div>
+              <div
+                className="mono"
+                style={{
+                  fontSize: "11px",
+                  letterSpacing: "0.14em",
+                  color: "var(--amber)",
+                  marginBottom: "6px",
+                }}
+              >
+                SCORE LOCKED
+              </div>
+              <div style={{ color: "var(--muted)", fontSize: "13px", lineHeight: 1.6 }}>
+                Questions are public, but scoring and session history require a signed-in account.
+              </div>
+            </div>
+            <button
+              className="btn-primary"
+              onClick={() => navigate(`/auth?next=${encodeURIComponent(`/interview?role=${role}`)}`)}
+              style={{ fontSize: "12px", flexShrink: 0 }}
+            >
+              Sign In
+            </button>
           </div>
         )}
 

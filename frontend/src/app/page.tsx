@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { RoleSelector } from "../components/RoleSelector";
-import type { Role } from "../lib/api";
+import { clearToken, isAuthenticated, type Role } from "../lib/api";
 
 // Animated grid background
 function GridBackground() {
@@ -59,6 +59,7 @@ function GridBackground() {
 
 export default function HomePage() {
   const [role, setRole] = useState<Role | null>(null);
+  const [authed, setAuthed] = useState(isAuthenticated());
   const navigate = useNavigate();
 
   const handleStart = () => {
@@ -88,6 +89,40 @@ export default function HomePage() {
       >
         {/* Header */}
         <div style={{ marginBottom: "56px", textAlign: "center" }}>
+          <div
+            className="animate-fade-up"
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              gap: "12px",
+              marginBottom: "18px",
+            }}
+          >
+            <Link to="/history" style={{ textDecoration: "none" }}>
+              <button className="btn-ghost" style={{ fontSize: "11px" }}>
+                Session Log
+              </button>
+            </Link>
+            {authed ? (
+              <button
+                className="btn-ghost"
+                onClick={() => {
+                  clearToken();
+                  setAuthed(false);
+                }}
+                style={{ fontSize: "11px" }}
+              >
+                Sign Out
+              </button>
+            ) : (
+              <Link to="/auth" style={{ textDecoration: "none" }}>
+                <button className="btn-ghost" style={{ fontSize: "11px" }}>
+                  Sign In
+                </button>
+              </Link>
+            )}
+          </div>
+
           {/* System label */}
           <div
             className="mono animate-fade-up"
@@ -132,6 +167,19 @@ export default function HomePage() {
           >
             AI-powered interview analysis. Submit your answer — receive a
             multi-dimensional score with precision feedback.
+          </p>
+          <p
+            className="animate-fade-up"
+            style={{
+              fontSize: "12px",
+              color: authed ? "var(--green)" : "var(--muted)",
+              letterSpacing: "0.08em",
+              marginTop: "14px",
+              animationDelay: "220ms",
+              textTransform: "uppercase",
+            }}
+          >
+            {authed ? "Authenticated for scoring and history" : "Browse questions publicly, sign in to save scores"}
           </p>
         </div>
 
