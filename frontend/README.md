@@ -1,324 +1,233 @@
-# Interview Intel — Frontend
+# Interview Intel Frontend
 
-React + TypeScript frontend for the Interview Prep Platform. AI-powered interview practice with multi-dimensional scoring and session history.
+React + TypeScript frontend for the InterviewPrep platform.
 
----
+This app lets users:
 
-## Tech Stack
+- choose an interview track
+- practice questions by role
+- register or sign in
+- submit answers for backend scoring
+- view saved session history
 
-| Tool | Purpose |
-|------|---------|
-| React 18 + TypeScript | UI framework |
-| Vite | Build tool + dev server |
-| React Router v6 | Client-side routing |
-| Tailwind CSS v4 | Utility styling |
-| Recharts | Score visualization (radar chart) |
-| localStorage | JWT token persistence |
+## Stack
 
----
+- React 19
+- TypeScript
+- Vite
+- React Router
+- Tailwind CSS v4
 
-## Prerequisites
+## Routes
 
-- Node.js v20+
-- npm v9+
-- Backend running on `http://localhost:8000` (see backend README)
+| Path | Purpose | Auth |
+|---|---|---|
+| `/` | Home and role selection | No |
+| `/auth` | Login / registration | No |
+| `/interview?role=swe` | Interview session | Questions are public, scoring requires auth |
+| `/history` | Session history | Yes |
 
----
+Frontend role query params are:
 
-## Getting Started
+- `swe`
+- `data`
+- `pm`
+- `behavioral`
 
-### 1. Clone and install
+The API layer maps those values to the backend role values automatically.
 
-```bash
-git clone https://github.com/your-org/interview-prep.git
-cd interview-prep/frontend
-npm install
+## Project Structure
+
+```txt
+frontend/
+├── src/
+│   ├── app/
+│   │   ├── page.tsx
+│   │   ├── auth/page.tsx
+│   │   ├── interview/page.tsx
+│   │   └── history/page.tsx
+│   ├── components/
+│   ├── lib/api.ts
+│   ├── App.tsx
+│   ├── main.tsx
+│   └── index.css
+├── package.json
+└── README.md
 ```
 
-### 2. Configure environment
+## API Integration
 
-```bash
-cp .env.example .env
-```
+All backend communication goes through `src/lib/api.ts`.
 
-`.env` defaults:
+Do not add raw `fetch()` calls directly in page components unless there is a strong reason to extend the API layer first.
+
+### Base URL
+
+The frontend reads the backend URL from:
 
 ```env
 VITE_API_URL=http://localhost:8000
 ```
 
-Only change this if your backend runs on a different port.
+If `VITE_API_URL` is missing, it defaults to `http://localhost:8000`.
 
-### 3. Start dev server
+### Token Storage
+
+JWTs are stored in `localStorage` under the key `token`.
+
+Available helpers:
+
+- `setToken(token)`
+- `getToken()`
+- `clearToken()`
+- `isAuthenticated()`
+
+### Backend Contract
+
+The frontend is wired to this backend behavior:
+
+- `POST /auth/register`
+  - JSON body: `{ "email": "...", "password": "..." }`
+- `POST /auth/login`
+  - `application/x-www-form-urlencoded`
+  - fields: `username`, `password`
+- `GET /questions?role=SWE`
+  - returns `{ items: [...] }`
+- `POST /scoring/submit`
+  - requires `Authorization: Bearer <token>`
+  - JSON body:
+
+```json
+{
+  "question_id": 1,
+  "role": "SWE",
+  "answer_text": "..."
+}
+```
+
+- `GET /history`
+  - requires `Authorization: Bearer <token>`
+  - returns `{ items: [...] }`
+
+### Current Normalization
+
+The frontend keeps some UI-friendly types that differ from the raw backend payloads.
+
+Examples:
+
+- question `prompt` is normalized to frontend `text`
+- backend role values like `DataScience` are normalized to frontend `data`
+- history items are reshaped into the existing UI model
+
+## Local Development
+
+### Prerequisites
+
+- Node.js 20+
+- npm 9+
+- backend API running on `http://localhost:8000`
+
+### Install
+
+```bash
+cd frontend
+npm install
+```
+
+### Configure
+
+Create `frontend/.env` if you want to override the default backend URL:
+
+```env
+VITE_API_URL=http://localhost:8000
+```
+
+### Start
 
 ```bash
 npm run dev
 ```
 
-App runs at `http://localhost:5173`
+Vite runs on:
 
-> **Note:** The backend must be running and seeded before the app is usable.  
-> If questions don't load, ask your backend teammate to run:
-> ```bash
-> python -m backend.seed_questions
-> ```
+```txt
+http://localhost:5173
+```
 
----
+This matters because the backend CORS config currently allows:
 
-## Available Scripts
+- `http://localhost:5173`
+- `http://localhost:3000`
+
+## Build
 
 ```bash
-npm run dev        # Start dev server (localhost:5173)
-npm run build      # TypeScript check + production build
-npm run preview    # Preview production build locally
+npm run build
 ```
 
-> There is no separate `npm run typecheck` — TypeScript errors will surface during `npm run build`. Run the build before opening a PR.
+This runs the TypeScript build and the Vite production build.
 
----
+## User Flow
 
-## Project Structure
+### Public flow
 
-```
-src/
-├── app/                      # Route-level pages
-│   ├── page.tsx              # / — Role selection home
-│   ├── interview/
-│   │   └── page.tsx          # /interview?role=SWE
-│   └── history/
-│       └── page.tsx          # /history
-│
-├── components/
-│   ├── ScoreCard.tsx         # Ring score + animated dimension bars
-│   ├── FeedbackPanel.tsx     # Improvement tips + retry/next actions
-│   └── RoleSelector.tsx      # 4-role card grid (SWE, DS, PM, Behavioral)
-│
-├── lib/
-│   └── api.ts                # All fetch wrappers + shared TypeScript types
-│
-├── App.tsx                   # BrowserRouter + route definitions
-├── main.tsx                  # React root entry point
-└── index.css                 # Design tokens, global styles, animations
-```
+1. Open `/`
+2. Choose a role
+3. Open `/interview?role=...`
+4. Load questions from the backend
 
----
+### Authenticated flow
 
-## Routing
+1. Open `/auth`
+2. Register or sign in
+3. Submit an answer from the interview page
+4. Receive a scored result from the backend
+5. Open `/history` to review prior submissions
 
-| Path | Page | Auth required |
-|------|------|--------------|
-| `/` | Role selection | No |
-| `/interview?role=SWE` | Interview session | No (but submit requires token) |
-| `/history` | Session history | Yes — redirects if no token |
+### Redirect behavior
 
-Valid `role` query param values: `SWE`, `DataScience`, `PM`, `Behavioral`
+- if a user tries to score without a token, the frontend redirects to `/auth`
+- if a user opens `/history` without a token, the frontend redirects to `/auth`
+- if the backend rejects an expired or invalid token, the frontend clears it and sends the user back to `/auth`
 
----
+## Known Limitations
 
-## Backend Integration
+These are backend-contract limitations, not frontend bugs:
 
-All API calls live in `src/lib/api.ts`. Do not write raw `fetch` calls in components — always go through the functions exported from `api.ts`.
+- `/questions` does not currently return `difficulty`
+- `/questions` does not expose rubric hints to the frontend
+- `/history` does not currently return detailed feedback text
 
-### Base URL
-
-Reads from `VITE_API_URL` env var. Defaults to `http://localhost:8000`.
-
-### Auth
-
-JWT token is stored in `localStorage` under the key `"token"`.
-
-```ts
-import { getToken, setToken, clearToken } from "../lib/api";
-
-setToken(data.access_token);   // after login or register
-getToken();                     // read before protected requests
-clearToken();                   // on logout
-```
-
-### Key gotchas
-
-**Login sends form data, not JSON.**  
-The backend uses FastAPI's OAuth2 password form which requires `application/x-www-form-urlencoded`. The field name is `username` even though it holds an email. This is handled in `api.ts` — do not change it.
-
-**Questions are wrapped in `{ items: [] }`.**  
-The backend does not return a bare array. `getQuestions()` and `getHistory()` unwrap this automatically.
-
-**Submit requires `role` in the request body.**  
-The payload for `POST /scoring/submit` is:
-```json
-{
-  "question_id": 2,
-  "role": "SWE",
-  "answer_text": "Your answer here"
-}
-```
-
-### Public vs protected endpoints
-
-| Endpoint | Auth |
-|----------|------|
-| `GET /health` | Public |
-| `POST /auth/register` | Public |
-| `POST /auth/login` | Public |
-| `GET /questions?role=` | Public |
-| `POST /scoring/submit` | **Protected** |
-| `GET /history` | **Protected** |
-
----
-
-## API Reference
-
-### Auth
-
-```ts
-// Register — returns { access_token, token_type }
-register(email: string, password: string): Promise<AuthResponse>
-
-// Login — sends form data, returns { access_token, token_type }
-login(email: string, password: string): Promise<AuthResponse>
-```
-
-### Questions
-
-```ts
-// Returns Question[] for the given role
-getQuestions(role: Role): Promise<Question[]>
-```
-
-### Scoring
-
-```ts
-// Protected. Returns full ScoreResult
-submitAnswer(question_id: number, role: Role, answer_text: string): Promise<ScoreResult>
-```
-
-### History
-
-```ts
-// Protected. Returns HistoryItem[] sorted newest first
-getHistory(): Promise<HistoryItem[]>
-```
-
----
-
-## TypeScript Types
-
-Defined and exported from `src/lib/api.ts`:
-
-```ts
-type Role = "SWE" | "DataScience" | "PM" | "Behavioral";
-
-interface Question {
-  id: number;
-  role: Role;
-  prompt: string;
-}
-
-interface ScoreResult {
-  answer_id: number;
-  question_id: number;
-  role: Role;
-  overall: number;
-  scores: {
-    technical_depth: number;
-    clarity: number;
-    completeness: number;
-    structure: number;
-  };
-  feedback: {
-    strengths: string[];
-    weaknesses: string[];
-    missing_keywords: string[];
-    notes: {
-      similarity_raw: number;
-      keyword_coverage: number;
-      ideal_snippet: string;
-    };
-  };
-}
-
-interface HistoryItem {
-  answer_id: number;
-  question_id: number;
-  role: Role;
-  prompt: string;
-  answer_text: string;
-  created_at: string;
-  overall: number;
-  scores: {
-    technical_depth: number;
-    clarity: number;
-    completeness: number;
-    structure: number;
-  };
-}
-```
-
-Import them wherever needed:
-
-```ts
-import type { Role, Question, ScoreResult, HistoryItem } from "../lib/api";
-```
-
----
-
-## Environment Variables
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `VITE_API_URL` | `http://localhost:8000` | Backend base URL |
-
-All Vite env vars must be prefixed with `VITE_` to be accessible in the browser.
-
----
-
-## CI
-
-GitHub Actions runs on every push or PR that touches the `frontend/` directory.
-
-Pipeline: `npm ci` → `npm run build`
-
-A TypeScript error or failed build will block the PR.
-
-Workflow file: `.github/workflows/frontend.yml`
-
----
+The frontend fills those gaps with placeholders where needed so the UI can still render.
 
 ## Common Issues
 
-### App loads but questions are empty
-The backend database needs seeding. Tell your backend teammate:
-```bash
-python -m backend.seed_questions
-```
+### Questions do not load
 
-### 401 on submit or history
-Token is missing or expired. Check `localStorage` has a `"token"` key. Re-login to get a fresh token.
+Usually one of these is true:
 
-### 422 on login
-The login endpoint is receiving JSON instead of form data. Do not modify the `login()` function in `api.ts` — it already handles this correctly.
+- backend is not running
+- database migrations were not applied
+- questions were not seeded
 
-### CORS error in browser
-Frontend must run on `http://localhost:5173` (Vite default) or `http://localhost:3000`. Any other port will be blocked by the backend CORS config. Check your `.env` and that `npm run dev` is using the default port.
+### Submit or history returns 401
 
-### `localStorage` token persists after browser close
-This is intentional for MVP. To log out, call `clearToken()` or clear `localStorage` manually in DevTools.
+Usually one of these is true:
 
----
+- user is not logged in
+- token expired
+- backend JWT secret changed
 
-## Branch Strategy
+Use the auth page to sign in again.
 
-```
-main        ← stable, deployable
-dev         ← integration branch — both frontend and backend PR here
-feature/*   ← your feature branches, PR into dev
-```
+### Login returns 422
 
-Never push directly to `main`. Open a PR into `dev`, verify it works with the backend, then merge `dev` → `main` together.
+The login endpoint expects form data, not JSON. The frontend API client already handles this. Do not change login to send JSON.
 
----
+### CORS error in the browser
 
-## Contact
+Run the frontend on `5173` or `3000`. Other ports are not allowed by the backend CORS config right now.
 
-Frontend: Freeman Yiu  
-Backend: Youcheng Taing
+### Build warning about CSS `@import`
+
+There is an existing CSS warning in `src/index.css` about `@import` ordering. The app still builds successfully.
