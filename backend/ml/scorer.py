@@ -28,40 +28,9 @@ Notes:
 """
 
 from typing import List, Dict, Tuple
-import numpy as np
-from sentence_transformers import SentenceTransformer
-from sklearn.metrics.pairwise import cosine_similarity
 import re
 
-# Load model lazily to avoid startup cost in tests
-_MODEL = None
-
-
-def _load_model():
-    global _MODEL
-    if _MODEL is None:
-        # Model choice: small & fast for dev, good semantic quality.
-        _MODEL = SentenceTransformer("all-MiniLM-L6-v2")
-    return _MODEL
-
-
-def _embed_text(texts: List[str]) -> np.ndarray:
-    """
-    Embed a list of texts and return numpy array of shape (n, dim)
-    """
-    model = _load_model()
-    embs = model.encode(texts, convert_to_numpy=True, show_progress_bar=False)
-    return embs
-
-
-def _cos_sim(a: np.ndarray, b: np.ndarray) -> float:
-    """
-    Cosine similarity between two 1-D numpy vectors (returns scalar).
-    Guard against zero vectors.
-    """
-    if np.linalg.norm(a) == 0 or np.linalg.norm(b) == 0:
-        return 0.0
-    return float(cosine_similarity(a.reshape(1, -1), b.reshape(1, -1))[0, 0])
+from backend.ml.embedder import cosine_similarity_safe, embed_texts
 
 
 def _tokenize(text: str) -> List[str]:
@@ -116,10 +85,10 @@ def compute_scores(
     # 1) Semantic similarity
     # Embed both texts and compute cosine similarity in [ -1, 1 ], then map to [0,1]
     try:
-        embs = _embed_text([answer_text, ideal])
-        sim_raw = _cos_sim(embs[0], embs[1])
+        embs = embed_texts([answer_text, ideal])
+        sim_raw = cosine_similarity_safe(embs[0], embs[1])
         similarity = max(0.0, (sim_raw + 1) / 2)  # make sure non-negative and scaled 0-1
-    except Exception as e:
+    except Exception:
         # If embedding fails, fallback to zero similarity but keep service resilient
         similarity = 0.0
 
