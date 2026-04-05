@@ -3,15 +3,224 @@
     "role": "SWE",
     "prompt": "Explain the difference between a process and a thread.",
     "rubric": {
-    "ideal_answer": "A process has its own address space; threads share memory and are lighter weight.",
-    "keywords": ["address space", "shared memory", "context switch"],
+      "ideal_answer": "A process has its own memory space and system resources, while threads share the same process memory and are lighter weight to create and switch between.",
+      "keywords": ["address space", "shared memory", "context switch", "lightweight"],
       "dimension_keywords": {
-      "technical_depth": ["address space", "context switch"],
-      "clarity": ["explain", "example"],
-      "completeness": ["address space", "shared memory", "context switch"],
-      "structure": ["definition", "comparison"]
+        "technical_depth": ["address space", "context switch"],
+        "clarity": ["difference", "example"],
+        "completeness": ["address space", "shared memory", "lightweight"],
+        "structure": ["first", "second", "comparison"]
+      }
+    }
+  },
+  {
+    "role": "SWE",
+    "prompt": "What is the time complexity of binary search and why?",
+    "rubric": {
+      "ideal_answer": "Binary search runs in O(log n) time because it halves the search space on every iteration or recursive step, assuming the input is sorted.",
+      "keywords": ["O(log n)", "sorted", "halve", "search space"],
+      "dimension_keywords": {
+        "technical_depth": ["O(log n)", "search space"],
+        "clarity": ["because", "sorted"],
+        "completeness": ["O(log n)", "halve", "sorted"],
+        "structure": ["first", "then", "therefore"]
+      }
+    }
+  },
+  {
+    "role": "SWE",
+    "prompt": "How would you design a URL shortener like bit.ly?",
+    "rubric": {
+      "ideal_answer": "A URL shortener needs an API, a database mapping short codes to long URLs, unique key generation, redirect handling, caching, analytics, and considerations for scalability and collisions.",
+      "keywords": ["database", "unique key", "redirect", "scalability", "collision", "cache"],
+      "dimension_keywords": {
+        "technical_depth": ["database", "cache", "scalability"],
+        "clarity": ["components", "flow"],
+        "completeness": ["unique key", "redirect", "collision", "analytics"],
+        "structure": ["first", "next", "finally"]
+      }
+    }
+  },
+  {
+    "role": "SWE",
+    "prompt": "When would you use a hash table instead of a tree?",
+    "rubric": {
+      "ideal_answer": "A hash table is useful for fast average-case lookups and inserts when ordering is not needed, while a tree is better when sorted traversal, range queries, or worst-case guarantees matter.",
+      "keywords": ["lookup", "ordering", "range query", "average case", "sorted"],
+      "dimension_keywords": {
+        "technical_depth": ["average case", "range query"],
+        "clarity": ["instead", "when"],
+        "completeness": ["lookup", "ordering", "sorted"],
+        "structure": ["if", "whereas", "for example"]
+      }
+    }
+  },
+  {
+    "role": "DataScience",
+    "prompt": "What is the difference between precision and recall?",
+    "rubric": {
+      "ideal_answer": "Precision measures the fraction of predicted positives that are correct, while recall measures the fraction of actual positives that are captured by the model.",
+      "keywords": ["true positive", "false positive", "false negative", "predicted positives", "actual positives"],
+      "dimension_keywords": {
+        "technical_depth": ["false positive", "false negative"],
+        "clarity": ["difference", "measures"],
+        "completeness": ["predicted positives", "actual positives"],
+        "structure": ["precision", "recall", "while"]
+      }
+    }
+  },
+  {
+    "role": "DataScience",
+    "prompt": "How do you handle missing data in a dataset?",
+    "rubric": {
+      "ideal_answer": "Handling missing data depends on context and may involve removing rows or columns, imputing values, adding missingness indicators, and checking whether the missingness pattern is informative.",
+      "keywords": ["imputation", "drop rows", "drop columns", "missingness", "indicator"],
+      "dimension_keywords": {
+        "technical_depth": ["imputation", "missingness"],
+        "clarity": ["depends", "context"],
+        "completeness": ["drop rows", "drop columns", "indicator"],
+        "structure": ["first", "then", "evaluate"]
+      }
+    }
+  },
+  {
+    "role": "DataScience",
+    "prompt": "What is overfitting and how can you reduce it?",
+    "rubric": {
+      "ideal_answer": "Overfitting happens when a model learns noise in the training data and performs poorly on unseen data. It can be reduced with regularization, simpler models, cross-validation, more data, and early stopping.",
+      "keywords": ["generalization", "regularization", "cross-validation", "simpler model", "early stopping"],
+      "dimension_keywords": {
+        "technical_depth": ["regularization", "cross-validation"],
+        "clarity": ["unseen data", "poorly"],
+        "completeness": ["generalization", "simpler model", "early stopping"],
+        "structure": ["definition", "causes", "solutions"]
+      }
+    }
+  },
+  {
+    "role": "DataScience",
+    "prompt": "Why is train-test split important?",
+    "rubric": {
+      "ideal_answer": "Train-test split is important because it helps estimate how well the model generalizes to unseen data and prevents evaluating performance only on the training set.",
+      "keywords": ["generalization", "unseen data", "evaluation", "data leakage", "training set"],
+      "dimension_keywords": {
+        "technical_depth": ["data leakage", "generalization"],
+        "clarity": ["important", "estimate"],
+        "completeness": ["unseen data", "training set", "evaluation"],
+        "structure": ["because", "therefore", "for example"]
+      }
+    }
+  },
+  {
+    "role": "PM",
+    "prompt": "How would you prioritize features for a new product?",
+    "rubric": {
+      "ideal_answer": "Feature prioritization should balance user impact, business value, effort, risk, and strategic alignment using a clear framework such as RICE or impact versus effort.",
+      "keywords": ["user impact", "business value", "effort", "risk", "RICE", "strategy"],
+      "dimension_keywords": {
+        "technical_depth": ["RICE", "tradeoff"],
+        "clarity": ["framework", "criteria"],
+        "completeness": ["user impact", "business value", "effort", "risk"],
+        "structure": ["first", "next", "finally"]
+      }
+    }
+  },
+  {
+    "role": "PM",
+    "prompt": "What metrics would you use to evaluate a product launch?",
+    "rubric": {
+      "ideal_answer": "Product launch metrics depend on the goal but often include activation, adoption, retention, engagement, conversion, customer satisfaction, and operational reliability.",
+      "keywords": ["activation", "adoption", "retention", "engagement", "conversion", "satisfaction"],
+      "dimension_keywords": {
+        "technical_depth": ["north star", "leading indicator"],
+        "clarity": ["goal", "depends"],
+        "completeness": ["activation", "retention", "conversion"],
+        "structure": ["goal", "metric", "decision"]
+      }
+    }
+  },
+  {
+    "role": "PM",
+    "prompt": "How would you respond if a key product metric suddenly dropped?",
+    "rubric": {
+      "ideal_answer": "A strong response starts with validating the metric and checking instrumentation, segmenting the impact, identifying recent changes, and coordinating investigation and mitigation with relevant teams.",
+      "keywords": ["validate", "instrumentation", "segment", "recent changes", "root cause", "mitigation"],
+      "dimension_keywords": {
+        "technical_depth": ["root cause", "segment"],
+        "clarity": ["validate", "investigation"],
+        "completeness": ["instrumentation", "recent changes", "mitigation"],
+        "structure": ["first", "then", "next"]
+      }
+    }
+  },
+  {
+    "role": "PM",
+    "prompt": "How do you balance user needs with business goals?",
+    "rubric": {
+      "ideal_answer": "Balancing user needs with business goals means understanding user pain points, defining business constraints, evaluating tradeoffs, and finding solutions that create sustainable value for both sides.",
+      "keywords": ["user pain point", "business goal", "tradeoff", "constraint", "value"],
+      "dimension_keywords": {
+        "technical_depth": ["tradeoff", "constraint"],
+        "clarity": ["balance", "both sides"],
+        "completeness": ["user pain point", "business goal", "value"],
+        "structure": ["understand", "evaluate", "decide"]
+      }
+    }
+  },
+  {
+    "role": "Behavioral",
+    "prompt": "Tell me about a time you dealt with conflict on a team.",
+    "rubric": {
+      "ideal_answer": "A strong answer uses the STAR format, explains the conflict clearly, shows empathy and communication, describes concrete actions taken, and ends with a measurable or meaningful outcome.",
+      "keywords": ["STAR", "situation", "action", "communication", "outcome", "resolution"],
+      "dimension_keywords": {
+        "technical_depth": ["root cause", "tradeoff"],
+        "clarity": ["situation", "action", "outcome"],
+        "completeness": ["communication", "resolution", "outcome"],
+        "structure": ["STAR", "situation", "task", "action", "result"]
+      }
+    }
+  },
+  {
+    "role": "Behavioral",
+    "prompt": "Describe a time you failed and what you learned.",
+    "rubric": {
+      "ideal_answer": "A strong answer honestly describes the failure, takes ownership, explains what changed afterward, and shows clear reflection and growth.",
+      "keywords": ["ownership", "lesson", "reflection", "growth", "change"],
+      "dimension_keywords": {
+        "technical_depth": ["root cause", "improvement"],
+        "clarity": ["failure", "learned"],
+        "completeness": ["ownership", "lesson", "change"],
+        "structure": ["situation", "action", "result", "reflection"]
+      }
+    }
+  },
+  {
+    "role": "Behavioral",
+    "prompt": "Tell me about a time you showed leadership.",
+    "rubric": {
+      "ideal_answer": "A strong answer explains how the candidate influenced others, created clarity, made decisions, handled challenges, and delivered a positive outcome.",
+      "keywords": ["influence", "decision", "initiative", "team", "outcome"],
+      "dimension_keywords": {
+        "technical_depth": ["tradeoff", "decision"],
+        "clarity": ["leadership", "example"],
+        "completeness": ["initiative", "team", "outcome"],
+        "structure": ["context", "action", "result"]
+      }
+    }
+  },
+  {
+    "role": "Behavioral",
+    "prompt": "How do you handle tight deadlines or pressure?",
+    "rubric": {
+      "ideal_answer": "A strong answer describes prioritization, communication, time management, calm decision-making, and how quality was maintained under pressure.",
+      "keywords": ["prioritization", "communication", "time management", "pressure", "quality"],
+      "dimension_keywords": {
+        "technical_depth": ["risk", "tradeoff"],
+        "clarity": ["pressure", "handle"],
+        "completeness": ["prioritization", "communication", "quality"],
+        "structure": ["first", "then", "result"]
       }
     }
   }
-
 ]
