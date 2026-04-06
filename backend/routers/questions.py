@@ -1,5 +1,4 @@
-from fastapi import APIRouter, Depends
-from pypika import JSON
+from fastapi import APIRouter, Depends, HTTPException
 
 from sqlalchemy.orm import Session
 
@@ -38,4 +37,25 @@ def list_questions(role: str | None = None, db: Session = Depends(get_db)):
         for r in rows
     ]
 )
-                                       
+
+
+@router.get("/next", response_model=QuestionItem)
+def get_next_question(
+    role: str,
+    current_id: int | None = None,
+    db: Session = Depends(get_db),
+):
+    q = db.query(Question).filter(Question.role == role)
+
+    if current_id is not None:
+        q = q.filter(Question.id > current_id)
+
+    row = q.order_by(Question.id.asc()).first()
+    if not row:
+        raise HTTPException(status_code=404, detail="No next question found")
+
+    return QuestionItem(
+        id=row.id,
+        role=row.role,
+        prompt=row.prompt,
+    )

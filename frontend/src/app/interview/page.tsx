@@ -4,9 +4,11 @@ import { ScoreCard } from "../../components/ScoreCard";
 import { FeedbackPanel } from "../../components/FeedbackPanel";
 import {
   clearToken,
+  getHistory,
   getQuestions,
   isAuthenticated,
   submitAnswer,
+  type Role,
   type Question,
   type ScoreResult,
 } from "../../lib/api";
@@ -77,11 +79,30 @@ function DiffBadge({ level }: { level: string }) {
 
 type Phase = "question" | "submitting" | "result";
 
+const SESSION_KEY_PREFIX = "interview-session";
+
+function getSessionKey(role: Role) {
+  return `${SESSION_KEY_PREFIX}:${role}`;
+}
+
+function readSavedQuestionId(role: Role): number | null {
+  const saved = localStorage.getItem(getSessionKey(role));
+  if (!saved) return null;
+
+  const parsed = Number(saved);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function saveQuestionId(role: Role, questionId: number) {
+  localStorage.setItem(getSessionKey(role), String(questionId));
+}
+
 export default function InterviewPage() {
   const [params] = useSearchParams();
   const navigate = useNavigate();
   const roleParam = params.get("role");
   const role = roleParam === "data" || roleParam === "pm" || roleParam === "behavioral" ? roleParam : "swe";
+  const requestedQuestionId = Number(params.get("questionId"));
 
   const [questions, setQuestions] = useState<Question[]>([]);
   const [qIndex, setQIndex] = useState(0);
@@ -91,16 +112,59 @@ export default function InterviewPage() {
   const [error, setError] = useState<string | null>(null);
   const [charCount, setCharCount] = useState(0);
   const [authed, setAuthed] = useState(isAuthenticated());
+  const [completedIds, setCompletedIds] = useState<number[]>([]);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
+    setError(null);
     getQuestions(role)
-      .then(setQuestions)
+      .then((loadedQuestions) => {
+        setQuestions(loadedQuestions);
+
+        const requestedIndex = Number.isFinite(requestedQuestionId)
+          ? loadedQuestions.findIndex((item) => item.id === requestedQuestionId)
+          : -1;
+        const savedQuestionId = readSavedQuestionId(role);
+        const savedIndex =
+          savedQuestionId === null ? -1 : loadedQuestions.findIndex((item) => item.id === savedQuestionId);
+        const nextIndex = requestedIndex >= 0 ? requestedIndex : savedIndex >= 0 ? savedIndex : 0;
+
+        setQIndex(nextIndex);
+        setAnswer("");
+        setCharCount(0);
+        setScore(null);
+        setPhase("question");
+      })
       .catch(() => setError("Failed to load questions."));
-  }, [role]);
+  }, [role, requestedQuestionId]);
+
+  useEffect(() => {
+    if (!authed) {
+      setCompletedIds([]);
+      return;
+    }
+
+    getHistory()
+      .then((records) => {
+        const answeredForRole = records
+          .filter((record) => record.question.role === role)
+          .map((record) => record.question.id);
+        setCompletedIds(Array.from(new Set(answeredForRole)));
+      })
+      .catch(() => {
+        setCompletedIds([]);
+      });
+  }, [authed, role]);
 
   const question = questions[qIndex];
   const progress = questions.length ? ((qIndex + 1) / questions.length) * 100 : 0;
+
+  useEffect(() => {
+    if (!question) return;
+
+    saveQuestionId(role, question.id);
+    navigate(`/interview?role=${role}&questionId=${question.id}`, { replace: true });
+  }, [navigate, question, role]);
 
   async function handleSubmit() {
     if (!question || answer.trim().length < 20) return;
@@ -113,6 +177,7 @@ export default function InterviewPage() {
     try {
       const result = await submitAnswer(question.id, answer, role);
       setScore(result);
+      setCompletedIds((current) => (current.includes(question.id) ? current : [...current, question.id]));
       setPhase("result");
     } catch (err) {
       const message = err instanceof Error ? err.message : "Scoring failed. Please retry.";
@@ -131,13 +196,18 @@ export default function InterviewPage() {
     }
   }
 
+  function selectQuestion(index: number) {
+    setQIndex(index);
+    setAnswer("");
+    setCharCount(0);
+    setScore(null);
+    setPhase("question");
+    setTimeout(() => textareaRef.current?.focus(), 100);
+  }
+
   function handleNext() {
     if (qIndex + 1 < questions.length) {
-      setQIndex((i) => i + 1);
-      setAnswer("");
-      setScore(null);
-      setPhase("question");
-      setTimeout(() => textareaRef.current?.focus(), 100);
+      selectQuestion(qIndex + 1);
     } else {
       navigate("/history");
     }
@@ -337,6 +407,73 @@ export default function InterviewPage() {
 
         {question && (
           <>
+            <div
+              className="panel animate-fade-up"
+              style={{ padding: "18px 20px", marginBottom: "20px" }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  gap: "12px",
+                  marginBottom: "14px",
+                  flexWrap: "wrap",
+                }}
+              >
+                <div>
+                  <div
+                    className="mono"
+                    style={{
+                      fontSize: "10px",
+                      letterSpacing: "0.14em",
+                      textTransform: "uppercase",
+                      color: "var(--cyan)",
+                      marginBottom: "4px",
+                    }}
+                  >
+                    Question Navigator
+                  </div>
+                  <div style={{ fontSize: "13px", color: "var(--muted)" }}>
+                    Resume where you left off or jump to any question in this track.
+                  </div>
+                </div>
+                <div className="mono" style={{ fontSize: "11px", color: "var(--muted)" }}>
+                  {completedIds.length} completed
+                </div>
+              </div>
+
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+                {questions.map((item, index) => {
+                  const active = index === qIndex;
+                  const completed = completedIds.includes(item.id);
+
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => selectQuestion(index)}
+                      className="mono"
+                      style={{
+                        fontSize: "10px",
+                        letterSpacing: "0.12em",
+                        textTransform: "uppercase",
+                        padding: "6px 10px",
+                        border: `1px solid ${
+                          active ? "var(--cyan)" : completed ? "#22c55e66" : "var(--border)"
+                        }`,
+                        background: active ? "var(--cyan-glow)" : completed ? "#22c55e12" : "transparent",
+                        color: active ? "var(--cyan)" : completed ? "#22c55e" : "var(--muted)",
+                        cursor: "pointer",
+                      }}
+                      title={item.text}
+                    >
+                      Q{index + 1} {completed ? "Done" : ""}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
             {/* Question panel */}
             <div
               className="panel animate-fade-up"
