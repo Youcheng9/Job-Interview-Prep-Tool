@@ -4,20 +4,20 @@
 
 /* ── Design Tokens ─────────────────────────────────────────────────── */
 :root {
-  --bg:        #030712;
-  --surface:   #0a0f1e;
-  --surface2:  #0f1629;
-  --border:    #1e2d4a;
+  --bg:        #162235;
+  --surface:   #1e2d45;
+  --surface2:  #273956;
+  --border:    #c9cfd9;
   --border2:   #0d9488;
   --cyan:      #0d9488;
   --cyan-dim:  #0f766e;
-  --cyan-glow: rgba(13,148,136,0.25);
+  --cyan-glow: rgba(13,148,136,0.18);
   --amber:     #f59e0b;
   --amber-dim: rgba(245,158,11,0.15);
   --red:       #ef4444;
   --green:     #22c55e;
-  --text:      #e2e8f0;
-  --muted:     #64748b;
+  --text:      #f8fafc;
+  --muted:     #c8d4e2;
   --font-head: 'Rajdhani', sans-serif;
   --font-mono: 'Share Tech Mono', monospace;
   --font-body: 'Exo 2', sans-serif;
@@ -32,10 +32,13 @@ body {
   background: var(--bg);
   color: var(--text);
   font-family: var(--font-body);
-  font-size: 15px;
-  line-height: 1.6;
+  font-size: 17px;
+  line-height: 1.72;
   min-height: 100vh;
   overflow-x: hidden;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* Scanline overlay */
@@ -47,8 +50,8 @@ body::before {
     0deg,
     transparent,
     transparent 2px,
-    rgba(0,0,0,0.05) 2px,
-    rgba(0,0,0,0.05) 4px
+    rgba(0,0,0,0.02) 2px,
+    rgba(0,0,0,0.02) 4px
   );
   pointer-events: none;
   z-index: 9999;
@@ -63,6 +66,21 @@ h1,h2,h3,h4 {
 }
 
 .mono { font-family: var(--font-mono); }
+
+p,
+button,
+input,
+textarea,
+select,
+label {
+  font-size: 1rem;
+}
+
+input,
+textarea,
+select {
+  color: var(--text);
+}
 
 /* ── Glitch animation ───────────────────────────────────────────────── */
 @keyframes glitch {
@@ -152,12 +170,13 @@ h1,h2,h3,h4 {
   background: transparent;
   border: 1px solid var(--cyan);
   color: var(--cyan);
-  padding: 10px 28px;
+  padding: 12px 32px;
   cursor: pointer;
   position: relative;
   overflow: hidden;
   transition: color 0.2s;
   clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+  font-size: 0.95rem;
 }
 .btn-primary::before {
   content: '';
@@ -179,9 +198,10 @@ h1,h2,h3,h4 {
   background: transparent;
   border: 1px solid var(--border);
   color: var(--muted);
-  padding: 8px 20px;
+  padding: 10px 24px;
   cursor: pointer;
   transition: color 0.2s, border-color 0.2s;
   clip-path: polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%);
+  font-size: 0.92rem;
 }
 .btn-ghost:hover { color: var(--text); border-color: var(--border2); }

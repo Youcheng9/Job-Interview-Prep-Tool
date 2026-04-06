@@ -63,13 +63,13 @@ function DiffBadge({ level }: { level: string }) {
     <span
       className="mono"
       style={{
-        fontSize: "10px",
+        fontSize: "12px",
         letterSpacing: "0.12em",
         textTransform: "uppercase",
         color: c,
         border: `1px solid ${c}40`,
         background: `${c}12`,
-        padding: "2px 8px",
+        padding: "4px 10px",
       }}
     >
       {level}
@@ -234,7 +234,7 @@ export default function InterviewPage() {
       >
         <div
           className="mono"
-          style={{ color: "var(--cyan)", letterSpacing: "0.15em", fontSize: "12px" }}
+          style={{ color: "var(--cyan)", letterSpacing: "0.15em", fontSize: "14px" }}
         >
           LOADING QUESTION BANK...
         </div>
@@ -282,7 +282,7 @@ export default function InterviewPage() {
           to="/"
           style={{
             fontFamily: "var(--font-head)",
-            fontSize: "13px",
+            fontSize: "15px",
             letterSpacing: "0.1em",
             textTransform: "uppercase",
             color: "var(--muted)",
@@ -295,17 +295,17 @@ export default function InterviewPage() {
         <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
           <span
             className="mono"
-            style={{ fontSize: "11px", color: "var(--muted)" }}
+            style={{ fontSize: "13px", color: "var(--muted)" }}
           >
             {qIndex + 1} / {questions.length || "?"}
           </span>
           <span
             className="mono"
             style={{
-              fontSize: "11px",
+              fontSize: "13px",
               color: "var(--cyan)",
               background: "var(--cyan-glow)",
-              padding: "2px 10px",
+              padding: "4px 12px",
               border: "1px solid var(--cyan)",
               textTransform: "uppercase",
               letterSpacing: "0.1em",
@@ -319,7 +319,7 @@ export default function InterviewPage() {
           to="/history"
           style={{
             fontFamily: "var(--font-head)",
-            fontSize: "12px",
+            fontSize: "15px",
             letterSpacing: "0.08em",
             textTransform: "uppercase",
             color: "var(--muted)",
@@ -345,9 +345,9 @@ export default function InterviewPage() {
 
       <div
         style={{
-          maxWidth: "860px",
+          maxWidth: "1240px",
           margin: "0 auto",
-          padding: "40px 24px 0",
+          padding: "48px 32px 0",
         }}
       >
         {error && (
@@ -356,8 +356,8 @@ export default function InterviewPage() {
               background: "rgba(239,68,68,0.08)",
               border: "1px solid #ef444440",
               borderLeft: "2px solid #ef4444",
-              padding: "12px 16px",
-              fontSize: "13px",
+              padding: "14px 18px",
+              fontSize: "15px",
               color: "#ef4444",
               marginBottom: "20px",
               fontFamily: "var(--font-mono)",
@@ -372,7 +372,7 @@ export default function InterviewPage() {
             className="panel animate-fade-up"
             style={{
               marginBottom: "20px",
-              padding: "18px 20px",
+              padding: "22px 24px",
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
@@ -383,7 +383,7 @@ export default function InterviewPage() {
               <div
                 className="mono"
                 style={{
-                  fontSize: "11px",
+                  fontSize: "13px",
                   letterSpacing: "0.14em",
                   color: "var(--amber)",
                   marginBottom: "6px",
@@ -391,14 +391,14 @@ export default function InterviewPage() {
               >
                 SCORE LOCKED
               </div>
-              <div style={{ color: "var(--muted)", fontSize: "13px", lineHeight: 1.6 }}>
+              <div style={{ color: "var(--muted)", fontSize: "16px", lineHeight: 1.7 }}>
                 Questions are public, but scoring and session history require a signed-in account.
               </div>
             </div>
             <button
               className="btn-primary"
               onClick={() => navigate(`/auth?next=${encodeURIComponent(`/interview?role=${role}`)}`)}
-              style={{ fontSize: "12px", flexShrink: 0 }}
+              style={{ fontSize: "15px", flexShrink: 0 }}
             >
               Sign In
             </button>
@@ -409,7 +409,7 @@ export default function InterviewPage() {
           <>
             <div
               className="panel animate-fade-up"
-              style={{ padding: "18px 20px", marginBottom: "20px" }}
+              style={{ padding: "24px 26px", marginBottom: "24px" }}
             >
               <div
                 style={{
@@ -425,7 +425,7 @@ export default function InterviewPage() {
                   <div
                     className="mono"
                     style={{
-                      fontSize: "10px",
+                      fontSize: "12px",
                       letterSpacing: "0.14em",
                       textTransform: "uppercase",
                       color: "var(--cyan)",
@@ -434,11 +434,11 @@ export default function InterviewPage() {
                   >
                     Question Navigator
                   </div>
-                  <div style={{ fontSize: "13px", color: "var(--muted)" }}>
+                  <div style={{ fontSize: "16px", color: "var(--muted)" }}>
                     Resume where you left off or jump to any question in this track.
                   </div>
                 </div>
-                <div className="mono" style={{ fontSize: "11px", color: "var(--muted)" }}>
+                <div className="mono" style={{ fontSize: "13px", color: "var(--muted)" }}>
                   {completedIds.length} completed
                 </div>
               </div>
@@ -454,10 +454,10 @@ export default function InterviewPage() {
                       onClick={() => selectQuestion(index)}
                       className="mono"
                       style={{
-                        fontSize: "10px",
+                        fontSize: "12px",
                         letterSpacing: "0.12em",
                         textTransform: "uppercase",
-                        padding: "6px 10px",
+                        padding: "8px 12px",
                         border: `1px solid ${
                           active ? "var(--cyan)" : completed ? "#22c55e66" : "var(--border)"
                         }`,
@@ -477,7 +477,7 @@ export default function InterviewPage() {
             {/* Question panel */}
             <div
               className="panel animate-fade-up"
-              style={{ padding: "28px", marginBottom: "24px" }}
+              style={{ padding: "34px", marginBottom: "28px" }}
             >
               <div
                 style={{
@@ -490,7 +490,7 @@ export default function InterviewPage() {
                 <span
                   className="mono"
                   style={{
-                    fontSize: "11px",
+                    fontSize: "13px",
                     color: "var(--cyan)",
                     letterSpacing: "0.15em",
                   }}
@@ -503,13 +503,13 @@ export default function InterviewPage() {
 
               <p
                 style={{
-                  fontSize: "18px",
+                  fontSize: "24px",
                   fontFamily: "var(--font-head)",
                   fontWeight: 500,
                   letterSpacing: "0.02em",
-                  lineHeight: 1.6,
+                  lineHeight: 1.7,
                   color: "var(--text)",
-                  minHeight: "60px",
+                  minHeight: "90px",
                 }}
               >
                 {phase === "question" || phase === "submitting" ? (
@@ -525,7 +525,7 @@ export default function InterviewPage() {
                   <summary
                     style={{
                       fontFamily: "var(--font-head)",
-                      fontSize: "10px",
+                      fontSize: "12px",
                       letterSpacing: "0.12em",
                       textTransform: "uppercase",
                       color: "var(--muted)",
@@ -541,11 +541,11 @@ export default function InterviewPage() {
                         key={r}
                         className="mono"
                         style={{
-                          fontSize: "11px",
+                          fontSize: "13px",
                           color: "var(--muted)",
                           background: "var(--surface2)",
                           border: "1px solid var(--border)",
-                          padding: "3px 10px",
+                          padding: "5px 12px",
                         }}
                       >
                         {r}
@@ -607,11 +607,11 @@ export default function InterviewPage() {
                       background: "var(--surface)",
                       border: "1px solid var(--border)",
                       borderRadius: "2px",
-                      padding: "20px",
+                      padding: "24px",
                       color: "var(--text)",
                       fontFamily: "var(--font-body)",
-                      fontSize: "14px",
-                      lineHeight: 1.8,
+                      fontSize: "18px",
+                      lineHeight: 1.85,
                       resize: "vertical",
                       outline: "none",
                       transition: "border-color 0.2s, box-shadow 0.2s",
@@ -637,7 +637,7 @@ export default function InterviewPage() {
                   <span
                     className="mono"
                     style={{
-                      fontSize: "11px",
+                      fontSize: "13px",
                       color: charCount < 20 ? "#ef4444" : "var(--muted)",
                     }}
                   >
@@ -665,8 +665,8 @@ export default function InterviewPage() {
                 <div
                   style={{
                     display: "grid",
-                    gridTemplateColumns: "1fr 300px",
-                    gap: "20px",
+                    gridTemplateColumns: "1fr 360px",
+                    gap: "24px",
                     alignItems: "start",
                   }}
                 >

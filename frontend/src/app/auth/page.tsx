@@ -54,14 +54,14 @@ export default function AuthPage() {
         className="panel animate-fade-up"
         style={{
           width: "100%",
-          maxWidth: "460px",
-          padding: "28px",
+          maxWidth: "620px",
+          padding: "36px",
         }}
       >
         <div
           className="mono"
           style={{
-            fontSize: "11px",
+            fontSize: "13px",
             letterSpacing: "0.18em",
             color: "var(--cyan)",
             marginBottom: "12px",
@@ -69,10 +69,10 @@ export default function AuthPage() {
         >
           AUTH://ACCESS_GATE
         </div>
-        <h1 style={{ fontSize: "30px", marginBottom: "10px" }}>
+        <h1 style={{ fontSize: "42px", marginBottom: "12px" }}>
           {mode === "login" ? "Sign In" : "Create Account"}
         </h1>
-        <p style={{ color: "var(--muted)", marginBottom: "24px", lineHeight: 1.7 }}>
+        <p style={{ color: "var(--muted)", marginBottom: "28px", lineHeight: 1.7, fontSize: "18px" }}>
           Sign in to score answers and sync your session history with the backend.
         </p>
 
@@ -86,7 +86,7 @@ export default function AuthPage() {
                 setMode(item);
                 setError(null);
               }}
-              style={{ flex: 1, fontSize: "12px" }}
+              style={{ flex: 1, fontSize: "15px" }}
             >
               {item === "login" ? "Sign In" : "Register"}
             </button>
@@ -98,7 +98,7 @@ export default function AuthPage() {
             style={{
               display: "block",
               fontFamily: "var(--font-head)",
-              fontSize: "11px",
+              fontSize: "13px",
               letterSpacing: "0.12em",
               textTransform: "uppercase",
               color: "var(--muted)",
@@ -119,8 +119,9 @@ export default function AuthPage() {
               background: "var(--surface2)",
               border: "1px solid var(--border)",
               color: "var(--text)",
-              padding: "12px 14px",
+              padding: "16px 18px",
               fontFamily: "var(--font-body)",
+              fontSize: "17px",
             }}
           />
 
@@ -128,7 +129,7 @@ export default function AuthPage() {
             style={{
               display: "block",
               fontFamily: "var(--font-head)",
-              fontSize: "11px",
+              fontSize: "13px",
               letterSpacing: "0.12em",
               textTransform: "uppercase",
               color: "var(--muted)",
@@ -150,8 +151,9 @@ export default function AuthPage() {
               background: "var(--surface2)",
               border: "1px solid var(--border)",
               color: "var(--text)",
-              padding: "12px 14px",
+              padding: "16px 18px",
               fontFamily: "var(--font-body)",
+              fontSize: "17px",
             }}
           />
 
@@ -164,7 +166,7 @@ export default function AuthPage() {
                 background: "rgba(239,68,68,0.08)",
                 border: "1px solid rgba(239,68,68,0.24)",
                 color: "#fca5a5",
-                fontSize: "13px",
+                fontSize: "15px",
               }}
             >
               {error}
@@ -177,7 +179,7 @@ export default function AuthPage() {
             disabled={submitting}
             style={{
               width: "100%",
-              fontSize: "13px",
+              fontSize: "16px",
               opacity: submitting ? 0.7 : 1,
               cursor: submitting ? "wait" : "pointer",
             }}
@@ -199,7 +201,7 @@ export default function AuthPage() {
             gap: "16px",
           }}
         >
-          <span style={{ color: "var(--muted)", fontSize: "13px" }}>
+          <span style={{ color: "var(--muted)", fontSize: "15px" }}>
             {mode === "login" ? "Need an account?" : "Already registered?"}
           </span>
           <button
@@ -209,7 +211,7 @@ export default function AuthPage() {
               setMode(mode === "login" ? "register" : "login");
               setError(null);
             }}
-            style={{ fontSize: "11px" }}
+            style={{ fontSize: "13px" }}
           >
             {mode === "login" ? "Register" : "Sign In"}
           </button>
@@ -221,7 +223,7 @@ export default function AuthPage() {
             style={{
               color: "var(--muted)",
               textDecoration: "none",
-              fontSize: "12px",
+              fontSize: "14px",
             }}
           >
             Continue without signing in

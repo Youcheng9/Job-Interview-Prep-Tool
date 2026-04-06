@@ -16,7 +16,7 @@ function ScorePill({ value }: { value: number }) {
     <span
       className="mono"
       style={{
-        fontSize: "18px",
+        fontSize: "24px",
         fontWeight: 700,
         color,
         textShadow: `0 0 8px ${color}60`,
@@ -88,7 +88,7 @@ function HistoryRow({ record, index }: { record: AnswerRecord; index: number }) 
         {/* Index */}
         <span
           className="mono"
-          style={{ fontSize: "11px", color: "var(--muted)", width: "32px" }}
+          style={{ fontSize: "13px", color: "var(--muted)", width: "40px" }}
         >
           #{String(index + 1).padStart(3, "0")}
         </span>
@@ -97,7 +97,7 @@ function HistoryRow({ record, index }: { record: AnswerRecord; index: number }) 
         <span
           style={{
             fontFamily: "var(--font-head)",
-            fontSize: "14px",
+            fontSize: "18px",
             letterSpacing: "0.02em",
             color: "var(--text)",
             overflow: "hidden",
@@ -112,7 +112,7 @@ function HistoryRow({ record, index }: { record: AnswerRecord; index: number }) 
         <span
           className="mono"
           style={{
-            fontSize: "10px",
+            fontSize: "12px",
             letterSpacing: "0.1em",
             textTransform: "uppercase",
             color: roleColor,
@@ -128,7 +128,7 @@ function HistoryRow({ record, index }: { record: AnswerRecord; index: number }) 
         {/* Date */}
         <span
           className="mono"
-          style={{ fontSize: "11px", color: "var(--muted)", whiteSpace: "nowrap" }}
+          style={{ fontSize: "13px", color: "var(--muted)", whiteSpace: "nowrap" }}
         >
           {date.toLocaleDateString("en-US", {
             month: "short",
@@ -169,7 +169,7 @@ function HistoryRow({ record, index }: { record: AnswerRecord; index: number }) 
                 <div
                   style={{
                     fontFamily: "var(--font-head)",
-                    fontSize: "9px",
+                    fontSize: "11px",
                     letterSpacing: "0.12em",
                     textTransform: "uppercase",
                     color: "var(--muted)",
@@ -179,7 +179,7 @@ function HistoryRow({ record, index }: { record: AnswerRecord; index: number }) 
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                   <MiniBar value={val} color={c} />
-                  <span className="mono" style={{ fontSize: "12px", color: c }}>{val}</span>
+                  <span className="mono" style={{ fontSize: "14px", color: c }}>{val}</span>
                 </div>
               </div>
             ))}
@@ -190,8 +190,8 @@ function HistoryRow({ record, index }: { record: AnswerRecord; index: number }) 
             style={{
               background: "var(--surface2)",
               border: "1px solid var(--border)",
-              padding: "14px 16px",
-              fontSize: "13px",
+              padding: "18px 20px",
+              fontSize: "16px",
               color: "var(--muted)",
               lineHeight: 1.7,
               maxHeight: "120px",
@@ -219,7 +219,7 @@ function HistoryRow({ record, index }: { record: AnswerRecord; index: number }) 
                 marginTop: "12px",
                 borderLeft: "2px solid var(--cyan)",
                 paddingLeft: "14px",
-                fontSize: "12px",
+                fontSize: "15px",
                 color: "var(--muted)",
                 lineHeight: 1.7,
               }}
@@ -292,7 +292,7 @@ export default function HistoryPage() {
           to="/"
           style={{
             fontFamily: "var(--font-head)",
-            fontSize: "13px",
+            fontSize: "15px",
             letterSpacing: "0.1em",
             textTransform: "uppercase",
             color: "var(--muted)",
@@ -304,7 +304,7 @@ export default function HistoryPage() {
         <span
           style={{
             fontFamily: "var(--font-head)",
-            fontSize: "14px",
+            fontSize: "18px",
             fontWeight: 700,
             letterSpacing: "0.1em",
             textTransform: "uppercase",
@@ -317,7 +317,7 @@ export default function HistoryPage() {
           to="/interview?role=swe"
           style={{
             fontFamily: "var(--font-head)",
-            fontSize: "12px",
+            fontSize: "15px",
             letterSpacing: "0.08em",
             textTransform: "uppercase",
             color: "var(--cyan)",
@@ -328,7 +328,7 @@ export default function HistoryPage() {
         </Link>
       </div>
 
-      <div style={{ maxWidth: "900px", margin: "0 auto", padding: "40px 24px 60px" }}>
+      <div style={{ maxWidth: "1240px", margin: "0 auto", padding: "48px 32px 72px" }}>
         {/* Stats summary */}
         <div
           className="animate-fade-up"
@@ -359,15 +359,15 @@ export default function HistoryPage() {
             >
               <div
                 className="mono"
-                style={{ fontSize: "28px", color: "var(--cyan)", marginBottom: "6px" }}
+                style={{ fontSize: "34px", color: "var(--cyan)", marginBottom: "6px" }}
               >
                 {val}
-                <span style={{ fontSize: "14px", color: "var(--muted)" }}>{unit}</span>
+                <span style={{ fontSize: "16px", color: "var(--muted)" }}>{unit}</span>
               </div>
               <div
                 style={{
                   fontFamily: "var(--font-head)",
-                  fontSize: "9px",
+                  fontSize: "11px",
                   letterSpacing: "0.12em",
                   textTransform: "uppercase",
                   color: "var(--muted)",
@@ -395,10 +395,10 @@ export default function HistoryPage() {
               onClick={() => setFilter(r)}
               className="mono"
               style={{
-                fontSize: "10px",
+                fontSize: "12px",
                 letterSpacing: "0.12em",
                 textTransform: "uppercase",
-                padding: "5px 14px",
+                padding: "8px 16px",
                 border: `1px solid ${filter === r ? (r === "all" ? "var(--cyan)" : ROLE_COLORS[r as Role]) : "var(--border)"}`,
                 background:
                   filter === r
@@ -429,7 +429,7 @@ export default function HistoryPage() {
               textAlign: "center",
               padding: "60px",
               color: "var(--muted)",
-              fontSize: "12px",
+              fontSize: "14px",
               letterSpacing: "0.1em",
             }}
           >
@@ -447,7 +447,7 @@ export default function HistoryPage() {
             <div
               className="mono"
               style={{
-                fontSize: "12px",
+                fontSize: "14px",
                 letterSpacing: "0.15em",
                 color: "#fca5a5",
                 marginBottom: "14px",
@@ -457,7 +457,7 @@ export default function HistoryPage() {
             </div>
             <div style={{ color: "var(--muted)", marginBottom: "16px" }}>{error}</div>
             <Link to="/auth?next=%2Fhistory" style={{ textDecoration: "none" }}>
-              <button className="btn-primary" style={{ fontSize: "12px" }}>
+              <button className="btn-primary" style={{ fontSize: "15px" }}>
                 Reauthenticate
               </button>
             </Link>
@@ -473,7 +473,7 @@ export default function HistoryPage() {
             <div
               className="mono"
               style={{
-                fontSize: "12px",
+                fontSize: "14px",
                 letterSpacing: "0.15em",
                 color: "var(--muted)",
                 marginBottom: "16px",
@@ -482,7 +482,7 @@ export default function HistoryPage() {
               NO RECORDS FOUND
             </div>
             <Link to="/">
-              <button className="btn-primary" style={{ fontSize: "12px" }}>
+              <button className="btn-primary" style={{ fontSize: "15px" }}>
                 Start First Session →
               </button>
             </Link>

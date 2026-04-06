@@ -38,11 +38,11 @@ function ImprovementTip({ dim, score }: { dim: string; score: number }) {
       style={{
         display: "flex",
         gap: "12px",
-        padding: "12px 14px",
+        padding: "16px 18px",
         background: "var(--surface2)",
         border: "1px solid var(--border)",
         marginBottom: "8px",
-        fontSize: "12px",
+        fontSize: "15px",
         color: "var(--muted)",
         lineHeight: 1.6,
       }}
@@ -61,13 +61,13 @@ export function FeedbackPanel({ score, onRetry, onNext }: Props) {
   return (
     <div
       className="panel animate-fade-up"
-      style={{ padding: "24px", animationDelay: "150ms" }}
+      style={{ padding: "30px", animationDelay: "150ms" }}
     >
       {/* Header */}
       <div
         style={{
           fontFamily: "var(--font-head)",
-          fontSize: "13px",
+          fontSize: "16px",
           fontWeight: 600,
           letterSpacing: "0.12em",
           textTransform: "uppercase",
@@ -100,7 +100,7 @@ export function FeedbackPanel({ score, onRetry, onNext }: Props) {
           <div
             style={{
               fontFamily: "var(--font-head)",
-              fontSize: "10px",
+              fontSize: "12px",
               letterSpacing: "0.1em",
               textTransform: "uppercase",
               color: "var(--muted)",
@@ -119,7 +119,7 @@ export function FeedbackPanel({ score, onRetry, onNext }: Props) {
             textAlign: "center",
             padding: "20px",
             fontFamily: "var(--font-head)",
-            fontSize: "14px",
+            fontSize: "18px",
             letterSpacing: "0.08em",
             color: "#22c55e",
           }}
@@ -143,7 +143,7 @@ export function FeedbackPanel({ score, onRetry, onNext }: Props) {
         <span
           style={{
             fontFamily: "var(--font-head)",
-            fontSize: "10px",
+            fontSize: "12px",
             letterSpacing: "0.12em",
             textTransform: "uppercase",
             color: "var(--muted)",
@@ -151,9 +151,9 @@ export function FeedbackPanel({ score, onRetry, onNext }: Props) {
         >
           Dimensions at target
         </span>
-        <span className="mono" style={{ fontSize: "18px", color: "var(--cyan)" }}>
+        <span className="mono" style={{ fontSize: "24px", color: "var(--cyan)" }}>
           {4 - weakDims.length}
-          <span style={{ color: "var(--muted)", fontSize: "13px" }}> / 4</span>
+          <span style={{ color: "var(--muted)", fontSize: "16px" }}> / 4</span>
         </span>
       </div>
 

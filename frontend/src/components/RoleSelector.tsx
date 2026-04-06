@@ -41,8 +41,8 @@ export function RoleSelector({ selected, onChange }: Props) {
     <div
       style={{
         display: "grid",
-        gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-        gap: "16px",
+        gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
+        gap: "20px",
       }}
     >
       {ROLES.map((role, i) => {
@@ -59,7 +59,7 @@ export function RoleSelector({ selected, onChange }: Props) {
                 : "var(--surface)",
               border: `1px solid ${isActive ? role.color : "var(--border)"}`,
               borderRadius: "2px",
-              padding: "20px",
+              padding: "26px",
               cursor: "pointer",
               textAlign: "left",
               position: "relative",
@@ -113,13 +113,13 @@ export function RoleSelector({ selected, onChange }: Props) {
               className="mono"
               style={{
                 display: "inline-block",
-                fontSize: "10px",
+                fontSize: "12px",
                 letterSpacing: "0.12em",
                 color: role.color,
                 background: `${role.color}18`,
                 border: `1px solid ${role.color}40`,
-                padding: "2px 8px",
-                marginBottom: "10px",
+                padding: "4px 10px",
+                marginBottom: "14px",
               }}
             >
               {role.tag}
@@ -128,18 +128,18 @@ export function RoleSelector({ selected, onChange }: Props) {
             <div
               style={{
                 fontFamily: "var(--font-head)",
-                fontSize: "16px",
+                fontSize: "21px",
                 fontWeight: 600,
                 letterSpacing: "0.05em",
                 textTransform: "uppercase",
                 color: isActive ? role.color : "var(--text)",
-                marginBottom: "6px",
+                marginBottom: "10px",
                 transition: "color 0.2s",
               }}
             >
               {role.label}
             </div>
-            <div style={{ fontSize: "12px", color: "var(--muted)", lineHeight: 1.5 }}>
+            <div style={{ fontSize: "15px", color: "var(--muted)", lineHeight: 1.65 }}>
               {role.desc}
             </div>
 

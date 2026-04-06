@@ -81,9 +81,9 @@ export default function HomePage() {
         style={{
           position: "relative",
           zIndex: 1,
-          maxWidth: "860px",
+          maxWidth: "1180px",
           margin: "0 auto",
-          padding: "80px 24px 60px",
+          padding: "92px 32px 72px",
           width: "100%",
         }}
       >
@@ -99,7 +99,7 @@ export default function HomePage() {
             }}
           >
             <Link to="/history" style={{ textDecoration: "none" }}>
-              <button className="btn-ghost" style={{ fontSize: "11px" }}>
+              <button className="btn-ghost" style={{ fontSize: "13px" }}>
                 Session Log
               </button>
             </Link>
@@ -110,13 +110,13 @@ export default function HomePage() {
                   clearToken();
                   setAuthed(false);
                 }}
-                style={{ fontSize: "11px" }}
+                style={{ fontSize: "13px" }}
               >
                 Sign Out
               </button>
             ) : (
               <Link to="/auth" style={{ textDecoration: "none" }}>
-                <button className="btn-ghost" style={{ fontSize: "11px" }}>
+                <button className="btn-ghost" style={{ fontSize: "13px" }}>
                   Sign In
                 </button>
               </Link>
@@ -127,7 +127,7 @@ export default function HomePage() {
           <div
             className="mono animate-fade-up"
             style={{
-              fontSize: "11px",
+              fontSize: "13px",
               letterSpacing: "0.2em",
               color: "var(--cyan)",
               marginBottom: "16px",
@@ -156,10 +156,10 @@ export default function HomePage() {
           <p
             className="animate-fade-up"
             style={{
-              fontSize: "14px",
+              fontSize: "18px",
               color: "var(--muted)",
               letterSpacing: "0.04em",
-              maxWidth: "480px",
+              maxWidth: "680px",
               margin: "0 auto",
               lineHeight: 1.7,
               animationDelay: "160ms",
@@ -171,7 +171,7 @@ export default function HomePage() {
           <p
             className="animate-fade-up"
             style={{
-              fontSize: "12px",
+              fontSize: "14px",
               color: authed ? "var(--green)" : "var(--muted)",
               letterSpacing: "0.08em",
               marginTop: "14px",
@@ -198,7 +198,7 @@ export default function HomePage() {
           <span
             className="mono"
             style={{
-              fontSize: "10px",
+              fontSize: "12px",
               letterSpacing: "0.15em",
               color: "var(--muted)",
               textTransform: "uppercase",
@@ -231,8 +231,8 @@ export default function HomePage() {
             onClick={handleStart}
             disabled={!role}
             style={{
-              fontSize: "14px",
-              padding: "14px 48px",
+              fontSize: "17px",
+              padding: "18px 56px",
               opacity: role ? 1 : 0.35,
               cursor: role ? "pointer" : "not-allowed",
               letterSpacing: "0.15em",
@@ -264,7 +264,7 @@ export default function HomePage() {
               <div
                 className="mono"
                 style={{
-                  fontSize: "22px",
+                  fontSize: "28px",
                   color: "var(--cyan)",
                   marginBottom: "4px",
                 }}
@@ -274,7 +274,7 @@ export default function HomePage() {
               <div
                 style={{
                   fontFamily: "var(--font-head)",
-                  fontSize: "10px",
+                  fontSize: "12px",
                   letterSpacing: "0.1em",
                   textTransform: "uppercase",
                   color: "var(--muted)",

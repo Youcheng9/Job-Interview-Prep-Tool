@@ -46,7 +46,7 @@ function ScoreBar({
         <span
           style={{
             fontFamily: "var(--font-head)",
-            fontSize: "11px",
+            fontSize: "13px",
             letterSpacing: "0.1em",
             textTransform: "uppercase",
             color: "var(--muted)",
@@ -56,14 +56,14 @@ function ScoreBar({
         </span>
         <span
           className="mono"
-          style={{ fontSize: "13px", color }}
+          style={{ fontSize: "16px", color }}
         >
           {value}
         </span>
       </div>
       <div
         style={{
-          height: "4px",
+          height: "6px",
           background: "var(--surface2)",
           borderRadius: "2px",
           overflow: "hidden",
@@ -95,12 +95,12 @@ function RingScore({ value }: { value: number }) {
     value >= 75 ? "#22c55e" : value >= 50 ? "#f59e0b" : "#ef4444";
 
   return (
-    <div style={{ position: "relative", width: 110, height: 110, flexShrink: 0 }}>
-      <svg width="110" height="110" style={{ transform: "rotate(-90deg)" }}>
-        <circle cx="55" cy="55" r={radius} fill="none" stroke="var(--border)" strokeWidth="5" />
+    <div style={{ position: "relative", width: 132, height: 132, flexShrink: 0 }}>
+      <svg width="132" height="132" style={{ transform: "rotate(-90deg)" }}>
+        <circle cx="66" cy="66" r={radius} fill="none" stroke="var(--border)" strokeWidth="5" />
         <circle
-          cx="55"
-          cy="55"
+          cx="66"
+          cy="66"
           r={radius}
           fill="none"
           stroke={color}
@@ -126,14 +126,14 @@ function RingScore({ value }: { value: number }) {
       >
         <span
           className="mono"
-          style={{ fontSize: "26px", color, lineHeight: 1 }}
+          style={{ fontSize: "34px", color, lineHeight: 1 }}
         >
           {value}
         </span>
         <span
           style={{
             fontFamily: "var(--font-head)",
-            fontSize: "9px",
+            fontSize: "11px",
             letterSpacing: "0.12em",
             color: "var(--muted)",
             textTransform: "uppercase",
@@ -150,7 +150,7 @@ export function ScoreCard({ score }: Props) {
   return (
     <div
       className="panel animate-fade-up"
-      style={{ padding: "24px", gap: "24px" }}
+      style={{ padding: "30px", gap: "28px" }}
     >
       {/* Header */}
       <div
@@ -168,7 +168,7 @@ export function ScoreCard({ score }: Props) {
           <div
             style={{
               fontFamily: "var(--font-head)",
-              fontSize: "11px",
+              fontSize: "13px",
               letterSpacing: "0.15em",
               color: "var(--muted)",
               textTransform: "uppercase",
@@ -180,7 +180,7 @@ export function ScoreCard({ score }: Props) {
           <div
             style={{
               fontFamily: "var(--font-head)",
-              fontSize: "20px",
+              fontSize: "28px",
               fontWeight: 700,
               letterSpacing: "0.05em",
               textTransform: "uppercase",
@@ -221,8 +221,8 @@ export function ScoreCard({ score }: Props) {
             background: "var(--surface2)",
             border: "1px solid var(--border)",
             borderLeft: "2px solid var(--cyan)",
-            padding: "14px 16px",
-            fontSize: "13px",
+            padding: "18px 20px",
+            fontSize: "16px",
             color: "var(--text)",
             lineHeight: 1.7,
             marginBottom: "16px",
@@ -239,7 +239,7 @@ export function ScoreCard({ score }: Props) {
             <div
               style={{
                 fontFamily: "var(--font-head)",
-                fontSize: "10px",
+                fontSize: "12px",
                 letterSpacing: "0.12em",
                 textTransform: "uppercase",
                 color: "#22c55e",
@@ -252,7 +252,7 @@ export function ScoreCard({ score }: Props) {
               <div
                 key={s}
                 style={{
-                  fontSize: "12px",
+                  fontSize: "15px",
                   color: "var(--muted)",
                   paddingLeft: "12px",
                   borderLeft: "1px solid #22c55e40",
@@ -270,7 +270,7 @@ export function ScoreCard({ score }: Props) {
             <div
               style={{
                 fontFamily: "var(--font-head)",
-                fontSize: "10px",
+                fontSize: "12px",
                 letterSpacing: "0.12em",
                 textTransform: "uppercase",
                 color: "#ef4444",
@@ -283,7 +283,7 @@ export function ScoreCard({ score }: Props) {
               <div
                 key={c}
                 style={{
-                  fontSize: "12px",
+                  fontSize: "15px",
                   color: "var(--muted)",
                   paddingLeft: "12px",
                   borderLeft: "1px solid #ef444440",
