@@ -8,24 +8,28 @@ interface Props {
 
 const TIPS: Record<string, string[]> = {
   technical_depth: [
-    "Include specific time/space complexity analysis",
-    "Mention edge cases and how you handle them",
-    "Reference concrete data structures or algorithms by name",
+    "Include specific technical terms and concepts from the domain",
+    "Explain the 'why' behind technical choices or complexities",
+    "Reference concrete algorithms, data structures, or methodologies by name",
+    "Discuss trade-offs between different technical approaches",
   ],
   clarity: [
     "Structure your answer with a clear beginning, middle, end",
-    "Define terms before using them",
-    "Use analogies to explain complex concepts",
+    "Define technical terms before using them",
+    "Use concrete examples to illustrate abstract concepts",
+    "Break down complex ideas into digestible parts",
   ],
   completeness: [
-    "Cover all parts of the question, not just the first part",
-    "Include trade-offs between approaches",
-    "Mention follow-up considerations",
+    "Cover all aspects of the question thoroughly",
+    "Address edge cases, limitations, and assumptions",
+    "Include relevant context and background information",
+    "Mention alternative approaches and when to use them",
   ],
   structure: [
-    "Start with a brief overview before diving deep",
-    "Use numbered steps for processes",
-    "Summarize key points at the end",
+    "Start with a brief overview before diving into details",
+    "Use transitional phrases like 'first', 'then', 'however', 'therefore'",
+    "Organize your answer with clear logical flow",
+    "End with a summary of key takeaways",
   ],
 };
 

@@ -3,13 +3,13 @@
     "role": "SWE",
     "prompt": "Explain the difference between a process and a thread.",
     "rubric": {
-      "ideal_answer": "A process has its own memory space and system resources, while threads share the same process memory and are lighter weight to create and switch between.",
-      "keywords": ["address space", "shared memory", "context switch", "lightweight"],
+      "ideal_answer": "A process is an independent program with its own memory space, file descriptors, and system resources. Threads are lightweight execution units within a process that share the same memory space and resources but have their own stack and program counter. Processes require more overhead to create and switch between, while threads are more efficient for concurrent execution within the same application.",
+      "keywords": ["process", "thread", "memory space", "shared memory", "context switch", "lightweight", "independent", "execution unit"],
       "dimension_keywords": {
-        "technical_depth": ["address space", "context switch"],
-        "clarity": ["difference", "example"],
-        "completeness": ["address space", "shared memory", "lightweight"],
-        "structure": ["first", "second", "comparison"]
+        "technical_depth": ["memory space", "context switch", "program counter", "stack"],
+        "clarity": ["difference", "independent", "share", "execution"],
+        "completeness": ["memory space", "shared memory", "lightweight", "overhead"],
+        "structure": ["first", "whereas", "however", "in contrast"]
       }
     }
   },
@@ -17,13 +17,13 @@
     "role": "SWE",
     "prompt": "What is the time complexity of binary search and why?",
     "rubric": {
-      "ideal_answer": "Binary search runs in O(log n) time because it halves the search space on every iteration or recursive step, assuming the input is sorted.",
-      "keywords": ["O(log n)", "sorted", "halve", "search space"],
+      "ideal_answer": "Binary search has O(log n) time complexity because it repeatedly divides the search space in half with each comparison. For example, in an array of 1000 elements, it takes at most 10 comparisons to find an element. This logarithmic growth occurs because each step eliminates half of the remaining elements, requiring log₂(n) steps in the worst case. The input must be sorted for binary search to work correctly.",
+      "keywords": ["O(log n)", "logarithmic", "sorted", "divide", "half", "search space", "comparison"],
       "dimension_keywords": {
-        "technical_depth": ["O(log n)", "search space"],
-        "clarity": ["because", "sorted"],
-        "completeness": ["O(log n)", "halve", "sorted"],
-        "structure": ["first", "then", "therefore"]
+        "technical_depth": ["O(log n)", "logarithmic", "divide and conquer", "search space"],
+        "clarity": ["because", "for example", "each step", "worst case"],
+        "completeness": ["O(log n)", "sorted", "half", "log₂(n)"],
+        "structure": ["first", "because", "for example", "therefore"]
       }
     }
   },
