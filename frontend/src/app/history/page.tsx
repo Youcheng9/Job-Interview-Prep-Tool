@@ -273,61 +273,7 @@ export default function HistoryPage() {
       : 0;
 
   return (
-    <div style={{ minHeight: "100vh" }}>
-      {/* Top nav */}
-      <div
-        style={{
-          background: "var(--surface)",
-          borderBottom: "1px solid var(--border)",
-          padding: "12px 24px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          position: "sticky",
-          top: 0,
-          zIndex: 10,
-        }}
-      >
-        <Link
-          to="/"
-          style={{
-            fontFamily: "var(--font-head)",
-            fontSize: "15px",
-            letterSpacing: "0.1em",
-            textTransform: "uppercase",
-            color: "var(--muted)",
-            textDecoration: "none",
-          }}
-        >
-          ← Home
-        </Link>
-        <span
-          style={{
-            fontFamily: "var(--font-head)",
-            fontSize: "18px",
-            fontWeight: 700,
-            letterSpacing: "0.1em",
-            textTransform: "uppercase",
-            color: "var(--text)",
-          }}
-        >
-          Session Log
-        </span>
-        <Link
-          to="/interview?role=swe"
-          style={{
-            fontFamily: "var(--font-head)",
-            fontSize: "15px",
-            letterSpacing: "0.08em",
-            textTransform: "uppercase",
-            color: "var(--cyan)",
-            textDecoration: "none",
-          }}
-        >
-          New Session →
-        </Link>
-      </div>
-
+    <div style={{ padding: "32px" }}>
       <div style={{ maxWidth: "1240px", margin: "0 auto", padding: "48px 32px 72px" }}>
         {/* Stats summary */}
         <div

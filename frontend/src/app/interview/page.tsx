@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useSearchParams, useNavigate, Link } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { ScoreCard } from "../../components/ScoreCard";
 import { FeedbackPanel } from "../../components/FeedbackPanel";
 import {
@@ -259,77 +259,10 @@ export default function InterviewPage() {
   return (
     <div
       style={{
-        minHeight: "100vh",
-        padding: "0 0 60px",
+        padding: "32px 32px 60px",
         position: "relative",
       }}
     >
-      {/* Top bar */}
-      <div
-        style={{
-          background: "var(--surface)",
-          borderBottom: "1px solid var(--border)",
-          padding: "12px 24px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          position: "sticky",
-          top: 0,
-          zIndex: 10,
-        }}
-      >
-        <Link
-          to="/"
-          style={{
-            fontFamily: "var(--font-head)",
-            fontSize: "15px",
-            letterSpacing: "0.1em",
-            textTransform: "uppercase",
-            color: "var(--muted)",
-            textDecoration: "none",
-          }}
-        >
-          ← Exit
-        </Link>
-
-        <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-          <span
-            className="mono"
-            style={{ fontSize: "13px", color: "var(--muted)" }}
-          >
-            {qIndex + 1} / {questions.length || "?"}
-          </span>
-          <span
-            className="mono"
-            style={{
-              fontSize: "13px",
-              color: "var(--cyan)",
-              background: "var(--cyan-glow)",
-              padding: "4px 12px",
-              border: "1px solid var(--cyan)",
-              textTransform: "uppercase",
-              letterSpacing: "0.1em",
-            }}
-          >
-            {role.toUpperCase()}
-          </span>
-        </div>
-
-        <Link
-          to="/history"
-          style={{
-            fontFamily: "var(--font-head)",
-            fontSize: "15px",
-            letterSpacing: "0.08em",
-            textTransform: "uppercase",
-            color: "var(--muted)",
-            textDecoration: "none",
-          }}
-        >
-          History →
-        </Link>
-      </div>
-
       {/* Progress bar */}
       <div style={{ height: "2px", background: "var(--border)" }}>
         <div
