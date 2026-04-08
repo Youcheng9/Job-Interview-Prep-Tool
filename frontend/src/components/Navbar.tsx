@@ -1,9 +1,11 @@
 import { Link, useLocation } from "react-router-dom";
 import { clearToken, isAuthenticated } from "../lib/api";
+import { useTheme } from "./ThemeProvider";
 
 export function Navbar() {
   const location = useLocation();
   const authed = isAuthenticated();
+  const { theme, toggleTheme } = useTheme();
 
   const navItems = [
     { path: "/", label: "Home" },
@@ -64,6 +66,17 @@ export function Navbar() {
 
         {/* Navigation Links */}
         <div style={{ display: "flex", alignItems: "center", gap: "24px" }}>
+          <button
+            className="btn-ghost"
+            onClick={toggleTheme}
+            style={{
+              fontSize: "13px",
+              padding: "6px 16px",
+            }}
+          >
+            {theme === "dark" ? "Light Mode" : "Dark Mode"}
+          </button>
+
           {navItems.map(({ path, label }) => (
             <Link
               key={path}

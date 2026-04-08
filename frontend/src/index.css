@@ -7,7 +7,7 @@
   --bg:        #162235;
   --surface:   #1e2d45;
   --surface2:  #273956;
-  --border:    #c9cfd9;
+  --border:    #40567a;
   --border2:   #0d9488;
   --cyan:      #0d9488;
   --cyan-dim:  #0f766e;
@@ -18,9 +18,28 @@
   --green:     #22c55e;
   --text:      #f8fafc;
   --muted:     #c8d4e2;
+  --scanline:  rgba(0,0,0,0.02);
   --font-head: 'Rajdhani', sans-serif;
   --font-mono: 'Share Tech Mono', monospace;
   --font-body: 'Exo 2', sans-serif;
+}
+
+html[data-theme="light"] {
+  --bg:        #edf4fb;
+  --surface:   #f8fbff;
+  --surface2:  #e3edf8;
+  --border:    #b8cce0;
+  --border2:   #0d9488;
+  --cyan:      #0f766e;
+  --cyan-dim:  #115e59;
+  --cyan-glow: rgba(15,118,110,0.16);
+  --amber:     #d97706;
+  --amber-dim: rgba(217,119,6,0.14);
+  --red:       #dc2626;
+  --green:     #16a34a;
+  --text:      #0f172a;
+  --muted:     #506176;
+  --scanline:  rgba(255,255,255,0.12);
 }
 
 /* ── Base ───────────────────────────────────────────────────────────── */
@@ -39,6 +58,7 @@ body {
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.25s ease, color 0.25s ease;
 }
 
 /* Scanline overlay */
@@ -50,8 +70,8 @@ body::before {
     0deg,
     transparent,
     transparent 2px,
-    rgba(0,0,0,0.02) 2px,
-    rgba(0,0,0,0.02) 4px
+    var(--scanline) 2px,
+    var(--scanline) 4px
   );
   pointer-events: none;
   z-index: 9999;
@@ -142,6 +162,7 @@ select {
   border: 1px solid var(--border);
   border-radius: 2px;
   position: relative;
+  transition: background-color 0.25s ease, border-color 0.25s ease;
 }
 
 /* Corner brackets */

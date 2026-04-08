@@ -249,6 +249,116 @@ export default function HomePage() {
             </div>
           ))}
         </div>
+
+        {/* How it works */}
+        <div
+          className="animate-fade-up"
+          style={{
+            marginTop: "72px",
+            paddingTop: "32px",
+            borderTop: "1px solid var(--border)",
+            animationDelay: "480ms",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "16px",
+              marginBottom: "24px",
+            }}
+          >
+            <div style={{ flex: 1, height: "1px", background: "var(--border)" }} />
+            <span
+              className="mono"
+              style={{
+                fontSize: "12px",
+                letterSpacing: "0.16em",
+                color: "var(--cyan)",
+                textTransform: "uppercase",
+              }}
+            >
+              How It Works
+            </span>
+            <div style={{ flex: 1, height: "1px", background: "var(--border)" }} />
+          </div>
+
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
+              gap: "20px",
+            }}
+          >
+            {[
+              {
+                step: "01",
+                title: "Pick A Track",
+                desc: "Choose SWE, Data Science, PM, or Behavioral to load a role-specific question bank.",
+              },
+              {
+                step: "02",
+                title: "Sign In To Score",
+                desc: "Create an account or log in so your submissions can be scored and saved to your history.",
+              },
+              {
+                step: "03",
+                title: "Answer A Question",
+                desc: "Write your response in the interview workspace and submit it to the backend for evaluation.",
+              },
+              {
+                step: "04",
+                title: "Review Feedback",
+                desc: "See your overall score, dimension breakdown, and follow-up improvement guidance after each attempt.",
+              },
+            ].map(({ step, title, desc }) => (
+              <div
+                key={step}
+                className="panel"
+                style={{
+                  padding: "24px",
+                  minHeight: "210px",
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "space-between",
+                }}
+              >
+                <div
+                  className="mono"
+                  style={{
+                    fontSize: "13px",
+                    color: "var(--cyan)",
+                    letterSpacing: "0.16em",
+                    marginBottom: "16px",
+                  }}
+                >
+                  STEP {step}
+                </div>
+                <div
+                  style={{
+                    fontFamily: "var(--font-head)",
+                    fontSize: "24px",
+                    letterSpacing: "0.05em",
+                    textTransform: "uppercase",
+                    color: "var(--text)",
+                    marginBottom: "12px",
+                  }}
+                >
+                  {title}
+                </div>
+                <div
+                  style={{
+                    fontSize: "16px",
+                    color: "var(--muted)",
+                    lineHeight: 1.75,
+                  }}
+                >
+                  {desc}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
