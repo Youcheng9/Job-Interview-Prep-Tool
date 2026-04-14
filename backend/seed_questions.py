@@ -13,14 +13,26 @@ def main():
 
         created = 0
         for item in data:
+            level = item.get("level", "new_grad")
             exists = (
                 db.query(Question)
-                .filter(Question.role == item["role"], Question.prompt == item["prompt"])
+                .filter(
+                    Question.role == item["role"],
+                    Question.level == level,
+                    Question.prompt == item["prompt"],
+                )
                 .first()
             )
             if exists:
                 continue
-            db.add(Question(role=item["role"], prompt=item["prompt"], rubric=item["rubric"]))
+            db.add(
+                Question(
+                    role=item["role"],
+                    level=level,
+                    prompt=item["prompt"],
+                    rubric=item["rubric"],
+                )
+            )
             created += 1
 
         db.commit()
