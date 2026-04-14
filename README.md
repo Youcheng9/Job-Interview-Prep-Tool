@@ -7,6 +7,7 @@ InterviewPrep is a full-stack interview practice app with:
 - PostgreSQL for storage
 - JWT authentication
 - embedding + rubric-based answer scoring
+- Ollama-based AI coaching feedback
 
 ## Repo Layout
 
@@ -34,6 +35,7 @@ Install these before running the project:
 - Node.js 20+
 - npm 9+
 - PostgreSQL
+- Ollama
 
 ## Full Project Setup
 
@@ -74,6 +76,11 @@ DATABASE_URL=postgresql+psycopg2://postgres:YOUR_PASSWORD@localhost:5432/intervi
 JWT_SECRET=CHANGE_ME_TO_A_LONG_RANDOM_STRING
 JWT_ALGORITHM=HS256
 ACCESS_TOKEN_EXPIRE_MINUTES=10080
+
+OLLAMA_URL=http://127.0.0.1:11434/api/generate
+OLLAMA_MODEL=llama3.1:8b
+AI_FEEDBACK_ENABLED=true
+AI_FEEDBACK_TIMEOUT_SECONDS=90
 ```
 
 ### 3. Create the PostgreSQL database
@@ -113,7 +120,21 @@ Backend URLs:
 - API: `http://localhost:8000`
 - Swagger docs: `http://localhost:8000/docs`
 
-### 7. Start the frontend
+### 7. Start Ollama
+
+In another terminal:
+
+```bash
+ollama serve
+```
+
+If the model is not installed yet:
+
+```bash
+ollama pull llama3.1:8b
+```
+
+### 8. Start the frontend
 
 In another terminal:
 
@@ -163,9 +184,11 @@ http://localhost:5173
 ## Integration Notes
 
 - frontend questions are public
+- questions are currently loaded from the hardcoded seeded JSON dataset
 - scoring and history are protected
 - frontend stores the JWT in `localStorage`
 - backend CORS currently allows `http://localhost:5173` and `http://localhost:3000`
+- Ollama is used for AI coaching feedback on submitted answers
 
 ## Troubleshooting
 

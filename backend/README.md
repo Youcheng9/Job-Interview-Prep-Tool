@@ -7,6 +7,7 @@ The backend is a FastAPI service that supports:
 - User authentication (register/login) with JWT  
 - Question retrieval from PostgreSQL  
 - Answer submission + automatic scoring  
+- Ollama-based AI coaching feedback on submitted answers
 - User history (past answers + scores)  
 - Database schema migrations via Alembic  
 
@@ -22,6 +23,7 @@ This backend is designed to be the **source of truth** for users, questions, ans
 - **Migrations:** Alembic  
 - **Auth:** JWT (HS256) + bcrypt password hashing  
 - **Scoring:** sentence-transformers embeddings + cosine similarity + keyword coverage  
+- **AI feedback:** Ollama local LLM coaching layer  
 
 ---
 
@@ -47,6 +49,7 @@ backend/
 ├── migrations/              # Alembic migration scripts
 ├── data/
 │   └── questions.json       # Seed data for initial questions + rubric
+├── feedback_agent.py        # Ollama-based AI coaching feedback
 ├── seed_questions.py        # Seeds questions.json into DB
 └── dependencies.py          # get_current_user() JWT -> User dependency
 ```
@@ -65,6 +68,12 @@ DATABASE_URL=postgresql+psycopg2://postgres:YOUR_PASSWORD@localhost:5432/intervi
 JWT_SECRET=CHANGE_ME_TO_A_LONG_RANDOM_STRING
 JWT_ALGORITHM=HS256
 ACCESS_TOKEN_EXPIRE_MINUTES=10080
+
+# Ollama AI feedback
+OLLAMA_URL=http://127.0.0.1:11434/api/generate
+OLLAMA_MODEL=llama3.1:8b
+AI_FEEDBACK_ENABLED=true
+AI_FEEDBACK_TIMEOUT_SECONDS=90
 ```
 
 ### Notes
@@ -101,7 +110,19 @@ python -m backend.seed_questions
 uvicorn backend.main:app --reload --port 8000
 ```
 
-### 5. Open docs
+### 5. Start Ollama for AI feedback
+
+```bash
+ollama serve
+```
+
+If needed:
+
+```bash
+ollama pull llama3.1:8b
+```
+
+### 6. Open docs
 
 - Swagger UI: http://localhost:8000/docs
 
@@ -258,6 +279,25 @@ compute_scores(answer_text, rubric)
 - Simple tokenization (lowercase word boundaries)  
 
 ### Outputs
+
+## AI Feedback Layer
+
+Numeric scoring remains deterministic, but written coaching feedback is generated with a local Ollama model.
+
+Current flow:
+
+1. `compute_scores()` creates numeric scores and keyword-gap feedback.
+2. `backend/feedback_agent.py` sends the question, answer, rubric, and score breakdown to Ollama.
+3. Ollama returns structured coaching feedback:
+   - summary
+   - strengths
+   - weaknesses
+   - improvements
+   - improved answer
+   - next focus
+4. The backend stores this inside the `feedback` JSON for the score record.
+
+If Ollama is unavailable, scoring still works and the request does not fail. Only the AI coaching section is skipped.
 
 - `scores_dict` (dimension scores 0–100):
   - technical_depth  
