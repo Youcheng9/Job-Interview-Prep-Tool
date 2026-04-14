@@ -2,6 +2,7 @@ const BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
 const TOKEN_KEY = "token";
 
 export type Role = "swe" | "data" | "pm" | "behavioral";
+export type CandidateLevel = "intern" | "new_grad";
 type ApiRole = "SWE" | "DataScience" | "PM" | "Behavioral";
 
 export interface AuthResponse {
@@ -12,6 +13,7 @@ export interface AuthResponse {
 export interface Question {
   id: number;
   role: Role;
+  level: CandidateLevel;
   text: string;
   rubric: string[];
   difficulty: "easy" | "medium" | "hard";
@@ -26,6 +28,15 @@ export interface ScoreResult {
   missing_concepts: string[];
   strengths: string[];
   feedback: string;
+  ai_feedback?: {
+    summary: string;
+    strengths: string[];
+    weaknesses: string[];
+    improvements: string[];
+    improved_answer: string;
+    next_focus: string;
+  };
+  ai_feedback_error?: string;
 }
 
 export interface AnswerRecord {
@@ -40,6 +51,7 @@ interface ApiQuestionsResponse {
   items: Array<{
     id: number;
     role: ApiRole;
+    level: CandidateLevel;
     prompt: string;
   }>;
 }
@@ -59,6 +71,15 @@ interface ApiSubmitAnswerResponse {
     strengths?: string[];
     weaknesses?: string[];
     missing_keywords?: string[];
+    ai_feedback?: {
+      summary?: string;
+      strengths?: string[];
+      weaknesses?: string[];
+      improvements?: string[];
+      improved_answer?: string;
+      next_focus?: string;
+    };
+    ai_feedback_error?: string;
     notes?: {
       similarity_raw?: number;
       keyword_coverage?: number;
@@ -72,6 +93,7 @@ interface ApiHistoryResponse {
     answer_id: number;
     question_id: number;
     role: ApiRole;
+    level: CandidateLevel;
     prompt: string;
     answer_text: string;
     created_at: string;
@@ -113,9 +135,12 @@ function fromApiRole(role: string): Role {
   }
 }
 
-function getDifficulty(index: number): Question["difficulty"] {
-  const levels: Question["difficulty"][] = ["easy", "medium", "hard"];
-  return levels[index % levels.length];
+function getDifficulty(level: CandidateLevel, index: number): Question["difficulty"] {
+  if (level === "intern") {
+    return index % 3 === 2 ? "medium" : "easy";
+  }
+
+  return index % 3 === 0 ? "medium" : "hard";
 }
 
 function formatFeedback(payload?: ApiSubmitAnswerResponse["feedback"]): string {
@@ -141,6 +166,17 @@ function normalizeScore(payload: ApiSubmitAnswerResponse): ScoreResult {
     missing_concepts: payload.feedback?.missing_keywords ?? [],
     strengths: payload.feedback?.strengths ?? [],
     feedback: formatFeedback(payload.feedback),
+    ai_feedback: payload.feedback?.ai_feedback?.summary
+      ? {
+          summary: payload.feedback.ai_feedback.summary,
+          strengths: payload.feedback.ai_feedback.strengths ?? [],
+          weaknesses: payload.feedback.ai_feedback.weaknesses ?? [],
+          improvements: payload.feedback.ai_feedback.improvements ?? [],
+          improved_answer: payload.feedback.ai_feedback.improved_answer ?? "",
+          next_focus: payload.feedback.ai_feedback.next_focus ?? "",
+        }
+      : undefined,
+    ai_feedback_error: payload.feedback?.ai_feedback_error,
   };
 }
 
@@ -223,15 +259,20 @@ export async function login(email: string, password: string): Promise<AuthRespon
   return data;
 }
 
-export async function getQuestions(role: Role): Promise<Question[]> {
-  const data = await request<ApiQuestionsResponse>(`/questions?role=${toApiRole(role)}`);
+export async function getQuestions(role: Role, level: CandidateLevel): Promise<Question[]> {
+  const params = new URLSearchParams({
+    role: toApiRole(role),
+    level,
+  });
+  const data = await request<ApiQuestionsResponse>(`/questions?${params.toString()}`);
 
   return data.items.map((item, index) => ({
     id: item.id,
     role: fromApiRole(item.role),
+    level: item.level,
     text: item.prompt,
     rubric: [],
-    difficulty: getDifficulty(index),
+    difficulty: getDifficulty(item.level, index),
   }));
 }
 
@@ -274,9 +315,10 @@ export async function getHistory(): Promise<AnswerRecord[]> {
     question: {
       id: item.question_id,
       role: fromApiRole(item.role),
+      level: item.level,
       text: item.prompt,
       rubric: [],
-      difficulty: getDifficulty(index),
+      difficulty: getDifficulty(item.level, index),
     },
     answer: item.answer_text,
     created_at: item.created_at,
@@ -289,6 +331,7 @@ export async function getHistory(): Promise<AnswerRecord[]> {
       missing_concepts: [],
       strengths: [],
       feedback: "",
+      ai_feedback: undefined,
     },
   }));
 }
