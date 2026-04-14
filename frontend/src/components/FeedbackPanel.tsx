@@ -61,6 +61,8 @@ export function FeedbackPanel({ score, onRetry, onNext }: Props) {
   const weakDims = (
     ["technical_depth", "clarity", "completeness", "structure"] as const
   ).filter((d) => (score[d] as number) < 80);
+  const ai = score.ai_feedback;
+  const aiError = score.ai_feedback_error;
 
   return (
     <div
@@ -99,6 +101,142 @@ export function FeedbackPanel({ score, onRetry, onNext }: Props) {
       </div>
 
       {/* Tips for weak dims */}
+      {ai && (
+        <div style={{ marginBottom: "20px" }}>
+          <div
+            style={{
+              fontFamily: "var(--font-head)",
+              fontSize: "12px",
+              letterSpacing: "0.1em",
+              textTransform: "uppercase",
+              color: "var(--cyan)",
+              marginBottom: "12px",
+            }}
+          >
+            AI Coach Summary
+          </div>
+
+          <div
+            style={{
+              padding: "18px 20px",
+              background: "var(--surface2)",
+              border: "1px solid var(--border)",
+              borderLeft: "2px solid var(--cyan)",
+              fontSize: "15px",
+              lineHeight: 1.7,
+              color: "var(--text)",
+              marginBottom: "12px",
+            }}
+          >
+            {ai.summary}
+          </div>
+
+          {ai.improvements.length > 0 && (
+            <div style={{ marginBottom: "12px" }}>
+              <div
+                style={{
+                  fontFamily: "var(--font-head)",
+                  fontSize: "12px",
+                  letterSpacing: "0.1em",
+                  textTransform: "uppercase",
+                  color: "var(--muted)",
+                  marginBottom: "8px",
+                }}
+              >
+                Recommended Improvements
+              </div>
+              {ai.improvements.map((item) => (
+                <div
+                  key={item}
+                  style={{
+                    display: "flex",
+                    gap: "12px",
+                    padding: "14px 16px",
+                    background: "var(--surface2)",
+                    border: "1px solid var(--border)",
+                    marginBottom: "8px",
+                    fontSize: "15px",
+                    color: "var(--muted)",
+                    lineHeight: 1.6,
+                  }}
+                >
+                  <span style={{ color: "var(--cyan)", flexShrink: 0 }}>+</span>
+                  <span>{item}</span>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {ai.next_focus && (
+            <div
+              style={{
+                marginBottom: "12px",
+                padding: "14px 16px",
+                background: "var(--surface2)",
+                border: "1px solid var(--border)",
+                fontSize: "14px",
+                color: "var(--text)",
+              }}
+            >
+              <span className="mono" style={{ color: "var(--cyan)", marginRight: "8px" }}>
+                NEXT:
+              </span>
+              {ai.next_focus}
+            </div>
+          )}
+
+          {ai.improved_answer && (
+            <details style={{ marginBottom: "8px" }}>
+              <summary
+                style={{
+                  fontFamily: "var(--font-head)",
+                  fontSize: "12px",
+                  letterSpacing: "0.1em",
+                  textTransform: "uppercase",
+                  color: "var(--muted)",
+                  cursor: "pointer",
+                }}
+              >
+                View Improved Answer
+              </summary>
+              <div
+                style={{
+                  marginTop: "10px",
+                  padding: "16px 18px",
+                  background: "var(--surface2)",
+                  border: "1px solid var(--border)",
+                  fontSize: "15px",
+                  color: "var(--muted)",
+                  lineHeight: 1.75,
+                }}
+              >
+                {ai.improved_answer}
+              </div>
+            </details>
+          )}
+        </div>
+      )}
+
+      {!ai && aiError && (
+        <div
+          style={{
+            marginBottom: "20px",
+            padding: "16px 18px",
+            background: "rgba(245,158,11,0.08)",
+            border: "1px solid rgba(245,158,11,0.22)",
+            borderLeft: "2px solid var(--amber)",
+            fontSize: "14px",
+            lineHeight: 1.7,
+            color: "var(--text)",
+          }}
+        >
+          <span className="mono" style={{ color: "var(--amber)", marginRight: "8px" }}>
+            AI COACH:
+          </span>
+          {aiError}
+        </div>
+      )}
+
       {weakDims.length > 0 ? (
         <>
           <div
