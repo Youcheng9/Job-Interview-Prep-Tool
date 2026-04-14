@@ -31,6 +31,7 @@ def get_history(limit: int = 50, db: Session = Depends(get_db), user: User = Dep
             answer_id=ans.id,
             question_id=q.id,
             role=q.role,
+            level=q.level,
             prompt=q.prompt,
             answer_text=ans.answer_text,
             created_at=ans.created_at,

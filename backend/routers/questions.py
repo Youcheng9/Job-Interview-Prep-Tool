@@ -19,10 +19,15 @@ router = APIRouter(prefix="/questions", tags=["questions"])
 # 'role: str | None = None' makes 'role' an OPTIONAL query 
 # #parameter (e.g., /questions?role=admin)
 @router.get("", response_model=QuestionsResponse)
-def list_questions(role: str | None = None, db: Session = Depends(get_db)):
+def list_questions(
+    role: str | None = None,
+    level: str = "new_grad",
+    db: Session = Depends(get_db),
+):
     q = db.query(Question)
     if role:
         q = q.filter(Question.role == role)
+    q = q.filter(Question.level == level)
 
     rows = q.order_by(Question.id.asc()).all()
 
@@ -32,6 +37,7 @@ def list_questions(role: str | None = None, db: Session = Depends(get_db)):
         QuestionItem(
             id=r.id,
             role=r.role,
+            level=r.level,
             prompt=r.prompt
         )
         for r in rows
@@ -42,10 +48,11 @@ def list_questions(role: str | None = None, db: Session = Depends(get_db)):
 @router.get("/next", response_model=QuestionItem)
 def get_next_question(
     role: str,
+    level: str = "new_grad",
     current_id: int | None = None,
     db: Session = Depends(get_db),
 ):
-    q = db.query(Question).filter(Question.role == role)
+    q = db.query(Question).filter(Question.role == role, Question.level == level)
 
     if current_id is not None:
         q = q.filter(Question.id > current_id)
@@ -57,5 +64,6 @@ def get_next_question(
     return QuestionItem(
         id=row.id,
         role=row.role,
+        level=row.level,
         prompt=row.prompt,
     )
