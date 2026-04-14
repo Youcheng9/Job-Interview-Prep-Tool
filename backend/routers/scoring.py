@@ -6,6 +6,7 @@ from backend.models.models import Question, Answer, Score, User
 from backend.schemas.scoring import SubmitAnswerRequest, SubmitAnswerResponse
 # from backend.dev_user import get_or_create_dev_user
 from backend.dependencies import get_current_user
+from backend.feedback_agent import FeedbackAgentError, feedback_enabled, generate_agentic_feedback
 from backend.ml.scorer import compute_scores
 
 router = APIRouter(prefix="/scoring", tags=["scoring"])
@@ -32,6 +33,21 @@ def submit_answer(
         # This returns a per-dimension dict, an overall score (0-100), and a feedback dict.
         
         scores_dict, overall_int, feedback = compute_scores(payload.answer_text, q.rubric)
+
+        if feedback_enabled():
+            try:
+                feedback["ai_feedback"] = generate_agentic_feedback(
+                    role=payload.role,
+                    question_prompt=q.prompt,
+                    answer_text=payload.answer_text,
+                    rubric=q.rubric,
+                    scores=scores_dict,
+                    overall=overall_int,
+                    feedback=feedback,
+                )
+            except FeedbackAgentError as exc:
+                feedback["ai_feedback_error"] = str(exc)
+                print(f"AI feedback unavailable: {exc}")
 
         # 3) Save the score linked to this answer
         sc = Score(answer_id=ans.id, scores=scores_dict, overall=overall_int, feedback=feedback)
