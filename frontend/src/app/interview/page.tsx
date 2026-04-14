@@ -3,6 +3,7 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import { ScoreCard } from "../../components/ScoreCard";
 import { FeedbackPanel } from "../../components/FeedbackPanel";
 import {
+  type CandidateLevel,
   clearToken,
   getHistory,
   getQuestions,
@@ -77,24 +78,43 @@ function DiffBadge({ level }: { level: string }) {
   );
 }
 
+function LevelBadge({ level }: { level: CandidateLevel }) {
+  return (
+    <span
+      className="mono"
+      style={{
+        fontSize: "12px",
+        letterSpacing: "0.12em",
+        textTransform: "uppercase",
+        color: "var(--cyan)",
+        border: "1px solid var(--cyan-dim)",
+        background: "rgba(13,148,136,0.12)",
+        padding: "4px 10px",
+      }}
+    >
+      {level === "intern" ? "Intern" : "New Grad"}
+    </span>
+  );
+}
+
 type Phase = "question" | "submitting" | "result";
 
 const SESSION_KEY_PREFIX = "interview-session";
 
-function getSessionKey(role: Role) {
-  return `${SESSION_KEY_PREFIX}:${role}`;
+function getSessionKey(role: Role, level: CandidateLevel) {
+  return `${SESSION_KEY_PREFIX}:${role}:${level}`;
 }
 
-function readSavedQuestionId(role: Role): number | null {
-  const saved = localStorage.getItem(getSessionKey(role));
+function readSavedQuestionId(role: Role, level: CandidateLevel): number | null {
+  const saved = localStorage.getItem(getSessionKey(role, level));
   if (!saved) return null;
 
   const parsed = Number(saved);
   return Number.isFinite(parsed) ? parsed : null;
 }
 
-function saveQuestionId(role: Role, questionId: number) {
-  localStorage.setItem(getSessionKey(role), String(questionId));
+function saveQuestionId(role: Role, level: CandidateLevel, questionId: number) {
+  localStorage.setItem(getSessionKey(role, level), String(questionId));
 }
 
 export default function InterviewPage() {
@@ -102,6 +122,8 @@ export default function InterviewPage() {
   const navigate = useNavigate();
   const roleParam = params.get("role");
   const role = roleParam === "data" || roleParam === "pm" || roleParam === "behavioral" ? roleParam : "swe";
+  const levelParam = params.get("level");
+  const level: CandidateLevel = levelParam === "intern" ? "intern" : "new_grad";
   const requestedQuestionId = Number(params.get("questionId"));
 
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -117,14 +139,18 @@ export default function InterviewPage() {
 
   useEffect(() => {
     setError(null);
-    getQuestions(role)
+    getQuestions(role, level)
       .then((loadedQuestions) => {
         setQuestions(loadedQuestions);
+        if (!loadedQuestions.length) {
+          setError(`No ${level === "intern" ? "intern" : "new grad"} questions are available for this track yet.`);
+          return;
+        }
 
         const requestedIndex = Number.isFinite(requestedQuestionId)
           ? loadedQuestions.findIndex((item) => item.id === requestedQuestionId)
           : -1;
-        const savedQuestionId = readSavedQuestionId(role);
+        const savedQuestionId = readSavedQuestionId(role, level);
         const savedIndex =
           savedQuestionId === null ? -1 : loadedQuestions.findIndex((item) => item.id === savedQuestionId);
         const nextIndex = requestedIndex >= 0 ? requestedIndex : savedIndex >= 0 ? savedIndex : 0;
@@ -136,7 +162,7 @@ export default function InterviewPage() {
         setPhase("question");
       })
       .catch(() => setError("Failed to load questions."));
-  }, [role, requestedQuestionId]);
+  }, [level, role, requestedQuestionId]);
 
   useEffect(() => {
     if (!authed) {
@@ -147,14 +173,14 @@ export default function InterviewPage() {
     getHistory()
       .then((records) => {
         const answeredForRole = records
-          .filter((record) => record.question.role === role)
+          .filter((record) => record.question.role === role && record.question.level === level)
           .map((record) => record.question.id);
         setCompletedIds(Array.from(new Set(answeredForRole)));
       })
       .catch(() => {
         setCompletedIds([]);
       });
-  }, [authed, role]);
+  }, [authed, level, role]);
 
   const question = questions[qIndex];
   const progress = questions.length ? ((qIndex + 1) / questions.length) * 100 : 0;
@@ -162,14 +188,14 @@ export default function InterviewPage() {
   useEffect(() => {
     if (!question) return;
 
-    saveQuestionId(role, question.id);
-    navigate(`/interview?role=${role}&questionId=${question.id}`, { replace: true });
-  }, [navigate, question, role]);
+    saveQuestionId(role, level, question.id);
+    navigate(`/interview?role=${role}&level=${level}&questionId=${question.id}`, { replace: true });
+  }, [level, navigate, question, role]);
 
   async function handleSubmit() {
     if (!question || answer.trim().length < 20) return;
     if (!authed) {
-      navigate(`/auth?next=${encodeURIComponent(`/interview?role=${role}`)}`);
+      navigate(`/auth?next=${encodeURIComponent(`/interview?role=${role}&level=${level}`)}`);
       return;
     }
     setPhase("submitting");
@@ -188,7 +214,7 @@ export default function InterviewPage() {
       ) {
         clearToken();
         setAuthed(false);
-        navigate(`/auth?next=${encodeURIComponent(`/interview?role=${role}`)}`);
+        navigate(`/auth?next=${encodeURIComponent(`/interview?role=${role}&level=${level}`)}`);
         return;
       }
       setError(message);
@@ -236,7 +262,7 @@ export default function InterviewPage() {
           className="mono"
           style={{ color: "var(--cyan)", letterSpacing: "0.15em", fontSize: "14px" }}
         >
-          LOADING QUESTION BANK...
+          LOADING {level === "intern" ? "INTERN" : "NEW GRAD"} QUESTION BANK...
         </div>
         <div style={{ display: "flex", gap: "6px" }}>
           {[0, 1, 2].map((i) => (
@@ -330,7 +356,7 @@ export default function InterviewPage() {
             </div>
             <button
               className="btn-primary"
-              onClick={() => navigate(`/auth?next=${encodeURIComponent(`/interview?role=${role}`)}`)}
+              onClick={() => navigate(`/auth?next=${encodeURIComponent(`/interview?role=${role}&level=${level}`)}`)}
               style={{ fontSize: "15px", flexShrink: 0 }}
             >
               Sign In
@@ -430,6 +456,7 @@ export default function InterviewPage() {
                 >
                   Q_{String(qIndex + 1).padStart(3, "0")}
                 </span>
+                <LevelBadge level={level} />
                 <DiffBadge level={question.difficulty} />
                 <div style={{ flex: 1, height: "1px", background: "var(--border)" }} />
               </div>

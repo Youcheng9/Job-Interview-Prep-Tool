@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { LevelSelector } from "../components/LevelSelector";
 import { RoleSelector } from "../components/RoleSelector";
-import { isAuthenticated, type Role } from "../lib/api";
+import { isAuthenticated, type CandidateLevel, type Role } from "../lib/api";
 
 // Animated grid background
 function GridBackground() {
@@ -59,10 +60,11 @@ function GridBackground() {
 
 export default function HomePage() {
   const [role, setRole] = useState<Role | null>(null);
+  const [level, setLevel] = useState<CandidateLevel>("new_grad");
   const navigate = useNavigate();
 
   const handleStart = () => {
-    if (role) navigate(`/interview?role=${role}`);
+    if (role) navigate(`/interview?role=${role}&level=${level}`);
   };
 
   return (
@@ -179,6 +181,35 @@ export default function HomePage() {
           style={{ marginBottom: "40px", animationDelay: "240ms" }}
         >
           <RoleSelector selected={role} onChange={setRole} />
+        </div>
+
+        <div
+          className="animate-fade-up"
+          style={{ marginBottom: "40px", animationDelay: "280ms" }}
+        >
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "16px",
+              marginBottom: "24px",
+            }}
+          >
+            <div style={{ flex: 1, height: "1px", background: "var(--border)" }} />
+            <span
+              className="mono"
+              style={{
+                fontSize: "12px",
+                letterSpacing: "0.15em",
+                color: "var(--muted)",
+                textTransform: "uppercase",
+              }}
+            >
+              Select Level
+            </span>
+            <div style={{ flex: 1, height: "1px", background: "var(--border)" }} />
+          </div>
+          <LevelSelector selected={level} onChange={setLevel} />
         </div>
 
         {/* CTA */}
