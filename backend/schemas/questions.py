@@ -18,6 +18,7 @@ class QuestionItem(BaseModel):
     """
     id: int
     role: str
+    level: str
     prompt: str
 
 
