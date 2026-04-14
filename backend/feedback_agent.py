@@ -10,6 +10,8 @@ OLLAMA_URL = os.getenv("OLLAMA_URL", "http://127.0.0.1:11434/api/generate")
 OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3.1:8b")
 AI_FEEDBACK_ENABLED = os.getenv("AI_FEEDBACK_ENABLED", "true").lower() == "true"
 AI_FEEDBACK_TIMEOUT_SECONDS = int(os.getenv("AI_FEEDBACK_TIMEOUT_SECONDS", "90"))
+AI_FEEDBACK_FAST_MODE = os.getenv("AI_FEEDBACK_FAST_MODE", "true").lower() == "true"
+AI_FEEDBACK_MAX_TOKENS = int(os.getenv("AI_FEEDBACK_MAX_TOKENS", "220"))
 
 
 class FeedbackAgentError(RuntimeError):
@@ -76,6 +78,39 @@ def build_feedback_prompt(
     overall: int,
     feedback: dict,
 ) -> str:
+    keywords = rubric.get("keywords", [])[:6]
+    missing_keywords = (feedback.get("missing_keywords", []) or [])[:4]
+    strengths = (feedback.get("strengths", []) or [])[:2]
+    weaknesses = (feedback.get("weaknesses", []) or [])[:2]
+
+    if AI_FEEDBACK_FAST_MODE:
+        return f"""
+You are an interview coach. Return valid JSON only.
+
+Question: {question_prompt}
+Candidate answer: {answer_text}
+Ideal answer summary: {rubric.get("ideal_answer", "")[:280]}
+Role: {role}
+Overall score: {overall}
+Dimension scores: {json.dumps(scores)}
+Expected keywords: {json.dumps(keywords)}
+Missing keywords: {json.dumps(missing_keywords)}
+Known strengths: {json.dumps(strengths)}
+Known weaknesses: {json.dumps(weaknesses)}
+
+Return exactly:
+{{
+  "summary": "1 to 2 sentences",
+  "strengths": ["item", "item"],
+  "weaknesses": ["item", "item"],
+  "improvements": ["item", "item"],
+  "improved_answer": "2 to 4 concise sentences",
+  "next_focus": "short phrase"
+}}
+
+Keep every field concise and specific.
+""".strip()
+
     return f"""
 You are an interview coach agent. Your job is to analyze an answer, identify the most important improvement opportunities, and produce practical next-step coaching.
 
@@ -86,12 +121,12 @@ You are given:
 - interview question: {question_prompt}
 - candidate answer: {answer_text}
 - ideal answer: {rubric.get("ideal_answer", "")}
-- rubric keywords: {json.dumps(rubric.get("keywords", []))}
+- rubric keywords: {json.dumps(keywords)}
 - current overall score: {overall}
 - dimension scores: {json.dumps(scores)}
-- existing deterministic strengths: {json.dumps(feedback.get("strengths", []))}
-- existing deterministic weaknesses: {json.dumps(feedback.get("weaknesses", []))}
-- missing keywords: {json.dumps(feedback.get("missing_keywords", []))}
+- existing deterministic strengths: {json.dumps(strengths)}
+- existing deterministic weaknesses: {json.dumps(weaknesses)}
+- missing keywords: {json.dumps(missing_keywords)}
 
 Return exactly this JSON shape:
 {{
@@ -120,6 +155,10 @@ def call_ollama(prompt: str) -> str:
             "prompt": prompt,
             "stream": False,
             "format": "json",
+            "options": {
+                "temperature": 0.2,
+                "num_predict": AI_FEEDBACK_MAX_TOKENS,
+            },
         }
     ).encode("utf-8")
 
