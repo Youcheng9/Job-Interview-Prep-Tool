@@ -14,6 +14,35 @@ import {
   type ScoreResult,
 } from "../../lib/api";
 
+type SpeechRecognitionCtor = new () => {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  start: () => void;
+  stop: () => void;
+  onstart: null | (() => void);
+  onend: null | (() => void);
+  onerror: null | ((event: { error?: string }) => void);
+  onresult: null | ((event: SpeechRecognitionResultEventLike) => void);
+};
+
+interface SpeechRecognitionResultEventLike {
+  resultIndex: number;
+  results: ArrayLike<{
+    isFinal?: boolean;
+    0: {
+      transcript: string;
+    };
+  }>;
+}
+
+declare global {
+  interface Window {
+    SpeechRecognition?: SpeechRecognitionCtor;
+    webkitSpeechRecognition?: SpeechRecognitionCtor;
+  }
+}
+
 // Typing animation for question text
 function TypedText({ text }: { text: string }) {
   const [displayed, setDisplayed] = useState("");
@@ -135,7 +164,73 @@ export default function InterviewPage() {
   const [charCount, setCharCount] = useState(0);
   const [authed, setAuthed] = useState(isAuthenticated());
   const [completedIds, setCompletedIds] = useState<number[]>([]);
+  const [isSpeechSupported, setIsSpeechSupported] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+  const [speechError, setSpeechError] = useState<string | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const recognitionRef = useRef<InstanceType<SpeechRecognitionCtor> | null>(null);
+
+  useEffect(() => {
+    const Recognition = window.SpeechRecognition ?? window.webkitSpeechRecognition;
+    setIsSpeechSupported(Boolean(Recognition));
+
+    if (!Recognition) {
+      recognitionRef.current = null;
+      return;
+    }
+
+    const recognition = new Recognition();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = "en-US";
+
+    recognition.onstart = () => {
+      setSpeechError(null);
+      setIsListening(true);
+    };
+
+    recognition.onend = () => {
+      setIsListening(false);
+    };
+
+    recognition.onerror = (event) => {
+      const nextError =
+        event.error === "not-allowed"
+          ? "Microphone access was blocked. Please allow mic access and try again."
+          : event.error === "no-speech"
+            ? "No speech was detected. Try again and speak a bit closer to the mic."
+            : "Speech recognition could not capture audio clearly.";
+      setSpeechError(nextError);
+      setIsListening(false);
+    };
+
+    recognition.onresult = (event) => {
+      let finalTranscript = "";
+
+      for (let index = event.resultIndex; index < event.results.length; index += 1) {
+        const transcript = event.results[index]?.[0]?.transcript ?? "";
+        if (event.results[index]?.isFinal) {
+          finalTranscript += transcript;
+        }
+      }
+
+      if (!finalTranscript.trim()) return;
+
+      setAnswer((current) => {
+        const separator = current.trim().length ? " " : "";
+        const nextValue = `${current}${separator}${finalTranscript.trim()}`.replace(/\s+/g, " ").trim();
+        setCharCount(nextValue.length);
+        return nextValue;
+      });
+    };
+
+    recognitionRef.current = recognition;
+
+    return () => {
+      recognition.stop();
+      recognitionRef.current = null;
+    };
+  }, []);
 
   useEffect(() => {
     setError(null);
@@ -243,6 +338,23 @@ export default function InterviewPage() {
     setAnswer("");
     setScore(null);
     setPhase("question");
+  }
+
+  function handleSpeechToggle() {
+    if (!recognitionRef.current) {
+      setSpeechError("Speech-to-text is not supported in this browser.");
+      return;
+    }
+
+    setSpeechError(null);
+
+    if (isListening) {
+      recognitionRef.current.stop();
+      return;
+    }
+
+    textareaRef.current?.focus();
+    recognitionRef.current.start();
   }
 
   // Loading state
@@ -592,17 +704,64 @@ export default function InterviewPage() {
                     display: "flex",
                     justifyContent: "space-between",
                     alignItems: "center",
+                    gap: "16px",
+                    flexWrap: "wrap",
                   }}
                 >
-                  <span
-                    className="mono"
-                    style={{
-                      fontSize: "13px",
-                      color: charCount < 20 ? "#ef4444" : "var(--muted)",
-                    }}
-                  >
-                    {charCount} chars {charCount < 20 && "— min 20 required"}
-                  </span>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                    <span
+                      className="mono"
+                      style={{
+                        fontSize: "13px",
+                        color: charCount < 20 ? "#ef4444" : "var(--muted)",
+                      }}
+                    >
+                      {charCount} chars {charCount < 20 && "— min 20 required"}
+                    </span>
+                    <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+                      <button
+                        className="btn-ghost"
+                        type="button"
+                        onClick={handleSpeechToggle}
+                        disabled={phase === "submitting" || !isSpeechSupported}
+                        style={{
+                          borderColor: isListening ? "var(--red)" : undefined,
+                          color: isListening ? "var(--red)" : undefined,
+                          opacity: phase === "submitting" || !isSpeechSupported ? 0.45 : 1,
+                          cursor:
+                            phase === "submitting" || !isSpeechSupported ? "not-allowed" : "pointer",
+                        }}
+                      >
+                        {isListening ? "Stop Recording" : "Speech to Text"}
+                      </button>
+                      <span
+                        className="mono"
+                        style={{
+                          fontSize: "12px",
+                          color: isListening ? "var(--red)" : "var(--muted)",
+                          letterSpacing: "0.08em",
+                          textTransform: "uppercase",
+                        }}
+                      >
+                        {!isSpeechSupported
+                          ? "Speech input unavailable"
+                          : isListening
+                            ? "Listening..."
+                            : "Mic ready"}
+                      </span>
+                    </div>
+                    {speechError && (
+                      <span
+                        style={{
+                          fontSize: "14px",
+                          color: "var(--amber)",
+                          lineHeight: 1.6,
+                        }}
+                      >
+                        {speechError}
+                      </span>
+                    )}
+                  </div>
 
                   <button
                     className="btn-primary"
