@@ -5,12 +5,37 @@
     "prompt": "Explain the difference between an array and a linked list.",
     "rubric": {
       "ideal_answer": "A strong answer explains that arrays store elements contiguously, which gives fast indexing but makes insertions in the middle expensive. Linked lists store nodes connected by pointers, so insertions and deletions can be easier once you have the node, but random access is slow because you must traverse the list.",
-      "keywords": ["array", "linked list", "contiguous memory", "random access", "insertion", "deletion", "pointer"],
+      "keywords": [
+        "array",
+        "linked list",
+        "contiguous memory",
+        "random access",
+        "insertion",
+        "deletion",
+        "pointer"
+      ],
       "dimension_keywords": {
-        "technical_depth": ["contiguous memory", "random access", "pointer"],
-        "clarity": ["difference", "whereas", "because"],
-        "completeness": ["indexing", "insertion", "deletion", "traverse"],
-        "structure": ["first", "in contrast", "for example"]
+        "technical_depth": [
+          "contiguous memory",
+          "random access",
+          "pointer"
+        ],
+        "clarity": [
+          "difference",
+          "whereas",
+          "because"
+        ],
+        "completeness": [
+          "indexing",
+          "insertion",
+          "deletion",
+          "traverse"
+        ],
+        "structure": [
+          "first",
+          "in contrast",
+          "for example"
+        ]
       }
     }
   },
@@ -20,12 +45,34 @@
     "prompt": "What happens when you use a for loop to scan through an array once?",
     "rubric": {
       "ideal_answer": "A strong answer states that scanning through an array once visits each element one time, so the work grows linearly with the number of elements. That means the time complexity is O(n). A good answer may also mention that this is efficient when every element needs to be checked.",
-      "keywords": ["loop", "array", "each element", "linear", "O(n)", "single pass"],
+      "keywords": [
+        "loop",
+        "array",
+        "each element",
+        "linear",
+        "O(n)",
+        "single pass"
+      ],
       "dimension_keywords": {
-        "technical_depth": ["O(n)", "linear"],
-        "clarity": ["single pass", "each element"],
-        "completeness": ["loop", "array", "linear", "time complexity"],
-        "structure": ["because", "therefore", "for example"]
+        "technical_depth": [
+          "O(n)",
+          "linear"
+        ],
+        "clarity": [
+          "single pass",
+          "each element"
+        ],
+        "completeness": [
+          "loop",
+          "array",
+          "linear",
+          "time complexity"
+        ],
+        "structure": [
+          "because",
+          "therefore",
+          "for example"
+        ]
       }
     }
   },
@@ -35,12 +82,41 @@
     "prompt": "Explain the difference between a process and a thread.",
     "rubric": {
       "ideal_answer": "A process is an independent program with its own memory space, file descriptors, and system resources. Threads are lightweight execution units within a process that share the same memory space and resources but have their own stack and program counter. Processes require more overhead to create and switch between, while threads are more efficient for concurrent execution within the same application.",
-      "keywords": ["process", "thread", "memory space", "shared memory", "context switch", "lightweight", "independent", "execution unit"],
+      "keywords": [
+        "process",
+        "thread",
+        "memory space",
+        "shared memory",
+        "context switch",
+        "lightweight",
+        "independent",
+        "execution unit"
+      ],
       "dimension_keywords": {
-        "technical_depth": ["memory space", "context switch", "program counter", "stack"],
-        "clarity": ["difference", "independent", "share", "execution"],
-        "completeness": ["memory space", "shared memory", "lightweight", "overhead"],
-        "structure": ["first", "whereas", "however", "in contrast"]
+        "technical_depth": [
+          "memory space",
+          "context switch",
+          "program counter",
+          "stack"
+        ],
+        "clarity": [
+          "difference",
+          "independent",
+          "share",
+          "execution"
+        ],
+        "completeness": [
+          "memory space",
+          "shared memory",
+          "lightweight",
+          "overhead"
+        ],
+        "structure": [
+          "first",
+          "whereas",
+          "however",
+          "in contrast"
+        ]
       }
     }
   },
@@ -50,12 +126,39 @@
     "prompt": "How would you design a URL shortener like bit.ly?",
     "rubric": {
       "ideal_answer": "A URL shortener needs an API, a database mapping short codes to long URLs, unique key generation, redirect handling, caching, analytics, and considerations for scalability and collisions. A strong answer also covers tradeoffs in ID generation, reliability, and how read-heavy traffic should be handled efficiently.",
-      "keywords": ["database", "unique key", "redirect", "scalability", "collision", "cache", "analytics", "API"],
+      "keywords": [
+        "database",
+        "unique key",
+        "redirect",
+        "scalability",
+        "collision",
+        "cache",
+        "analytics",
+        "API"
+      ],
       "dimension_keywords": {
-        "technical_depth": ["database", "cache", "scalability", "collision"],
-        "clarity": ["components", "flow", "tradeoff"],
-        "completeness": ["unique key", "redirect", "collision", "analytics"],
-        "structure": ["first", "next", "finally"]
+        "technical_depth": [
+          "database",
+          "cache",
+          "scalability",
+          "collision"
+        ],
+        "clarity": [
+          "components",
+          "flow",
+          "tradeoff"
+        ],
+        "completeness": [
+          "unique key",
+          "redirect",
+          "collision",
+          "analytics"
+        ],
+        "structure": [
+          "first",
+          "next",
+          "finally"
+        ]
       }
     }
   },
@@ -65,12 +168,34 @@
     "prompt": "What is the difference between training data and test data?",
     "rubric": {
       "ideal_answer": "Training data is the data used to fit the model, while test data is held out until the end to evaluate how well the model performs on unseen examples. A strong answer connects this to generalization and avoiding overly optimistic evaluation.",
-      "keywords": ["training data", "test data", "fit", "evaluate", "unseen data", "generalization"],
+      "keywords": [
+        "training data",
+        "test data",
+        "fit",
+        "evaluate",
+        "unseen data",
+        "generalization"
+      ],
       "dimension_keywords": {
-        "technical_depth": ["generalization", "evaluation"],
-        "clarity": ["difference", "used to", "held out"],
-        "completeness": ["fit", "evaluate", "unseen data"],
-        "structure": ["first", "while", "therefore"]
+        "technical_depth": [
+          "generalization",
+          "evaluation"
+        ],
+        "clarity": [
+          "difference",
+          "used to",
+          "held out"
+        ],
+        "completeness": [
+          "fit",
+          "evaluate",
+          "unseen data"
+        ],
+        "structure": [
+          "first",
+          "while",
+          "therefore"
+        ]
       }
     }
   },
@@ -80,12 +205,35 @@
     "prompt": "Why is data cleaning important before training a model?",
     "rubric": {
       "ideal_answer": "Data cleaning matters because messy data can lead to incorrect patterns, unstable models, or misleading results. A good answer mentions issues like missing values, duplicates, inconsistent formats, and outliers, and explains that cleaner data improves model quality and trustworthiness.",
-      "keywords": ["data cleaning", "missing values", "duplicates", "outliers", "quality", "model performance"],
+      "keywords": [
+        "data cleaning",
+        "missing values",
+        "duplicates",
+        "outliers",
+        "quality",
+        "model performance"
+      ],
       "dimension_keywords": {
-        "technical_depth": ["outliers", "missing values"],
-        "clarity": ["important", "because", "improves"],
-        "completeness": ["duplicates", "missing values", "formats", "quality"],
-        "structure": ["problem", "impact", "result"]
+        "technical_depth": [
+          "outliers",
+          "missing values"
+        ],
+        "clarity": [
+          "important",
+          "because",
+          "improves"
+        ],
+        "completeness": [
+          "duplicates",
+          "missing values",
+          "formats",
+          "quality"
+        ],
+        "structure": [
+          "problem",
+          "impact",
+          "result"
+        ]
       }
     }
   },
@@ -95,12 +243,34 @@
     "prompt": "What is overfitting and how can you reduce it?",
     "rubric": {
       "ideal_answer": "Overfitting happens when a model learns noise in the training data and performs poorly on unseen data. It can be reduced with regularization, simpler models, cross-validation, more data, and early stopping.",
-      "keywords": ["generalization", "regularization", "cross-validation", "simpler model", "early stopping", "unseen data"],
+      "keywords": [
+        "generalization",
+        "regularization",
+        "cross-validation",
+        "simpler model",
+        "early stopping",
+        "unseen data"
+      ],
       "dimension_keywords": {
-        "technical_depth": ["regularization", "cross-validation", "generalization"],
-        "clarity": ["unseen data", "poorly"],
-        "completeness": ["generalization", "simpler model", "early stopping"],
-        "structure": ["definition", "causes", "solutions"]
+        "technical_depth": [
+          "regularization",
+          "cross-validation",
+          "generalization"
+        ],
+        "clarity": [
+          "unseen data",
+          "poorly"
+        ],
+        "completeness": [
+          "generalization",
+          "simpler model",
+          "early stopping"
+        ],
+        "structure": [
+          "definition",
+          "causes",
+          "solutions"
+        ]
       }
     }
   },
@@ -110,12 +280,36 @@
     "prompt": "What is the difference between precision and recall, and when would you care more about one than the other?",
     "rubric": {
       "ideal_answer": "Precision measures the fraction of predicted positives that are correct, while recall measures the fraction of actual positives that the model successfully finds. A strong answer also explains that precision matters more when false positives are costly, while recall matters more when false negatives are costly.",
-      "keywords": ["precision", "recall", "false positive", "false negative", "predicted positives", "actual positives", "tradeoff"],
+      "keywords": [
+        "precision",
+        "recall",
+        "false positive",
+        "false negative",
+        "predicted positives",
+        "actual positives",
+        "tradeoff"
+      ],
       "dimension_keywords": {
-        "technical_depth": ["false positive", "false negative", "tradeoff"],
-        "clarity": ["difference", "measures", "when"],
-        "completeness": ["predicted positives", "actual positives", "costly"],
-        "structure": ["first", "while", "for example"]
+        "technical_depth": [
+          "false positive",
+          "false negative",
+          "tradeoff"
+        ],
+        "clarity": [
+          "difference",
+          "measures",
+          "when"
+        ],
+        "completeness": [
+          "predicted positives",
+          "actual positives",
+          "costly"
+        ],
+        "structure": [
+          "first",
+          "while",
+          "for example"
+        ]
       }
     }
   },
@@ -125,12 +319,34 @@
     "prompt": "How would you decide which feature to build first for a student app?",
     "rubric": {
       "ideal_answer": "A strong answer starts by understanding the user problem, then comparing features by impact, urgency, and effort. It should explain that the first feature should solve the most important user need with reasonable implementation cost, and that feedback should be used to validate the choice.",
-      "keywords": ["user problem", "impact", "effort", "priority", "feedback", "first feature"],
+      "keywords": [
+        "user problem",
+        "impact",
+        "effort",
+        "priority",
+        "feedback",
+        "first feature"
+      ],
       "dimension_keywords": {
-        "technical_depth": ["impact", "effort"],
-        "clarity": ["decide", "first", "why"],
-        "completeness": ["user problem", "priority", "feedback"],
-        "structure": ["first", "then", "finally"]
+        "technical_depth": [
+          "impact",
+          "effort"
+        ],
+        "clarity": [
+          "decide",
+          "first",
+          "why"
+        ],
+        "completeness": [
+          "user problem",
+          "priority",
+          "feedback"
+        ],
+        "structure": [
+          "first",
+          "then",
+          "finally"
+        ]
       }
     }
   },
@@ -140,12 +356,35 @@
     "prompt": "What metrics would you look at to know whether a new feature is useful?",
     "rubric": {
       "ideal_answer": "A strong answer mentions metrics tied to the feature goal, such as adoption, engagement, retention, or task completion. It should explain that the right metric depends on what success means for that feature and that both user behavior and qualitative feedback can help.",
-      "keywords": ["adoption", "engagement", "retention", "success metric", "goal", "feedback"],
+      "keywords": [
+        "adoption",
+        "engagement",
+        "retention",
+        "success metric",
+        "goal",
+        "feedback"
+      ],
       "dimension_keywords": {
-        "technical_depth": ["metric", "goal"],
-        "clarity": ["useful", "depends", "success"],
-        "completeness": ["adoption", "engagement", "retention", "feedback"],
-        "structure": ["goal", "metric", "decision"]
+        "technical_depth": [
+          "metric",
+          "goal"
+        ],
+        "clarity": [
+          "useful",
+          "depends",
+          "success"
+        ],
+        "completeness": [
+          "adoption",
+          "engagement",
+          "retention",
+          "feedback"
+        ],
+        "structure": [
+          "goal",
+          "metric",
+          "decision"
+        ]
       }
     }
   },
@@ -155,12 +394,36 @@
     "prompt": "How would you prioritize features for a new product?",
     "rubric": {
       "ideal_answer": "Feature prioritization should balance user impact, business value, effort, risk, and strategic alignment using a clear framework such as RICE or impact versus effort. A strong answer also explains how tradeoffs are communicated to stakeholders.",
-      "keywords": ["user impact", "business value", "effort", "risk", "RICE", "strategy", "tradeoff"],
+      "keywords": [
+        "user impact",
+        "business value",
+        "effort",
+        "risk",
+        "RICE",
+        "strategy",
+        "tradeoff"
+      ],
       "dimension_keywords": {
-        "technical_depth": ["RICE", "tradeoff", "strategic alignment"],
-        "clarity": ["framework", "criteria"],
-        "completeness": ["user impact", "business value", "effort", "risk"],
-        "structure": ["first", "next", "finally"]
+        "technical_depth": [
+          "RICE",
+          "tradeoff",
+          "strategic alignment"
+        ],
+        "clarity": [
+          "framework",
+          "criteria"
+        ],
+        "completeness": [
+          "user impact",
+          "business value",
+          "effort",
+          "risk"
+        ],
+        "structure": [
+          "first",
+          "next",
+          "finally"
+        ]
       }
     }
   },
@@ -170,12 +433,37 @@
     "prompt": "How would you respond if a key product metric suddenly dropped?",
     "rubric": {
       "ideal_answer": "A strong response starts with validating the metric and checking instrumentation, segmenting the impact, identifying recent changes, and coordinating investigation and mitigation with relevant teams. It should distinguish quick triage from deeper root-cause analysis.",
-      "keywords": ["validate", "instrumentation", "segment", "recent changes", "root cause", "mitigation", "triage"],
+      "keywords": [
+        "validate",
+        "instrumentation",
+        "segment",
+        "recent changes",
+        "root cause",
+        "mitigation",
+        "triage"
+      ],
       "dimension_keywords": {
-        "technical_depth": ["root cause", "segment", "instrumentation"],
-        "clarity": ["validate", "investigation", "mitigation"],
-        "completeness": ["instrumentation", "recent changes", "mitigation", "stakeholders"],
-        "structure": ["first", "then", "next"]
+        "technical_depth": [
+          "root cause",
+          "segment",
+          "instrumentation"
+        ],
+        "clarity": [
+          "validate",
+          "investigation",
+          "mitigation"
+        ],
+        "completeness": [
+          "instrumentation",
+          "recent changes",
+          "mitigation",
+          "stakeholders"
+        ],
+        "structure": [
+          "first",
+          "then",
+          "next"
+        ]
       }
     }
   },
@@ -185,12 +473,35 @@
     "prompt": "Tell me about a time you had to learn something new quickly.",
     "rubric": {
       "ideal_answer": "A strong answer uses a clear example, explains the challenge, shows how the candidate learned efficiently, and ends with a specific result. It should highlight curiosity, initiative, and the ability to apply what was learned.",
-      "keywords": ["learn quickly", "initiative", "resourceful", "challenge", "result", "reflection"],
+      "keywords": [
+        "learn quickly",
+        "initiative",
+        "resourceful",
+        "challenge",
+        "result",
+        "reflection"
+      ],
       "dimension_keywords": {
-        "technical_depth": ["learning strategy", "adaptation"],
-        "clarity": ["example", "challenge", "result"],
-        "completeness": ["initiative", "action", "result", "reflection"],
-        "structure": ["situation", "action", "result"]
+        "technical_depth": [
+          "learning strategy",
+          "adaptation"
+        ],
+        "clarity": [
+          "example",
+          "challenge",
+          "result"
+        ],
+        "completeness": [
+          "initiative",
+          "action",
+          "result",
+          "reflection"
+        ],
+        "structure": [
+          "situation",
+          "action",
+          "result"
+        ]
       }
     }
   },
@@ -200,12 +511,34 @@
     "prompt": "Describe a time you worked with others to finish a project.",
     "rubric": {
       "ideal_answer": "A strong answer explains the team context, the candidate's role, how they communicated and collaborated, and what outcome the group achieved. It should show reliability, teamwork, and awareness of how group work succeeds.",
-      "keywords": ["teamwork", "communication", "role", "collaboration", "outcome", "support"],
+      "keywords": [
+        "teamwork",
+        "communication",
+        "role",
+        "collaboration",
+        "outcome",
+        "support"
+      ],
       "dimension_keywords": {
-        "technical_depth": ["coordination", "ownership"],
-        "clarity": ["role", "team", "outcome"],
-        "completeness": ["communication", "collaboration", "result"],
-        "structure": ["context", "action", "result"]
+        "technical_depth": [
+          "coordination",
+          "ownership"
+        ],
+        "clarity": [
+          "role",
+          "team",
+          "outcome"
+        ],
+        "completeness": [
+          "communication",
+          "collaboration",
+          "result"
+        ],
+        "structure": [
+          "context",
+          "action",
+          "result"
+        ]
       }
     }
   },
@@ -215,12 +548,38 @@
     "prompt": "Tell me about a time you dealt with conflict on a team.",
     "rubric": {
       "ideal_answer": "A strong answer uses the STAR format, explains the conflict clearly, shows empathy and communication, describes concrete actions taken, and ends with a measurable or meaningful outcome.",
-      "keywords": ["STAR", "situation", "action", "communication", "outcome", "resolution", "empathy"],
+      "keywords": [
+        "STAR",
+        "situation",
+        "action",
+        "communication",
+        "outcome",
+        "resolution",
+        "empathy"
+      ],
       "dimension_keywords": {
-        "technical_depth": ["root cause", "tradeoff", "resolution"],
-        "clarity": ["situation", "action", "outcome"],
-        "completeness": ["communication", "resolution", "outcome"],
-        "structure": ["STAR", "situation", "task", "action", "result"]
+        "technical_depth": [
+          "root cause",
+          "tradeoff",
+          "resolution"
+        ],
+        "clarity": [
+          "situation",
+          "action",
+          "outcome"
+        ],
+        "completeness": [
+          "communication",
+          "resolution",
+          "outcome"
+        ],
+        "structure": [
+          "STAR",
+          "situation",
+          "task",
+          "action",
+          "result"
+        ]
       }
     }
   },
@@ -230,12 +589,413 @@
     "prompt": "Describe a time you failed and what you learned.",
     "rubric": {
       "ideal_answer": "A strong answer honestly describes the failure, takes ownership, explains what changed afterward, and shows clear reflection and growth. Strong responses avoid blame and focus on improved future behavior.",
-      "keywords": ["ownership", "lesson", "reflection", "growth", "change", "accountability"],
+      "keywords": [
+        "ownership",
+        "lesson",
+        "reflection",
+        "growth",
+        "change",
+        "accountability"
+      ],
       "dimension_keywords": {
-        "technical_depth": ["root cause", "improvement", "accountability"],
-        "clarity": ["failure", "learned", "changed"],
-        "completeness": ["ownership", "lesson", "change", "future behavior"],
-        "structure": ["situation", "action", "result", "reflection"]
+        "technical_depth": [
+          "root cause",
+          "improvement",
+          "accountability"
+        ],
+        "clarity": [
+          "failure",
+          "learned",
+          "changed"
+        ],
+        "completeness": [
+          "ownership",
+          "lesson",
+          "change",
+          "future behavior"
+        ],
+        "structure": [
+          "situation",
+          "action",
+          "result",
+          "reflection"
+        ]
+      }
+    }
+  },
+  {
+    "role": "SWE",
+    "level": "new_grad",
+    "prompt": "Design a caching mechanism to improve the performance of a web application.?",
+    "rubric": {
+      "ideal_answer": "Describe a cache hierarchy with multiple levels, including a fast in-memory cache and a slower disk-based cache. Explain how the cache is populated and updated. Discuss the trade-offs between cache size and hit ratio.",
+      "keywords": [
+        "cache",
+        "hierarchy",
+        "in-memory",
+        "disk-based"
+      ],
+      "dimension_keywords": {
+        "technical_depth": [
+          "data structures",
+          "algorithms"
+        ],
+        "clarity": [
+          "clear explanation",
+          "concise"
+        ],
+        "completeness": [
+          "cache population",
+          "update strategy"
+        ],
+        "structure": [
+          "cache hierarchy",
+          "trade-offs"
+        ]
+      }
+    }
+  },
+  {
+    "role": "PM",
+    "level": "new_grad",
+    "prompt": "What are the key differences between agile and waterfall project management methodologies?",
+    "rubric": {
+      "ideal_answer": "Agile focuses on iterative development, flexibility, and customer collaboration, while waterfall emphasizes a linear approach with fixed timelines and deliverables. Agile is better suited for projects with high uncertainty or changing requirements.",
+      "keywords": [
+        "agile",
+        "waterfall",
+        "project management"
+      ],
+      "dimension_keywords": {
+        "technical_depth": [
+          "methodologies",
+          "approach"
+        ],
+        "clarity": [
+          "flexibility",
+          "customer collaboration"
+        ],
+        "completeness": [
+          "linear approach",
+          "fixed timelines"
+        ],
+        "structure": [
+          "iterative development",
+          "deliverables"
+        ]
+      }
+    }
+  },
+  {
+    "role": "DataScience",
+    "level": "intern",
+    "prompt": "How would you approach data normalization for a dataset with mixed data types?",
+    "rubric": {
+      "ideal_answer": "Describe the process of identifying and converting data types to ensure consistency, including handling missing values.",
+      "keywords": [
+        "data normalization",
+        "data types",
+        "missing values"
+      ],
+      "dimension_keywords": {
+        "technical_depth": [
+          "data type conversion",
+          "handling missing values"
+        ],
+        "clarity": [
+          "consistent data format",
+          "clear explanation"
+        ],
+        "completeness": [
+          "all relevant steps mentioned",
+          "no gaps in reasoning"
+        ],
+        "structure": [
+          "logical flow of ideas",
+          "easy to follow"
+        ]
+      }
+    }
+  },
+  {
+    "role": "DataScience",
+    "level": "intern",
+    "prompt": "Explain how you would handle missing values in a dataset.?",
+    "rubric": {
+      "ideal_answer": "You can use the mean or median imputation method, depending on the data type. The choice of method depends on the specific problem and the characteristics of the data. It's also important to consider the impact of imputation on model performance.",
+      "keywords": [
+        "missing values",
+        "imputation",
+        "data preprocessing"
+      ],
+      "dimension_keywords": {
+        "technical_depth": [
+          "imputation methods",
+          "data type considerations"
+        ],
+        "clarity": [
+          "clear explanation",
+          "concise answer"
+        ],
+        "completeness": [
+          "handling missing values",
+          "impact on model performance"
+        ],
+        "structure": [
+          "step-by-step approach",
+          "considering problem context"
+        ]
+      }
+    }
+  },
+  {
+    "role": "DataScience",
+    "level": "intern",
+    "prompt": "Given a large dataset, describe your process for identifying and addressing potential sources of bias.?",
+    "rubric": {
+      "ideal_answer": "A strong answer would discuss methods for detecting bias, such as data visualization or statistical analysis, and propose strategies for mitigating its impact, including data preprocessing techniques or algorithmic adjustments.",
+      "keywords": [
+        "bias",
+        "data preprocessing",
+        "algorithmic fairness"
+      ],
+      "dimension_keywords": {
+        "technical_depth": [
+          "bias detection",
+          "mitigation strategies"
+        ],
+        "clarity": [
+          "clear explanation of process",
+          "concise summary of methods"
+        ],
+        "completeness": [
+          "identification of potential sources of bias",
+          "proposed solutions for mitigation"
+        ],
+        "structure": [
+          "logical flow of ideas",
+          "effective use of technical terms"
+        ]
+      }
+    }
+  },
+  {
+    "role": "DataScience",
+    "level": "intern",
+    "prompt": "How do you determine the optimal feature set for a machine learning model?",
+    "rubric": {
+      "ideal_answer": "A strong answer should describe a systematic approach to feature selection, including techniques such as correlation analysis and recursive feature elimination. It should also highlight potential pitfalls of overfitting or underfitting.",
+      "keywords": [
+        "feature selection",
+        "correlation analysis",
+        "recursive feature elimination"
+      ],
+      "dimension_keywords": {
+        "technical_depth": [
+          "regularization techniques",
+          "cross-validation methods"
+        ],
+        "clarity": [
+          "clear explanation of trade-offs",
+          "concise description of process"
+        ],
+        "completeness": [
+          "identification of potential pitfalls",
+          "description of evaluation metrics"
+        ],
+        "structure": [
+          "logical flow of steps",
+          "use of relevant technical terms"
+        ]
+      }
+    }
+  },
+  {
+    "role": "DataScience",
+    "level": "intern",
+    "prompt": "Design an experiment to compare the performance of two different algorithms on a classification task.?",
+    "rubric": {
+      "ideal_answer": "A well-designed experiment would involve splitting the dataset into training and testing sets, implementing both algorithms, and comparing their accuracy metrics. The ideal answer should demonstrate an understanding of experimental design and evaluation metrics for machine learning models.",
+      "keywords": [
+        "experimental_design",
+        "evaluation_metrics",
+        "algorithm_comparison"
+      ],
+      "dimension_keywords": {
+        "technical_depth": [
+          "model_selection",
+          "hyperparameter_tuning"
+        ],
+        "clarity": [
+          "clear_description_of_methodology",
+          "concise_explanation_of_results"
+        ],
+        "completeness": [
+          "description_of_data_preprocessing",
+          "mention_of_potential_biases"
+        ],
+        "structure": [
+          "logical_flow_of_experiment",
+          "clear_separation_of_sections"
+        ]
+      }
+    }
+  },
+  {
+    "role": "DataScience",
+    "level": "intern",
+    "prompt": "What are some common pitfalls when using cross-validation in model selection?",
+    "rubric": {
+      "ideal_answer": "Cross-validation can overfit or underfit if not used correctly, and it's essential to consider the type of problem and dataset characteristics. It's also crucial to tune hyperparameters properly.",
+      "keywords": [
+        "cross-validation",
+        "overfitting",
+        "underfitting",
+        "hyperparameter tuning"
+      ],
+      "dimension_keywords": {
+        "technical_depth": [
+          "regularization techniques",
+          "ensemble methods"
+        ],
+        "clarity": [
+          "clear explanation of concept",
+          "example use case"
+        ],
+        "completeness": [
+          "consideration of multiple factors",
+          "discussion of limitations"
+        ],
+        "structure": [
+          "logical organization",
+          "use of technical terms correctly"
+        ]
+      }
+    }
+  },
+  {
+    "role": "DataScience",
+    "level": "intern",
+    "prompt": "How would you describe your process for exploring and visualizing a large dataset?",
+    "rubric": {
+      "ideal_answer": "Describe the steps taken to explore data, including any relevant libraries or techniques used. Highlight key findings from visualization.",
+      "keywords": [
+        "exploratory_data_analysis",
+        "data_visualization",
+        "key_findings"
+      ],
+      "dimension_keywords": {
+        "technical_depth": [
+          "libraries_used",
+          "techniques_applied"
+        ],
+        "clarity": [
+          "clear_description_of_process",
+          "concise_summary_of_key_findings"
+        ],
+        "completeness": [
+          "all_steps_taken",
+          "all_relevant_libraries_mentioned"
+        ],
+        "structure": [
+          "logical_flow_of_description",
+          "easy_to_follow"
+        ]
+      }
+    }
+  },
+  {
+    "role": "DataScience",
+    "level": "intern",
+    "prompt": "Describe a scenario where overfitting occurs, and how you would address it?",
+    "rubric": {
+      "ideal_answer": "Overfitting occurs when a model is too complex for the training data, resulting in poor performance on new data. To address this, I would implement regularization techniques, such as L1 or L2 regularization, to reduce overfitting and improve generalization.",
+      "keywords": [
+        "overfitting",
+        "regularization",
+        "generalization"
+      ],
+      "dimension_keywords": {
+        "technical_depth": [
+          "model complexity",
+          "regularization methods"
+        ],
+        "clarity": [
+          "clear explanation of overfitting",
+          "concise description of solution"
+        ],
+        "completeness": [
+          "description of scenario",
+          "implementation of regularization techniques"
+        ],
+        "structure": [
+          "logical flow of ideas",
+          "clear distinction between problem and solution"
+        ]
+      }
+    }
+  },
+  {
+    "role": "DataScience",
+    "level": "intern",
+    "prompt": "A data scientist is tasked with analyzing customer purchase history to inform marketing strategies. How would you approach this problem, and what insights do you hope to gain?",
+    "rubric": {
+      "ideal_answer": "The candidate describes a process for exploring the dataset, identifying key variables, and using statistical methods to draw meaningful conclusions. They highlight the importance of considering customer demographics and purchase patterns in informing marketing strategies.",
+      "keywords": [
+        "customer segmentation",
+        "purchase history",
+        "marketing insights"
+      ],
+      "dimension_keywords": {
+        "technical_depth": [
+          "data exploration",
+          "feature engineering"
+        ],
+        "clarity": [
+          "clear explanation",
+          "concise summary"
+        ],
+        "completeness": [
+          "key variables",
+          "statistical methods"
+        ],
+        "structure": [
+          "problem statement",
+          "solution outline"
+        ]
+      }
+    }
+  },
+  {
+    "role": "DataScience",
+    "level": "intern",
+    "prompt": "How can you improve the accuracy of a model that's underperforming on a specific class?",
+    "rubric": {
+      "ideal_answer": "Describe techniques to handle class imbalance, such as oversampling or undersampling, and discuss the trade-offs between them. Additionally, consider using metrics like precision and recall to evaluate performance.",
+      "keywords": [
+        "class imbalance",
+        "oversampling",
+        "undersampling",
+        "precision",
+        "recall"
+      ],
+      "dimension_keywords": {
+        "technical_depth": [
+          "techniques for handling class imbalance",
+          "trade-offs between oversampling and undersampling"
+        ],
+        "clarity": [
+          "clearly describe the problem",
+          "concisely explain the solution"
+        ],
+        "completeness": [
+          "consider multiple approaches",
+          "evaluate performance metrics"
+        ],
+        "structure": [
+          "introduce the problem",
+          "present a clear solution"
+        ]
       }
     }
   }

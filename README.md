@@ -107,6 +107,26 @@ From the repo root:
 python -m backend.seed_questions
 ```
 
+### 5b. Generate new questions with Ollama
+
+If you want AI to draft more questions into `backend/data/questions.json`, first make sure Ollama is running, then use:
+
+```bash
+python -m backend.generate_questions --role SWE --level new_grad --count 10
+```
+
+Optional topic targeting:
+
+```bash
+python -m backend.generate_questions --role DataScience --level intern --count 5 --topic "sql and data cleaning"
+```
+
+Then seed the generated questions into PostgreSQL:
+
+```bash
+python -m backend.seed_questions
+```
+
 ### 6. Start the backend
 
 From the repo root:
