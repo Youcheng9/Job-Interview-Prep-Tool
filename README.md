@@ -80,7 +80,11 @@ ACCESS_TOKEN_EXPIRE_MINUTES=10080
 OLLAMA_URL=http://127.0.0.1:11434/api/generate
 OLLAMA_MODEL=llama3.1:8b
 AI_FEEDBACK_ENABLED=true
-AI_FEEDBACK_TIMEOUT_SECONDS=90
+AI_FEEDBACK_MODEL=llama3.1:8b
+AI_FEEDBACK_TIMEOUT_SECONDS=30
+AI_FEEDBACK_MAX_RETRIES=2
+AI_FEEDBACK_RETRY_WITH_PLAIN_JSON=true
+CORS_ALLOW_ORIGINS=http://localhost:3000,http://localhost:5173
 ```
 
 ### 3. Create the PostgreSQL database
@@ -208,6 +212,7 @@ http://localhost:5173
 - scoring and history are protected
 - frontend stores the JWT in `localStorage`
 - backend CORS currently allows `http://localhost:5173` and `http://localhost:3000`
+- backend CORS can be configured with `CORS_ALLOW_ORIGINS`
 - Ollama is used for AI coaching feedback on submitted answers
 
 ## Troubleshooting

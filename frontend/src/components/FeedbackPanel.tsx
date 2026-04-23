@@ -4,6 +4,8 @@ interface Props {
   score: ScoreResult;
   onRetry: () => void;
   onNext: () => void;
+  onGenerateAiFeedback?: () => void;
+  isGeneratingAiFeedback?: boolean;
 }
 
 const TIPS: Record<string, string[]> = {
@@ -33,10 +35,7 @@ const TIPS: Record<string, string[]> = {
   ],
 };
 
-function ImprovementTip({ dim, score }: { dim: string; score: number }) {
-  if (score >= 80) return null;
-  const tips = TIPS[dim] ?? [];
-  const tip = tips[Math.floor(Math.random() * tips.length)];
+function ImprovementTip({ tip }: { tip: string }) {
   return (
     <div
       style={{
@@ -51,25 +50,56 @@ function ImprovementTip({ dim, score }: { dim: string; score: number }) {
         lineHeight: 1.6,
       }}
     >
-      <span style={{ color: "var(--amber)", flexShrink: 0, marginTop: "1px" }}>›</span>
+      <span style={{ color: "var(--amber)", flexShrink: 0, marginTop: "1px" }}>{">"}</span>
       <span>{tip}</span>
     </div>
   );
 }
 
-export function FeedbackPanel({ score, onRetry, onNext }: Props) {
+function getFocusAreaTips(score: ScoreResult): string[] {
+  const weaknessTips = score.weaknesses.filter(Boolean).slice(0, 4);
+  if (weaknessTips.length > 0) {
+    return weaknessTips;
+  }
+
   const weakDims = (
     ["technical_depth", "clarity", "completeness", "structure"] as const
   ).filter((d) => (score[d] as number) < 80);
+
+  const fallbackTips = weakDims
+    .map((dim) => {
+      const tips = TIPS[dim] ?? [];
+      return tips[0];
+    })
+    .filter(Boolean);
+
+  if (score.missing_concepts.length > 0) {
+    fallbackTips.unshift(`Address these missing concepts directly: ${score.missing_concepts.slice(0, 2).join(", ")}.`);
+  }
+
+  return Array.from(new Set(fallbackTips)).slice(0, 4);
+}
+
+export function FeedbackPanel({
+  score,
+  onRetry,
+  onNext,
+  onGenerateAiFeedback,
+  isGeneratingAiFeedback = false,
+}: Props) {
+  const weakDims = (
+    ["technical_depth", "clarity", "completeness", "structure"] as const
+  ).filter((d) => (score[d] as number) < 80);
+  const focusAreaTips = getFocusAreaTips(score);
   const ai = score.ai_feedback;
   const aiError = score.ai_feedback_error;
+  const canGenerateAiFeedback = Boolean(onGenerateAiFeedback) && !ai && !isGeneratingAiFeedback;
 
   return (
     <div
       className="panel animate-fade-up"
       style={{ padding: "30px", animationDelay: "150ms" }}
     >
-      {/* Header */}
       <div
         style={{
           fontFamily: "var(--font-head)",
@@ -100,7 +130,6 @@ export function FeedbackPanel({ score, onRetry, onNext }: Props) {
         Improvement Protocol
       </div>
 
-      {/* Tips for weak dims */}
       {ai && (
         <div style={{ marginBottom: "20px" }}>
           <div
@@ -217,6 +246,40 @@ export function FeedbackPanel({ score, onRetry, onNext }: Props) {
         </div>
       )}
 
+      {!ai && !aiError && onGenerateAiFeedback && (
+        <div
+          style={{
+            marginBottom: "20px",
+            padding: "16px 18px",
+            background: "var(--surface2)",
+            border: "1px solid var(--border)",
+          }}
+        >
+          <div
+            style={{
+              fontSize: "14px",
+              lineHeight: 1.7,
+              color: "var(--muted)",
+              marginBottom: "12px",
+            }}
+          >
+            Deterministic scoring is ready. AI coaching is optional and may take longer depending on your local Ollama model.
+          </div>
+          <button
+            className="btn-ghost"
+            type="button"
+            onClick={onGenerateAiFeedback}
+            disabled={!canGenerateAiFeedback}
+            style={{
+              opacity: canGenerateAiFeedback ? 1 : 0.6,
+              cursor: canGenerateAiFeedback ? "pointer" : "not-allowed",
+            }}
+          >
+            {isGeneratingAiFeedback ? "Generating AI Feedback..." : "Generate AI Coach Feedback"}
+          </button>
+        </div>
+      )}
+
       {!ai && aiError && (
         <div
           style={{
@@ -237,7 +300,7 @@ export function FeedbackPanel({ score, onRetry, onNext }: Props) {
         </div>
       )}
 
-      {weakDims.length > 0 ? (
+      {focusAreaTips.length > 0 ? (
         <>
           <div
             style={{
@@ -251,8 +314,8 @@ export function FeedbackPanel({ score, onRetry, onNext }: Props) {
           >
             Focus Areas
           </div>
-          {weakDims.map((d) => (
-            <ImprovementTip key={d} dim={d} score={score[d] as number} />
+          {focusAreaTips.map((tip) => (
+            <ImprovementTip key={tip} tip={tip} />
           ))}
         </>
       ) : (
@@ -266,11 +329,10 @@ export function FeedbackPanel({ score, onRetry, onNext }: Props) {
             color: "#22c55e",
           }}
         >
-          ✓ Excellent performance across all dimensions
+          Excellent performance across all dimensions
         </div>
       )}
 
-      {/* Performance summary stat */}
       <div
         style={{
           marginTop: "20px",
@@ -299,7 +361,6 @@ export function FeedbackPanel({ score, onRetry, onNext }: Props) {
         </span>
       </div>
 
-      {/* Actions */}
       <div style={{ display: "flex", gap: "12px", marginTop: "20px" }}>
         <button className="btn-ghost" onClick={onRetry} style={{ flex: 1 }}>
           Retry

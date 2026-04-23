@@ -37,6 +37,7 @@ def get_history(limit: int = 50, db: Session = Depends(get_db), user: User = Dep
             created_at=ans.created_at,
             overall=sc.overall,
             scores=sc.scores,
+            feedback=sc.feedback,
         ))
 
     return HistoryResponse(items=items)

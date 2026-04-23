@@ -5,6 +5,7 @@ import { FeedbackPanel } from "../../components/FeedbackPanel";
 import {
   type CandidateLevel,
   clearToken,
+  generateAIFeedback,
   getHistory,
   getQuestions,
   isAuthenticated,
@@ -167,6 +168,7 @@ export default function InterviewPage() {
   const [isSpeechSupported, setIsSpeechSupported] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [speechError, setSpeechError] = useState<string | null>(null);
+  const [isGeneratingAiFeedback, setIsGeneratingAiFeedback] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const recognitionRef = useRef<InstanceType<SpeechRecognitionCtor> | null>(null);
 
@@ -254,6 +256,7 @@ export default function InterviewPage() {
         setAnswer("");
         setCharCount(0);
         setScore(null);
+        setIsGeneratingAiFeedback(false);
         setPhase("question");
       })
       .catch(() => setError("Failed to load questions."));
@@ -294,6 +297,7 @@ export default function InterviewPage() {
       return;
     }
     setPhase("submitting");
+    setIsGeneratingAiFeedback(false);
     setError(null);
     try {
       const result = await submitAnswer(question.id, answer, role);
@@ -317,11 +321,44 @@ export default function InterviewPage() {
     }
   }
 
+  async function handleGenerateAiFeedback() {
+    if (!score?.answerId || isGeneratingAiFeedback) return;
+
+    setIsGeneratingAiFeedback(true);
+    setError(null);
+
+    try {
+      const result = await generateAIFeedback(score.answerId);
+      setScore((current) => {
+        if (!current) return current;
+
+        return {
+          ...current,
+          ai_feedback: result.ai_feedback,
+          ai_feedback_error: result.ai_feedback_error,
+        };
+      });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "AI feedback failed. Please retry.";
+      setScore((current) => {
+        if (!current) return current;
+
+        return {
+          ...current,
+          ai_feedback_error: message,
+        };
+      });
+    } finally {
+      setIsGeneratingAiFeedback(false);
+    }
+  }
+
   function selectQuestion(index: number) {
     setQIndex(index);
     setAnswer("");
     setCharCount(0);
     setScore(null);
+    setIsGeneratingAiFeedback(false);
     setPhase("question");
     setTimeout(() => textareaRef.current?.focus(), 100);
   }
@@ -337,6 +374,7 @@ export default function InterviewPage() {
   function handleRetry() {
     setAnswer("");
     setScore(null);
+    setIsGeneratingAiFeedback(false);
     setPhase("question");
   }
 
@@ -784,16 +822,18 @@ export default function InterviewPage() {
                 <div
                   style={{
                     display: "grid",
-                    gridTemplateColumns: "1fr 360px",
+                    gridTemplateColumns: "minmax(0, 1fr) minmax(320px, 360px)",
                     gap: "24px",
                     alignItems: "start",
                   }}
                 >
-                  <ScoreCard score={score} />
+                  <ScoreCard score={score} submittedAnswer={answer} />
                   <FeedbackPanel
                     score={score}
                     onRetry={handleRetry}
                     onNext={handleNext}
+                    onGenerateAiFeedback={score.ai_feedback ? undefined : handleGenerateAiFeedback}
+                    isGeneratingAiFeedback={isGeneratingAiFeedback}
                   />
                 </div>
               )

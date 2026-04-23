@@ -9,9 +9,6 @@ from backend.models.models import User
 from backend.schemas.auth import RegisterRequest, AuthResponse
 from backend.auth import hash_password, create_access_token
 from backend.auth import verify_password
-from backend.schemas.auth import LoginRequest
-
-
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 
@@ -34,7 +31,10 @@ def register(payload: RegisterRequest, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Email already registered")
 
     # 2️. Hash password securely
-    password_hash = hash_password(payload.password)
+    try:
+        password_hash = hash_password(payload.password)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
     # 3️. Create and save user
     user = User(

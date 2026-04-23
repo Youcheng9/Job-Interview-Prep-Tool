@@ -13,6 +13,7 @@ class HistoryItem(BaseModel):
     created_at: datetime
     overall: int
     scores: dict[str, Any]
+    feedback: dict[str, Any]
    
 
 class HistoryResponse(BaseModel):

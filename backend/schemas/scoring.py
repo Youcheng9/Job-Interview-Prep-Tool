@@ -15,3 +15,9 @@ class SubmitAnswerResponse(BaseModel):
     overall: int
     scores: dict[str, int]
     feedback: dict[str, Any]
+
+
+class GenerateAIFeedbackResponse(BaseModel):
+    answer_id: int
+    ai_feedback: dict[str, Any] | None = None
+    ai_feedback_error: str | None = None

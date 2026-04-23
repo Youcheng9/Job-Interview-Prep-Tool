@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+import os
 from backend.routers.dbcheck import router as db_router
 from backend.routers.scoring import router as scoring_router
 from backend.routers.auth import router as auth_router
@@ -7,14 +8,20 @@ from backend.routers.history import router as history_router
 
 app = FastAPI(title="InterviewPrep API")
 
-# react dev server (5173 for Vite, 3000 for CRA)
+default_origins = [
+    "http://localhost:3000",
+    "http://localhost:5173",
+]
+configured_origins = [
+    origin.strip()
+    for origin in os.getenv("CORS_ALLOW_ORIGINS", ",".join(default_origins)).split(",")
+    if origin.strip()
+]
+
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
-    allow_origins = [
-        "http://localhost:3000", # Allow React app's origin
-        "http://localhost:5173" # if using Vite
-    ],
+    allow_origins=configured_origins,
     allow_methods=["*"],
     allow_headers=["*"],
 )

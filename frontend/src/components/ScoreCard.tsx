@@ -3,6 +3,7 @@ import type { ScoreResult } from "../lib/api";
 
 interface Props {
   score: ScoreResult;
+  submittedAnswer?: string;
 }
 
 const DIMS: { key: keyof ScoreResult; label: string; color: string }[] = [
@@ -146,7 +147,7 @@ function RingScore({ value }: { value: number }) {
   );
 }
 
-export function ScoreCard({ score }: Props) {
+export function ScoreCard({ score, submittedAnswer }: Props) {
   return (
     <div
       className="panel animate-fade-up"
@@ -229,6 +230,39 @@ export function ScoreCard({ score }: Props) {
           }}
         >
           {score.feedback}
+        </div>
+      )}
+
+      {submittedAnswer?.trim() && (
+        <div style={{ marginBottom: "16px" }}>
+          <div
+            style={{
+              fontFamily: "var(--font-head)",
+              fontSize: "12px",
+              letterSpacing: "0.12em",
+              textTransform: "uppercase",
+              color: "var(--cyan)",
+              marginBottom: "10px",
+            }}
+          >
+            Your Answer
+          </div>
+          <div
+            style={{
+              background: "var(--surface2)",
+              border: "1px solid var(--border)",
+              padding: "18px 20px",
+              fontSize: "15px",
+              color: "var(--text)",
+              lineHeight: 1.8,
+              whiteSpace: "pre-wrap",
+              wordBreak: "break-word",
+              maxHeight: "320px",
+              overflowY: "auto",
+            }}
+          >
+            {submittedAnswer}
+          </div>
         </div>
       )}
 
