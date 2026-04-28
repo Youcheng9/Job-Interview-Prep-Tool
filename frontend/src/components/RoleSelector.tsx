@@ -15,10 +15,8 @@ const ROLES: { id: Role; index: string; label: string; desc: string; loops: stri
 export function RoleSelector({ selected, onChange }: Props) {
   return (
     <div
+      className="responsive-card-grid"
       style={{
-        display: "grid",
-        gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
-        gap: "1px",
         background: "var(--border)",
         border: "1px solid var(--border)",
         borderRadius: "6px",
