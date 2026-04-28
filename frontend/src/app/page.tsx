@@ -49,7 +49,7 @@ export default function HomePage() {
             <h1 style={{ fontSize: "clamp(56px, 8vw, 104px)", lineHeight: 0.88, fontWeight: 700 }}>
               Crack the
               <br />
-              <span style={{ color: "rgba(245, 247, 251, 0.38)" }}>Interview</span>
+              <span style={{ color: "var(--text-soft)" }}>Corporate</span>
               <br />
               <span style={{ color: "var(--acid)" }}>Firewall.</span>
             </h1>
@@ -135,7 +135,7 @@ export default function HomePage() {
                 fontFamily: "var(--font-head)",
                 fontSize: "34px",
                 fontWeight: 800,
-                color: "rgba(245,247,251,0.4)",
+                color: "var(--text-band)",
                 whiteSpace: "nowrap",
               }}
             >
