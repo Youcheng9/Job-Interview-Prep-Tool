@@ -22,7 +22,7 @@ export function Navbar() {
         right: 0,
         zIndex: 50,
         borderBottom: "1px solid var(--border)",
-        background: "rgba(16, 17, 20, 0.78)",
+        background: "var(--nav-bg)",
         backdropFilter: "blur(18px)",
       }}
     >

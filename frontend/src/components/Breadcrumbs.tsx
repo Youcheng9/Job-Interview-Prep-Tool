@@ -11,7 +11,7 @@ export function Breadcrumbs() {
   };
 
   return (
-    <nav style={{ borderBottom: "1px solid var(--border)", background: "rgba(23, 25, 29, 0.92)" }}>
+    <nav style={{ borderBottom: "1px solid var(--border)", background: "var(--subnav-bg)" }}>
       <div
         className="shell-width mono"
         style={{
