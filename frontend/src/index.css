@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Manrope:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
 @import "tailwindcss";
 
 :root {
@@ -28,8 +28,8 @@
   --red: var(--danger);
   --green: var(--good);
   --border2: var(--acid);
-  --font-head: 'Plus Jakarta Sans', sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
+  --font-head: 'Manrope', sans-serif;
+  --font-mono: 'Manrope', sans-serif;
   --font-body: 'Manrope', sans-serif;
   --shadow-acid: 0 0 24px -8px var(--acid);
 }

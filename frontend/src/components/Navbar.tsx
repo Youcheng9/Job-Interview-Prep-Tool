@@ -9,7 +9,6 @@ export function Navbar() {
 
   const navItems = [
     { path: "/", label: "[Home]" },
-    { path: "/interview", label: "[Practice]" },
     { path: "/history", label: "[History]" },
   ];
 
@@ -33,7 +32,7 @@ export function Navbar() {
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          gap: "24px",
+          gap: "20px",
         }}
       >
         <Link
@@ -43,12 +42,12 @@ export function Navbar() {
             display: "flex",
             alignItems: "center",
             gap: "10px",
-            fontFamily: "var(--font-head)",
-            fontSize: "22px",
-            fontWeight: 700,
+            fontFamily: "var(--font-body)",
+            fontSize: "26px",
+            fontWeight: 800,
+            letterSpacing: 0,
           }}
         >
-          <span className="status-dot" />
           <span>Interview<span style={{ color: "var(--acid)" }}>Ace</span></span>
         </Link>
 
@@ -56,7 +55,7 @@ export function Navbar() {
           style={{
             display: "flex",
             alignItems: "center",
-            gap: "12px",
+            gap: "10px",
             flexWrap: "wrap",
             justifyContent: "flex-end",
           }}
@@ -65,7 +64,7 @@ export function Navbar() {
             style={{
               display: "flex",
               alignItems: "center",
-              gap: "8px",
+              gap: "4px",
               flexWrap: "wrap",
             }}
           >
@@ -79,12 +78,13 @@ export function Navbar() {
                 <Link
                   key={item.path}
                   to={item.path}
-                  className="mono"
                   style={{
                     textDecoration: "none",
-                    fontSize: "11px",
+                    fontFamily: "var(--font-body)",
+                    fontSize: "15px",
+                    fontWeight: 600,
                     textTransform: "uppercase",
-                    letterSpacing: "0.12em",
+                    letterSpacing: "0.02em",
                     color: active ? "var(--acid)" : "var(--muted)",
                     border: active ? "1px solid rgba(185, 255, 57, 0.35)" : "1px solid transparent",
                     background: active ? "var(--acid-soft)" : "transparent",
