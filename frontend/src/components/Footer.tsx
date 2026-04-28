@@ -1,223 +1,100 @@
 import { Link } from "react-router-dom";
 
 export function Footer() {
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
   return (
-    <footer
-      style={{
-        background: "var(--surface)",
-        borderTop: "1px solid var(--border)",
-        padding: "32px 0",
-        marginTop: "auto",
-      }}
-    >
-      <div
-        style={{
-          maxWidth: "1180px",
-          margin: "0 auto",
-          padding: "0 32px",
-        }}
-      >
+    <footer style={{ borderTop: "1px solid var(--border)", marginTop: "96px" }}>
+      <div className="shell-width" style={{ padding: "56px 0 24px" }}>
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
-            gap: "32px",
-            marginBottom: "32px",
+            gridTemplateColumns: "2fr 1fr 1fr 1fr",
+            gap: "28px",
           }}
         >
-          {/* Brand Section */}
           <div>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                marginBottom: "16px",
-              }}
-            >
-              <div
-                style={{
-                  width: "6px",
-                  height: "6px",
-                  background: "var(--cyan)",
-                  borderRadius: "50%",
-                  boxShadow: "0 0 6px var(--cyan-glow)",
-                }}
-              />
-              <span
-                className="mono"
-                style={{
-                  fontSize: "14px",
-                  letterSpacing: "0.15em",
-                  color: "var(--text)",
-                  textTransform: "uppercase",
-                }}
-              >
-                INTERVIEW INTEL v1.0
+            <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "14px" }}>
+              <span className="status-dot" />
+              <span style={{ fontFamily: "var(--font-head)", fontWeight: 700, fontSize: "22px" }}>
+                Interview<span style={{ color: "var(--acid)" }}>Ace</span>
               </span>
             </div>
-            <p
-              style={{
-                fontSize: "14px",
-                color: "var(--muted)",
-                lineHeight: 1.6,
-                marginBottom: "16px",
-              }}
-            >
-              AI-powered interview preparation with multi-dimensional scoring and personalized feedback.
+            <p className="muted" style={{ maxWidth: "32rem", fontSize: "15px" }}>
+              Adversarial mock interview practice with role-based question banks, scoring, and answer feedback.
             </p>
-            <button
-              onClick={scrollToTop}
-              className="btn-ghost"
-              style={{
-                fontSize: "12px",
-                padding: "8px 16px",
-              }}
-            >
-              ↑ Back to Top
-            </button>
-          </div>
-
-          {/* Quick Links */}
-          <div>
-            <h4
-              style={{
-                fontFamily: "var(--font-head)",
-                fontSize: "16px",
-                fontWeight: "600",
-                textTransform: "uppercase",
-                letterSpacing: "0.1em",
-                color: "var(--text)",
-                marginBottom: "16px",
-              }}
-            >
-              Quick Links
-            </h4>
-            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-              <Link
-                to="/"
-                style={{
-                  textDecoration: "none",
-                  color: "var(--muted)",
-                  fontSize: "14px",
-                  transition: "color 0.2s",
-                }}
-                onMouseEnter={(e) => (e.currentTarget.style.color = "var(--text)")}
-                onMouseLeave={(e) => (e.currentTarget.style.color = "var(--muted)")}
-              >
-                Home
-              </Link>
-              <Link
-                to="/interview?role=swe"
-                style={{
-                  textDecoration: "none",
-                  color: "var(--muted)",
-                  fontSize: "14px",
-                  transition: "color 0.2s",
-                }}
-                onMouseEnter={(e) => (e.currentTarget.style.color = "var(--text)")}
-                onMouseLeave={(e) => (e.currentTarget.style.color = "var(--muted)")}
-              >
-                Start Interview
-              </Link>
-              <Link
-                to="/history"
-                style={{
-                  textDecoration: "none",
-                  color: "var(--muted)",
-                  fontSize: "14px",
-                  transition: "color 0.2s",
-                }}
-                onMouseEnter={(e) => (e.currentTarget.style.color = "var(--text)")}
-                onMouseLeave={(e) => (e.currentTarget.style.color = "var(--muted)")}
-              >
-                Session History
-              </Link>
+            <div className="eyebrow" style={{ marginTop: "20px" }}>
+              v2.0.0 // status: online
             </div>
           </div>
 
-          {/* Interview Tracks */}
-          <div>
-            <h4
-              style={{
-                fontFamily: "var(--font-head)",
-                fontSize: "16px",
-                fontWeight: "600",
-                textTransform: "uppercase",
-                letterSpacing: "0.1em",
-                color: "var(--text)",
-                marginBottom: "16px",
-              }}
-            >
-              Interview Tracks
-            </h4>
-            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-              {[
-                { name: "Software Engineering", role: "swe" },
-                { name: "Data Science", role: "data" },
-                { name: "Product Management", role: "pm" },
-                { name: "Behavioral", role: "behavioral" },
-              ].map(({ name, role }) => (
-                <Link
-                  key={role}
-                  to={`/interview?role=${role}`}
-                  style={{
-                    textDecoration: "none",
-                    color: "var(--muted)",
-                    fontSize: "14px",
-                    transition: "color 0.2s",
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = "var(--text)")}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = "var(--muted)")}
-                >
-                  {name}
-                </Link>
-              ))}
-            </div>
-          </div>
+          <FooterColumn
+            title="Routes"
+            links={[
+              { label: "Home", to: "/" },
+              { label: "Practice", to: "/interview?role=swe&level=new_grad" },
+              { label: "History", to: "/history" },
+            ]}
+          />
+          <FooterColumn
+            title="Tracks"
+            links={[
+              { label: "SWE", to: "/interview?role=swe&level=new_grad" },
+              { label: "Data", to: "/interview?role=data&level=new_grad" },
+              { label: "PM", to: "/interview?role=pm&level=new_grad" },
+            ]}
+          />
+          <FooterColumn
+            title="Access"
+            links={[
+              { label: "Sign In", to: "/auth" },
+              { label: "Register", to: "/auth?mode=register" },
+              { label: "Behavioral", to: "/interview?role=behavioral&level=new_grad" },
+            ]}
+          />
         </div>
 
-        {/* Bottom Bar */}
         <div
+          className="mono"
           style={{
+            marginTop: "28px",
+            paddingTop: "18px",
             borderTop: "1px solid var(--border)",
-            paddingTop: "24px",
             display: "flex",
             justifyContent: "space-between",
-            alignItems: "center",
-            flexWrap: "wrap",
             gap: "16px",
+            flexWrap: "wrap",
+            fontSize: "10px",
+            textTransform: "uppercase",
+            letterSpacing: "0.12em",
+            color: "var(--muted)",
           }}
         >
-          <p
-            style={{
-              fontSize: "12px",
-              color: "var(--muted)",
-              margin: 0,
-            }}
-          >
-            © 2024 Interview Intel. Built for software engineering excellence.
-          </p>
-          <div
-            style={{
-              display: "flex",
-              gap: "16px",
-              fontSize: "12px",
-              color: "var(--muted)",
-            }}
-          >
-            <span>Privacy Policy</span>
-            <span>•</span>
-            <span>Terms of Service</span>
-            <span>•</span>
-            <span>Contact</span>
-          </div>
+          <span>© 2026 interview ace ai</span>
+          <span>designed after the reference repo shell language</span>
         </div>
       </div>
     </footer>
+  );
+}
+
+function FooterColumn({
+  title,
+  links,
+}: {
+  title: string;
+  links: Array<{ label: string; to: string }>;
+}) {
+  return (
+    <div>
+      <div className="eyebrow" style={{ marginBottom: "14px" }}>
+        // {title}
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+        {links.map((link) => (
+          <Link key={link.to} to={link.to} style={{ textDecoration: "none", color: "var(--muted)", fontSize: "14px" }}>
+            {link.label}
+          </Link>
+        ))}
+      </div>
+    </div>
   );
 }

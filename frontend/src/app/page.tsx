@@ -4,393 +4,179 @@ import { LevelSelector } from "../components/LevelSelector";
 import { RoleSelector } from "../components/RoleSelector";
 import { isAuthenticated, type CandidateLevel, type Role } from "../lib/api";
 
-// Animated grid background
-function GridBackground() {
-  return (
-    <div
-      style={{
-        position: "fixed",
-        inset: 0,
-        overflow: "hidden",
-        pointerEvents: "none",
-        zIndex: 0,
-      }}
-    >
-      {/* Grid lines */}
-      <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          backgroundImage: `
-            linear-gradient(rgba(13,148,136,0.06) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(13,148,136,0.06) 1px, transparent 1px)
-          `,
-          backgroundSize: "48px 48px",
-        }}
-      />
-      {/* Radial glow center */}
-      <div
-        style={{
-          position: "absolute",
-          top: "30%",
-          left: "50%",
-          transform: "translate(-50%, -50%)",
-          width: "600px",
-          height: "600px",
-          background:
-            "radial-gradient(ellipse, rgba(13,148,136,0.08) 0%, transparent 70%)",
-          borderRadius: "50%",
-        }}
-      />
-      {/* Scan line */}
-      <div
-        style={{
-          position: "absolute",
-          left: 0,
-          right: 0,
-          height: "1px",
-          background:
-            "linear-gradient(90deg, transparent, rgba(13,148,136,0.4), transparent)",
-          animation: "scan-line 6s linear infinite",
-        }}
-      />
-    </div>
-  );
-}
+const COMPANIES = ["GOOGLE", "META", "STRIPE", "OPENAI", "NVIDIA", "DATABRICKS", "AIRBNB", "NETFLIX"];
+const MARQUEE_COMPANIES = [...COMPANIES, ...COMPANIES];
 
 export default function HomePage() {
-  const [role, setRole] = useState<Role | null>(null);
+  const [role, setRole] = useState<Role | null>("swe");
   const [level, setLevel] = useState<CandidateLevel>("new_grad");
   const navigate = useNavigate();
 
-  const handleStart = () => {
-    if (role) navigate(`/interview?role=${role}&level=${level}`);
-  };
-
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        position: "relative",
-      }}
-    >
-      <GridBackground />
-
-      <div
-        style={{
-          position: "relative",
-          zIndex: 1,
-          maxWidth: "1180px",
-          margin: "0 auto",
-          padding: "92px 32px 72px",
-          width: "100%",
-        }}
-      >
-        {/* Header */}
-        <div style={{ marginBottom: "56px", textAlign: "center" }}>
-          {/* System label */}
-          <div
-            className="mono animate-fade-up"
-            style={{
-              fontSize: "13px",
-              letterSpacing: "0.2em",
-              color: "var(--cyan)",
-              marginBottom: "16px",
-              opacity: 0.8,
-            }}
-          >
-            SYS://INTERVIEW_PREP_v1.0 — INITIALIZED
-          </div>
-
-          {/* Main title */}
-          <h1
-            className="animate-fade-up glow-cyan"
-            style={{
-              fontSize: "clamp(36px, 6vw, 64px)",
-              letterSpacing: "0.06em",
-              lineHeight: 1.1,
-              marginBottom: "16px",
-              animationDelay: "80ms",
-              color: "var(--text)",
-            }}
-          >
-            INTERVIEW{" "}
-            <span style={{ color: "var(--cyan)" }}>INTEL</span>
-          </h1>
-
-          <p
-            className="animate-fade-up"
-            style={{
-              fontSize: "18px",
-              color: "var(--muted)",
-              letterSpacing: "0.04em",
-              maxWidth: "680px",
-              margin: "0 auto",
-              lineHeight: 1.7,
-              animationDelay: "160ms",
-            }}
-          >
-            AI-powered interview analysis. Submit your answer — receive a
-            multi-dimensional score with precision feedback.
-          </p>
-          <p
-            className="animate-fade-up"
-            style={{
-              fontSize: "14px",
-              color: isAuthenticated() ? "var(--green)" : "var(--muted)",
-              letterSpacing: "0.08em",
-              marginTop: "14px",
-              animationDelay: "220ms",
-              textTransform: "uppercase",
-            }}
-          >
-            {isAuthenticated() ? "Authenticated for scoring and history" : "Browse questions publicly, sign in to save scores"}
-          </p>
-        </div>
-
-        {/* Divider */}
+    <div>
+      <section className="section-band" style={{ overflow: "hidden" }}>
+        <div className="hero-grid" />
         <div
-          className="animate-fade-up"
           style={{
-            display: "flex",
+            position: "absolute",
+            top: "18%",
+            right: "-120px",
+            width: "520px",
+            height: "520px",
+            borderRadius: "999px",
+            background: "radial-gradient(circle, var(--acid-dim), transparent 62%)",
+            filter: "blur(20px)",
+            pointerEvents: "none",
+          }}
+        />
+
+        <div
+          className="shell-width"
+          style={{
+            position: "relative",
+            padding: "64px 0 84px",
+            display: "grid",
+            gridTemplateColumns: "minmax(0, 1.1fr) minmax(360px, 0.9fr)",
+            gap: "36px",
             alignItems: "center",
-            gap: "16px",
-            marginBottom: "28px",
-            animationDelay: "200ms",
           }}
         >
-          <div style={{ flex: 1, height: "1px", background: "var(--border)" }} />
-          <span
-            className="mono"
-            style={{
-              fontSize: "12px",
-              letterSpacing: "0.15em",
-              color: "var(--muted)",
-              textTransform: "uppercase",
-            }}
-          >
-            Select Track
-          </span>
-          <div style={{ flex: 1, height: "1px", background: "var(--border)" }} />
-        </div>
-
-        {/* Role selector */}
-        <div
-          className="animate-fade-up"
-          style={{ marginBottom: "40px", animationDelay: "240ms" }}
-        >
-          <RoleSelector selected={role} onChange={setRole} />
-        </div>
-
-        <div
-          className="animate-fade-up"
-          style={{ marginBottom: "40px", animationDelay: "280ms" }}
-        >
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "16px",
-              marginBottom: "24px",
-            }}
-          >
-            <div style={{ flex: 1, height: "1px", background: "var(--border)" }} />
-            <span
-              className="mono"
-              style={{
-                fontSize: "12px",
-                letterSpacing: "0.15em",
-                color: "var(--muted)",
-                textTransform: "uppercase",
-              }}
-            >
-              Select Level
-            </span>
-            <div style={{ flex: 1, height: "1px", background: "var(--border)" }} />
+          <div className="animate-fade-up" style={{ display: "flex", flexDirection: "column", gap: "22px" }}>
+            <div className="chip">
+              <span className="status-dot" style={{ width: "6px", height: "6px" }} />
+              Sim engine v2.4 // online
+            </div>
+            <h1 style={{ fontSize: "clamp(56px, 8vw, 104px)", lineHeight: 0.88, fontWeight: 700 }}>
+              Crack the
+              <br />
+              <span style={{ color: "rgba(245, 247, 251, 0.38)" }}>Interview</span>
+              <br />
+              <span style={{ color: "var(--acid)" }}>Firewall.</span>
+            </h1>
+            <p className="muted" style={{ fontSize: "18px", maxWidth: "40rem" }}>
+              Role-based AI interview drills for SWE, data, PM, and behavioral loops. Pick the track, survive the question set, and inspect the scoring signal after every answer.
+            </p>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "14px", alignItems: "center" }}>
+              <button
+                type="button"
+                className="btn-primary"
+                onClick={() => navigate(`/interview?role=${role ?? "swe"}&level=${level}`)}
+              >
+                Initialize Sequence →
+              </button>
+              <span className="mono" style={{ fontSize: "11px", textTransform: "uppercase", letterSpacing: "0.12em", color: "var(--muted)" }}>
+                {isAuthenticated() ? "history sync enabled" : "sign in for scoring + history"}
+              </span>
+            </div>
           </div>
-          <LevelSelector selected={level} onChange={setLevel} />
-        </div>
 
-        {/* CTA */}
-        <div
-          className="animate-fade-up"
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            animationDelay: "320ms",
-          }}
-        >
-          <button
-            className="btn-primary"
-            onClick={handleStart}
-            disabled={!role}
-            style={{
-              fontSize: "17px",
-              padding: "18px 56px",
-              opacity: role ? 1 : 0.35,
-              cursor: role ? "pointer" : "not-allowed",
-              letterSpacing: "0.15em",
-            }}
-          >
-            Initialize Session →
-          </button>
-        </div>
-
-        {/* Stats row */}
-        <div
-          className="animate-fade-up"
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            gap: "48px",
-            marginTop: "64px",
-            paddingTop: "32px",
-            borderTop: "1px solid var(--border)",
-            animationDelay: "400ms",
-          }}
-        >
-          {[
-            { val: "4", label: "Interview Tracks" },
-            { val: "200+", label: "Questions" },
-            { val: "4-Axis", label: "Scoring" },
-          ].map(({ val, label }) => (
-            <div key={label} style={{ textAlign: "center" }}>
+          <div className="animate-fade-up" style={{ animationDelay: "0.12s" }}>
+            <div className="terminal-window">
+              <div className="terminal-topbar">
+                <div style={{ display: "flex", gap: "8px" }}>
+                  <span style={{ width: "8px", height: "8px", borderRadius: 999, background: "var(--border-strong)" }} />
+                  <span style={{ width: "8px", height: "8px", borderRadius: 999, background: "var(--border-strong)" }} />
+                  <span style={{ width: "8px", height: "8px", borderRadius: 999, background: "var(--border-strong)" }} />
+                </div>
+                <span className="mono" style={{ fontSize: "10px", color: "var(--muted)" }}>
+                  sys@interview-ace: ~/loop-sim
+                </span>
+              </div>
+              <div style={{ padding: "24px", display: "flex", flexDirection: "column", gap: "18px" }}>
+                <div className="mono" style={{ fontSize: "12px", color: "var(--muted)", display: "grid", gap: "4px" }}>
+                  <span>[08:42:11] Target locked: STRIPE / SWE</span>
+                  <span>[08:42:12] Injecting follow-up pressure...</span>
+                  <span style={{ color: "var(--acid)" }}>[08:42:13] Simulation live.</span>
+                </div>
+                <div style={{ borderLeft: "2px solid var(--acid)", paddingLeft: "16px" }}>
+                  <p style={{ fontFamily: "var(--font-mono)", fontSize: "13px", lineHeight: 1.75 }}>
+                    [Interviewer_AI]: You are designing an idempotency layer for multi-region writes at 80k req/s. Two requests arrive with the same key 3ms apart in different regions. Walk through the design, failure modes, and tradeoffs.
+                  </p>
+                </div>
+                <div className="mono" style={{ display: "flex", alignItems: "center", gap: "8px", color: "var(--acid)" }}>
+                  <span>{">"}</span>
+                  <span style={{ width: "10px", height: "18px", background: "var(--text)", animation: "blink 1s step-end infinite" }} />
+                </div>
+              </div>
               <div
                 className="mono"
                 style={{
-                  fontSize: "28px",
-                  color: "var(--cyan)",
-                  marginBottom: "4px",
-                }}
-              >
-                {val}
-              </div>
-              <div
-                style={{
-                  fontFamily: "var(--font-head)",
-                  fontSize: "12px",
-                  letterSpacing: "0.1em",
+                  borderTop: "1px solid var(--border)",
+                  padding: "14px 16px",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  fontSize: "10px",
+                  letterSpacing: "0.12em",
                   textTransform: "uppercase",
                   color: "var(--muted)",
                 }}
               >
-                {label}
+                <span>depth: l4</span>
+                <span>threat: <span style={{ color: "var(--acid)" }}>0.92</span></span>
+                <span>elapsed: 03:12</span>
               </div>
             </div>
-          ))}
+          </div>
         </div>
+      </section>
 
-        {/* How it works */}
-        <div
-          className="animate-fade-up"
-          style={{
-            marginTop: "72px",
-            paddingTop: "32px",
-            borderTop: "1px solid var(--border)",
-            animationDelay: "480ms",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "16px",
-              marginBottom: "24px",
-            }}
-          >
-            <div style={{ flex: 1, height: "1px", background: "var(--border)" }} />
-            <span
-              className="mono"
+      <section style={{ borderTop: "1px solid var(--border)", borderBottom: "1px solid var(--border)", background: "rgba(255,255,255,0.02)" }}>
+        <div className="shell-width" style={{ padding: "20px 0" }}>
+          <div className="eyebrow" style={{ marginBottom: "12px" }}>
+            // modeled interview loops
+          </div>
+          <div className="marquee-fade">
+            <div
+              className="animate-marquee"
               style={{
-                fontSize: "12px",
-                letterSpacing: "0.16em",
-                color: "var(--cyan)",
-                textTransform: "uppercase",
+                display: "flex",
+                width: "max-content",
+                gap: "22px",
+                fontFamily: "var(--font-head)",
+                fontSize: "34px",
+                fontWeight: 800,
+                color: "rgba(245,247,251,0.4)",
+                whiteSpace: "nowrap",
               }}
             >
-              How It Works
-            </span>
-            <div style={{ flex: 1, height: "1px", background: "var(--border)" }} />
-          </div>
-
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
-              gap: "20px",
-            }}
-          >
-            {[
-              {
-                step: "01",
-                title: "Pick A Track",
-                desc: "Choose SWE, Data Science, PM, or Behavioral to load a role-specific question bank.",
-              },
-              {
-                step: "02",
-                title: "Sign In To Score",
-                desc: "Create an account or log in so your submissions can be scored and saved to your history.",
-              },
-              {
-                step: "03",
-                title: "Answer A Question",
-                desc: "Write your response in the interview workspace and submit it to the backend for evaluation.",
-              },
-              {
-                step: "04",
-                title: "Review Feedback",
-                desc: "See your overall score, dimension breakdown, and follow-up improvement guidance after each attempt.",
-              },
-            ].map(({ step, title, desc }) => (
-              <div
-                key={step}
-                className="panel"
-                style={{
-                  padding: "24px",
-                  minHeight: "210px",
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "space-between",
-                }}
-              >
-                <div
-                  className="mono"
-                  style={{
-                    fontSize: "13px",
-                    color: "var(--cyan)",
-                    letterSpacing: "0.16em",
-                    marginBottom: "16px",
-                  }}
-                >
-                  STEP {step}
-                </div>
-                <div
-                  style={{
-                    fontFamily: "var(--font-head)",
-                    fontSize: "24px",
-                    letterSpacing: "0.05em",
-                    textTransform: "uppercase",
-                    color: "var(--text)",
-                    marginBottom: "12px",
-                  }}
-                >
-                  {title}
-                </div>
-                <div
-                  style={{
-                    fontSize: "16px",
-                    color: "var(--muted)",
-                    lineHeight: 1.75,
-                  }}
-                >
-                  {desc}
-                </div>
-              </div>
-            ))}
+              {MARQUEE_COMPANIES.map((company, index) => (
+                <span key={`${company}-${index}`}>
+                  {company} <span style={{ color: "var(--acid)" }}>·</span>
+                </span>
+              ))}
+            </div>
           </div>
         </div>
-      </div>
+      </section>
+
+      <section className="shell-width" style={{ padding: "72px 0 32px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 0.9fr) minmax(0, 1.1fr)", gap: "24px", marginBottom: "24px" }}>
+          <div>
+            <div className="eyebrow" style={{ marginBottom: "12px" }}>
+              // 02 - tracks
+            </div>
+            <h2 style={{ fontSize: "clamp(42px, 5vw, 68px)", lineHeight: 0.92, fontWeight: 700 }}>
+              Four loops.
+              <br />
+              One interface.
+            </h2>
+          </div>
+        </div>
+        <RoleSelector selected={role} onChange={setRole} />
+      </section>
+
+      <section className="shell-width" style={{ padding: "28px 0 72px" }}>
+        <div className="eyebrow" style={{ marginBottom: "12px" }}>
+          // 03 - level
+        </div>
+        <div style={{ marginBottom: "20px", maxWidth: "46rem" }}>
+          <h2 style={{ fontSize: "clamp(34px, 4vw, 52px)", lineHeight: 0.94, fontWeight: 700, marginBottom: "10px" }}>
+            Pick the pressure band.
+          </h2>
+          <p className="muted">Choose a question set calibrated for either entry-level fundamentals or new-grad ownership and depth.</p>
+        </div>
+        <LevelSelector selected={level} onChange={setLevel} />
+      </section>
     </div>
   );
 }

@@ -8,9 +8,9 @@ export function Navbar() {
   const { theme, toggleTheme } = useTheme();
 
   const navItems = [
-    { path: "/", label: "Home" },
-    { path: "/interview", label: "Interview" },
-    { path: "/history", label: "History" },
+    { path: "/", label: "[Home]" },
+    { path: "/interview", label: "[Practice]" },
+    { path: "/history", label: "[History]" },
   ];
 
   return (
@@ -20,112 +20,109 @@ export function Navbar() {
         top: 0,
         left: 0,
         right: 0,
-        background: "var(--surface)",
+        zIndex: 50,
         borderBottom: "1px solid var(--border)",
-        padding: "0 32px",
-        zIndex: 1000,
-        backdropFilter: "blur(10px)",
+        background: "rgba(16, 17, 20, 0.78)",
+        backdropFilter: "blur(18px)",
       }}
     >
       <div
+        className="shell-width"
         style={{
-          maxWidth: "1180px",
-          margin: "0 auto",
+          minHeight: "72px",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          height: "64px",
+          gap: "24px",
         }}
       >
-        {/* Logo/Title */}
         <Link
           to="/"
           style={{
             textDecoration: "none",
-            fontFamily: "var(--font-head)",
-            fontSize: "20px",
-            fontWeight: "700",
-            letterSpacing: "0.1em",
-            color: "var(--text)",
             display: "flex",
             alignItems: "center",
-            gap: "8px",
+            gap: "10px",
+            fontFamily: "var(--font-head)",
+            fontSize: "22px",
+            fontWeight: 700,
+          }}
+        >
+          <span className="status-dot" />
+          <span>Interview<span style={{ color: "var(--acid)" }}>Ace</span></span>
+        </Link>
+
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "12px",
+            flexWrap: "wrap",
+            justifyContent: "flex-end",
           }}
         >
           <div
             style={{
-              width: "8px",
-              height: "8px",
-              background: "var(--cyan)",
-              borderRadius: "50%",
-              boxShadow: "0 0 8px var(--cyan-glow)",
-            }}
-          />
-          INTERVIEW <span style={{ color: "var(--cyan)" }}>INTEL</span>
-        </Link>
-
-        {/* Navigation Links */}
-        <div style={{ display: "flex", alignItems: "center", gap: "24px" }}>
-          <button
-            className="btn-ghost"
-            onClick={toggleTheme}
-            style={{
-              fontSize: "13px",
-              padding: "6px 16px",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              flexWrap: "wrap",
             }}
           >
-            {theme === "dark" ? "Light Mode" : "Dark Mode"}
+            {navItems.map((item) => {
+              const active =
+                item.path === "/"
+                  ? location.pathname === item.path
+                  : location.pathname.startsWith(item.path);
+
+              return (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  className="mono"
+                  style={{
+                    textDecoration: "none",
+                    fontSize: "11px",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.12em",
+                    color: active ? "var(--acid)" : "var(--muted)",
+                    border: active ? "1px solid rgba(185, 255, 57, 0.35)" : "1px solid transparent",
+                    background: active ? "var(--acid-soft)" : "transparent",
+                    borderRadius: "6px",
+                    padding: "8px 10px",
+                  }}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
+          </div>
+
+          <button
+            type="button"
+            className="btn-ghost"
+            onClick={toggleTheme}
+            style={{ minHeight: "40px", padding: "0 12px" }}
+          >
+            {theme === "dark" ? "Light" : "Dark"}
           </button>
 
-          {navItems.map(({ path, label }) => (
-            <Link
-              key={path}
-              to={path}
-              style={{
-                textDecoration: "none",
-                fontFamily: "var(--font-head)",
-                fontSize: "14px",
-                fontWeight: "500",
-                letterSpacing: "0.08em",
-                textTransform: "uppercase",
-                color: location.pathname === path ? "var(--cyan)" : "var(--muted)",
-                transition: "color 0.2s",
-                padding: "8px 12px",
-                borderRadius: "4px",
-                border: location.pathname === path ? "1px solid var(--cyan)" : "1px solid transparent",
-              }}
-            >
-              {label}
-            </Link>
-          ))}
-
-          {/* Auth Button */}
           {authed ? (
             <button
-              className="btn-ghost"
+              type="button"
+              className="btn-primary"
+              style={{ minHeight: "40px", padding: "0 12px" }}
               onClick={() => {
                 clearToken();
                 window.location.reload();
-              }}
-              style={{
-                fontSize: "13px",
-                padding: "6px 16px",
-                marginLeft: "8px",
               }}
             >
               Sign Out
             </button>
           ) : (
             <Link to="/auth" style={{ textDecoration: "none" }}>
-              <button
-                className="btn-ghost"
-                style={{
-                  fontSize: "13px",
-                  padding: "6px 16px",
-                  marginLeft: "8px",
-                }}
-              >
-                Sign In
+              <button type="button" className="btn-primary" style={{ minHeight: "40px", padding: "0 12px" }}>
+                Init →
               </button>
             </Link>
           )}

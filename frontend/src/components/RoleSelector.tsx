@@ -5,35 +5,11 @@ interface Props {
   onChange: (role: Role) => void;
 }
 
-const ROLES: { id: Role; label: string; tag: string; desc: string; color: string }[] = [
-  {
-    id: "swe",
-    label: "Software Engineering",
-    tag: "SWE",
-    desc: "Data structures, algorithms, system design, OOP",
-    color: "#0d9488",
-  },
-  {
-    id: "data",
-    label: "Data Science",
-    tag: "DS/ML",
-    desc: "Statistics, ML theory, model evaluation, SQL",
-    color: "#6366f1",
-  },
-  {
-    id: "pm",
-    label: "Product Management",
-    tag: "PM",
-    desc: "Product sense, metrics, prioritization, strategy",
-    color: "#f59e0b",
-  },
-  {
-    id: "behavioral",
-    label: "Behavioral",
-    tag: "BEH",
-    desc: "STAR method, leadership, conflict, teamwork",
-    color: "#ec4899",
-  },
+const ROLES: { id: Role; index: string; label: string; desc: string; loops: string }[] = [
+  { id: "swe", index: "[01]", label: "Software Eng", desc: "Algorithms, system design, object modeling, tradeoffs.", loops: "412 loops" },
+  { id: "data", index: "[02]", label: "DS / ML", desc: "Statistics, ML debugging, SQL, experiments, model reasoning.", loops: "286 loops" },
+  { id: "pm", index: "[03]", label: "Product Mgmt", desc: "Execution, product sense, metrics, prioritization.", loops: "194 loops" },
+  { id: "behavioral", index: "[04]", label: "Behavioral", desc: "STAR answers, conflict, leadership, ownership.", loops: "238 loops" },
 ];
 
 export function RoleSelector({ selected, onChange }: Props) {
@@ -42,120 +18,50 @@ export function RoleSelector({ selected, onChange }: Props) {
       style={{
         display: "grid",
         gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
-        gap: "20px",
+        gap: "1px",
+        background: "var(--border)",
+        border: "1px solid var(--border)",
+        borderRadius: "6px",
+        overflow: "hidden",
       }}
     >
-      {ROLES.map((role, i) => {
-        const isActive = selected === role.id;
+      {ROLES.map((role) => {
+        const active = selected === role.id;
         return (
           <button
             key={role.id}
+            type="button"
             onClick={() => onChange(role.id)}
-            className="animate-fade-up"
             style={{
-              animationDelay: `${i * 80}ms`,
-              background: isActive
-                ? `linear-gradient(135deg, ${role.color}18, ${role.color}08)`
-                : "var(--surface)",
-              border: `1px solid ${isActive ? role.color : "var(--border)"}`,
-              borderRadius: "2px",
               padding: "26px",
-              cursor: "pointer",
               textAlign: "left",
-              position: "relative",
-              overflow: "hidden",
-              transition: "all 0.2s ease",
-              boxShadow: isActive ? `0 0 24px ${role.color}30` : "none",
-            }}
-            onMouseEnter={(e) => {
-              if (!isActive) {
-                (e.currentTarget as HTMLElement).style.borderColor = role.color;
-                (e.currentTarget as HTMLElement).style.boxShadow = `0 0 16px ${role.color}20`;
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (!isActive) {
-                (e.currentTarget as HTMLElement).style.borderColor = "var(--border)";
-                (e.currentTarget as HTMLElement).style.boxShadow = "none";
-              }
+              background: active ? "var(--surface2)" : "var(--surface)",
+              border: "none",
+              color: "inherit",
+              cursor: "pointer",
             }}
           >
-            {/* Corner bracket */}
-            <span
-              style={{
-                position: "absolute",
-                top: 0,
-                left: 0,
-                width: 10,
-                height: 10,
-                borderTop: `2px solid ${role.color}`,
-                borderLeft: `2px solid ${role.color}`,
-                opacity: isActive ? 1 : 0.4,
-                transition: "opacity 0.2s",
-              }}
-            />
-            <span
-              style={{
-                position: "absolute",
-                bottom: 0,
-                right: 0,
-                width: 10,
-                height: 10,
-                borderBottom: `2px solid ${role.color}`,
-                borderRight: `2px solid ${role.color}`,
-                opacity: isActive ? 1 : 0.4,
-                transition: "opacity 0.2s",
-              }}
-            />
-
-            {/* Tag */}
-            <span
-              className="mono"
-              style={{
-                display: "inline-block",
-                fontSize: "12px",
-                letterSpacing: "0.12em",
-                color: role.color,
-                background: `${role.color}18`,
-                border: `1px solid ${role.color}40`,
-                padding: "4px 10px",
-                marginBottom: "14px",
-              }}
-            >
-              {role.tag}
-            </span>
-
+            <div style={{ display: "flex", justifyContent: "space-between", gap: "12px", marginBottom: "18px" }}>
+              <span className="mono" style={{ fontSize: "11px", color: active ? "var(--acid)" : "var(--muted)", letterSpacing: "0.12em" }}>
+                {role.index}
+              </span>
+              <span className="mono" style={{ fontSize: "11px", color: active ? "var(--acid)" : "var(--muted)", letterSpacing: "0.12em" }}>
+                {role.loops}
+              </span>
+            </div>
             <div
               style={{
                 fontFamily: "var(--font-head)",
-                fontSize: "21px",
-                fontWeight: 600,
-                letterSpacing: "0.05em",
-                textTransform: "uppercase",
-                color: isActive ? role.color : "var(--text)",
-                marginBottom: "10px",
-                transition: "color 0.2s",
+                fontSize: "32px",
+                fontWeight: 700,
+                lineHeight: 0.95,
+                marginBottom: "12px",
+                color: active ? "var(--acid)" : "var(--text)",
               }}
             >
               {role.label}
             </div>
-            <div style={{ fontSize: "15px", color: "var(--muted)", lineHeight: 1.65 }}>
-              {role.desc}
-            </div>
-
-            {/* Active indicator */}
-            {isActive && (
-              <div
-                style={{
-                  position: "absolute",
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
-                  height: "2px",
-                  background: `linear-gradient(90deg, transparent, ${role.color}, transparent)`,
-                }}
-              />
-            )}
+            <p style={{ color: "var(--muted)", fontSize: "14px", maxWidth: "28ch" }}>{role.desc}</p>
           </button>
         );
       })}

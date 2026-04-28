@@ -15,14 +15,14 @@ export default function AuthPage() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const next = useMemo(() => normalizeNext(params.get("next")), [params]);
-  const [mode, setMode] = useState<Mode>((params.get("mode") === "register" ? "register" : "login"));
+  const [mode, setMode] = useState<Mode>(params.get("mode") === "register" ? "register" : "login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
     setSubmitting(true);
     setError(null);
 
@@ -41,193 +41,128 @@ export default function AuthPage() {
   }
 
   return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "32px 24px",
-      }}
-    >
+    <div className="shell-width" style={{ padding: "56px 0 0" }}>
       <div
-        className="panel animate-fade-up"
         style={{
-          width: "100%",
-          maxWidth: "620px",
-          padding: "36px",
+          display: "grid",
+          gridTemplateColumns: "minmax(0, 0.95fr) minmax(340px, 0.8fr)",
+          gap: "28px",
+          alignItems: "stretch",
         }}
       >
-        <div
-          className="mono"
-          style={{
-            fontSize: "13px",
-            letterSpacing: "0.18em",
-            color: "var(--cyan)",
-            marginBottom: "12px",
-          }}
-        >
-          AUTH://ACCESS_GATE
-        </div>
-        <h1 style={{ fontSize: "42px", marginBottom: "12px" }}>
-          {mode === "login" ? "Sign In" : "Create Account"}
-        </h1>
-        <p style={{ color: "var(--muted)", marginBottom: "28px", lineHeight: 1.7, fontSize: "18px" }}>
-          Sign in to score answers and sync your session history with the backend.
-        </p>
+        <section className="panel" style={{ padding: "36px" }}>
+          <div className="eyebrow" style={{ marginBottom: "14px" }}>
+            // access gateway
+          </div>
+          <h1 style={{ fontSize: "clamp(42px, 5vw, 76px)", lineHeight: 0.9, marginBottom: "14px" }}>
+            Enter the
+            <br />
+            scoring loop.
+          </h1>
+          <p className="muted" style={{ fontSize: "17px", maxWidth: "36rem", marginBottom: "28px" }}>
+            Authentication unlocks score persistence, answer history, and AI coach feedback tied to saved attempts.
+          </p>
 
-        <div style={{ display: "flex", gap: "8px", marginBottom: "20px" }}>
-          {(["login", "register"] as const).map((item) => (
-            <button
-              key={item}
-              type="button"
-              className={mode === item ? "btn-primary" : "btn-ghost"}
-              onClick={() => {
-                setMode(item);
-                setError(null);
-              }}
-              style={{ flex: 1, fontSize: "15px" }}
-            >
-              {item === "login" ? "Sign In" : "Register"}
-            </button>
-          ))}
-        </div>
+          <div style={{ display: "grid", gap: "14px" }}>
+            {[
+              ["[01]", "Save every scored attempt by role and level."],
+              ["[02]", "Resume practice flows without losing answered questions."],
+              ["[03]", "Trigger optional AI coach feedback from saved submissions."],
+            ].map(([tag, text]) => (
+              <div key={tag} className="surface-strip" style={{ padding: "16px 18px", display: "flex", gap: "14px" }}>
+                <span className="mono" style={{ fontSize: "11px", color: "var(--acid)", minWidth: "44px" }}>{tag}</span>
+                <span style={{ color: "var(--muted)" }}>{text}</span>
+              </div>
+            ))}
+          </div>
+        </section>
 
-        <form onSubmit={handleSubmit}>
-          <label
-            style={{
-              display: "block",
-              fontFamily: "var(--font-head)",
-              fontSize: "13px",
-              letterSpacing: "0.12em",
-              textTransform: "uppercase",
-              color: "var(--muted)",
-              marginBottom: "8px",
-            }}
-          >
-            Email
-          </label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            autoComplete="email"
-            style={{
-              width: "100%",
-              marginBottom: "16px",
-              background: "var(--surface2)",
-              border: "1px solid var(--border)",
-              color: "var(--text)",
-              padding: "16px 18px",
-              fontFamily: "var(--font-body)",
-              fontSize: "17px",
-            }}
-          />
+        <section className="terminal-window">
+          <div className="terminal-topbar">
+            <span className="mono" style={{ fontSize: "10px", color: "var(--muted)" }}>
+              auth@interview-ace: ~/session
+            </span>
+            <span className="chip chip-acid" style={{ padding: "4px 8px", fontSize: "10px" }}>
+              {mode}
+            </span>
+          </div>
 
-          <label
-            style={{
-              display: "block",
-              fontFamily: "var(--font-head)",
-              fontSize: "13px",
-              letterSpacing: "0.12em",
-              textTransform: "uppercase",
-              color: "var(--muted)",
-              marginBottom: "8px",
-            }}
-          >
-            Password
-          </label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            minLength={8}
-            autoComplete={mode === "login" ? "current-password" : "new-password"}
-            style={{
-              width: "100%",
-              marginBottom: "18px",
-              background: "var(--surface2)",
-              border: "1px solid var(--border)",
-              color: "var(--text)",
-              padding: "16px 18px",
-              fontFamily: "var(--font-body)",
-              fontSize: "17px",
-            }}
-          />
-
-          {error && (
-            <div
-              style={{
-                marginBottom: "16px",
-                padding: "10px 12px",
-                borderLeft: "2px solid var(--red)",
-                background: "rgba(239,68,68,0.08)",
-                border: "1px solid rgba(239,68,68,0.24)",
-                color: "#fca5a5",
-                fontSize: "15px",
-              }}
-            >
-              {error}
+          <div style={{ padding: "28px" }}>
+            <div style={{ display: "flex", gap: "10px", marginBottom: "18px" }}>
+              {(["login", "register"] as const).map((item) => (
+                <button
+                  key={item}
+                  type="button"
+                  className={mode === item ? "btn-primary" : "btn-ghost"}
+                  style={{ flex: 1 }}
+                  onClick={() => {
+                    setMode(item);
+                    setError(null);
+                  }}
+                >
+                  {item === "login" ? "Sign In" : "Register"}
+                </button>
+              ))}
             </div>
-          )}
 
-          <button
-            type="submit"
-            className="btn-primary"
-            disabled={submitting}
-            style={{
-              width: "100%",
-              fontSize: "16px",
-              opacity: submitting ? 0.7 : 1,
-              cursor: submitting ? "wait" : "pointer",
-            }}
-          >
-            {submitting
-              ? "Processing..."
-              : mode === "login"
-              ? "Unlock Session"
-              : "Create Account"}
-          </button>
-        </form>
+            <form onSubmit={handleSubmit} style={{ display: "grid", gap: "14px" }}>
+              <label className="eyebrow">email</label>
+              <input className="input-shell" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="email" />
 
-        <div
-          style={{
-            marginTop: "18px",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            gap: "16px",
-          }}
-        >
-          <span style={{ color: "var(--muted)", fontSize: "15px" }}>
-            {mode === "login" ? "Need an account?" : "Already registered?"}
-          </span>
-          <button
-            type="button"
-            className="btn-ghost"
-            onClick={() => {
-              setMode(mode === "login" ? "register" : "login");
-              setError(null);
-            }}
-            style={{ fontSize: "13px" }}
-          >
-            {mode === "login" ? "Register" : "Sign In"}
-          </button>
-        </div>
+              <label className="eyebrow">password</label>
+              <input
+                className="input-shell"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                minLength={8}
+                autoComplete={mode === "login" ? "current-password" : "new-password"}
+              />
 
-        <div style={{ marginTop: "18px", textAlign: "center" }}>
-          <Link
-            to={next}
-            style={{
-              color: "var(--muted)",
-              textDecoration: "none",
-              fontSize: "14px",
-            }}
-          >
-            Continue without signing in
-          </Link>
-        </div>
+              {error ? (
+                <div
+                  className="mono"
+                  style={{
+                    padding: "12px 14px",
+                    border: "1px solid rgba(239, 83, 80, 0.35)",
+                    background: "rgba(239, 83, 80, 0.08)",
+                    color: "var(--danger)",
+                    fontSize: "12px",
+                  }}
+                >
+                  ERROR: {error}
+                </div>
+              ) : null}
+
+              <button type="submit" className="btn-primary" disabled={submitting} style={{ marginTop: "6px" }}>
+                {submitting ? "Processing..." : mode === "login" ? "Unlock Session" : "Create Account"}
+              </button>
+            </form>
+
+            <div style={{ marginTop: "18px", display: "flex", justifyContent: "space-between", gap: "12px", alignItems: "center" }}>
+              <span className="muted" style={{ fontSize: "14px" }}>
+                {mode === "login" ? "Need an account?" : "Already registered?"}
+              </span>
+              <button
+                type="button"
+                className="btn-ghost"
+                onClick={() => {
+                  setMode(mode === "login" ? "register" : "login");
+                  setError(null);
+                }}
+              >
+                {mode === "login" ? "Register" : "Sign In"}
+              </button>
+            </div>
+
+            <div style={{ marginTop: "18px" }}>
+              <Link to={next} className="mono" style={{ textDecoration: "none", color: "var(--muted)", fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase" }}>
+                continue without signing in
+              </Link>
+            </div>
+          </div>
+        </section>
       </div>
     </div>
   );
