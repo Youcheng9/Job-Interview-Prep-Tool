@@ -1,119 +1,161 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { LevelSelector } from "../components/LevelSelector";
 import { RoleSelector } from "../components/RoleSelector";
 import { isAuthenticated, type CandidateLevel, type Role } from "../lib/api";
 
-const COMPANIES = ["GOOGLE", "META", "STRIPE", "OPENAI", "NVIDIA", "DATABRICKS", "AIRBNB", "NETFLIX"];
+const COMPANIES = ["Google", "Meta", "Stripe", "OpenAI", "NVIDIA", "Databricks", "Airbnb", "Netflix"];
 const MARQUEE_COMPANIES = [...COMPANIES, ...COMPANIES];
+
+const STATS = [
+  { value: "4", label: "interview tracks", detail: "Software engineering, data, product, and behavioral practice." },
+  { value: "Question-level", label: "feedback", detail: "Scorecards break down structure, signal, and technical depth." },
+  { value: "Saved", label: "session history", detail: "Review previous answers, retry weak areas, and track improvement." },
+];
+
+const FEATURES = [
+  {
+    title: "Role-specific question banks",
+    description: "Switch between SWE, data, PM, and behavioral interviews without leaving the same workflow.",
+  },
+  {
+    title: "Follow-up pressure that adapts",
+    description: "Prompts get sharper when your answer is vague, missing tradeoffs, or light on execution details.",
+  },
+  {
+    title: "Scorecards you can act on",
+    description: "Every round ends with concise scoring and concrete guidance instead of generic encouragement.",
+  },
+  {
+    title: "Practice history and replay",
+    description: "Return to past sessions, compare outcomes, and rerun the same track after you revise your answer.",
+  },
+  {
+    title: "Level calibration",
+    description: "Choose intern or new-grad expectations so the product meets the bar you are actually targeting.",
+  },
+  {
+    title: "Faster prep loops",
+    description: "Run a focused interview in minutes when you need one more rep before an application or onsite.",
+  },
+];
+
+const WORKFLOW = [
+  {
+    step: "01",
+    title: "Choose the role and level",
+    description: "Start from the interview you are actually preparing for instead of a generic prompt box.",
+  },
+  {
+    step: "02",
+    title: "Answer a realistic round",
+    description: "Move through timed prompts and follow-ups that test communication, judgment, and technical depth.",
+  },
+  {
+    step: "03",
+    title: "Review the debrief",
+    description: "See where the answer lost signal, then rerun the same category with a sharper response.",
+  },
+];
+
+const LIBRARY_ROWS = [
+  { track: "System design", focus: "tradeoffs, scale, edge cases", duration: "18 min" },
+  { track: "Algorithms", focus: "clarity, complexity, communication", duration: "14 min" },
+  { track: "Behavioral", focus: "story structure, ownership, impact", duration: "11 min" },
+];
 
 export default function HomePage() {
   const [role, setRole] = useState<Role | null>("swe");
   const [level, setLevel] = useState<CandidateLevel>("new_grad");
   const navigate = useNavigate();
+  const authed = isAuthenticated();
+
+  const launchHref = `/interview?role=${role ?? "swe"}&level=${level}`;
 
   return (
     <div>
-      <section className="section-band" style={{ overflow: "hidden" }}>
-        <div className="hero-grid" />
-        <div
-          style={{
-            position: "absolute",
-            top: "18%",
-            right: "-120px",
-            width: "520px",
-            height: "520px",
-            borderRadius: "999px",
-            background: "radial-gradient(circle, var(--acid-dim), transparent 62%)",
-            filter: "blur(20px)",
-            pointerEvents: "none",
-          }}
-        />
-
-        <div
-          className="shell-width"
-          style={{
-            position: "relative",
-            padding: "64px 0 84px",
-            display: "grid",
-            gridTemplateColumns: "minmax(0, 1.1fr) minmax(360px, 0.9fr)",
-            gap: "36px",
-            alignItems: "center",
-          }}
-        >
-          <div className="animate-fade-up" style={{ display: "flex", flexDirection: "column", gap: "22px" }}>
-            <div className="chip">
-              <span className="status-dot" style={{ width: "6px", height: "6px" }} />
-              Sim engine v2.4 // online
-            </div>
-            <h1 style={{ fontSize: "clamp(56px, 8vw, 104px)", lineHeight: 0.88, fontWeight: 700 }}>
-              Crack the
-              <br />
-              <span style={{ color: "var(--text-soft)" }}>Corporate</span>
-              <br />
-              <span style={{ color: "var(--acid)" }}>Firewall.</span>
-            </h1>
-            <p className="muted" style={{ fontSize: "18px", maxWidth: "40rem" }}>
-              Role-based AI interview drills for SWE, data, PM, and behavioral loops. Pick the track, survive the question set, and inspect the scoring signal after every answer.
+      <section className="section-band landing-hero">
+        <div className="shell-width landing-hero-inner">
+          <div className="landing-copy animate-fade-up">
+            <div className="chip">InterviewAce for technical interview prep</div>
+            <h1 className="landing-title">Interview practice that feels like a real hiring loop.</h1>
+            <p className="landing-lead">
+              Train on role-specific prompts, get sharper follow-up questions, and review structured feedback after every answer. Built for candidates who need repetition, not novelty.
             </p>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "14px", alignItems: "center" }}>
-              <button
-                type="button"
-                className="btn-primary"
-                onClick={() => navigate(`/interview?role=${role ?? "swe"}&level=${level}`)}
-              >
-                Initialize Sequence →
+            <div className="landing-actions">
+              <button type="button" className="btn-primary" onClick={() => navigate(launchHref)}>
+                Start practice
               </button>
-              <span className="mono" style={{ fontSize: "11px", textTransform: "uppercase", letterSpacing: "0.12em", color: "var(--muted)" }}>
-                {isAuthenticated() ? "history sync enabled" : "sign in for scoring + history"}
-              </span>
+              <Link to={authed ? "/history" : "/auth"} className="landing-secondary-link">
+                <button type="button" className="btn-ghost">
+                  {authed ? "View progress" : "Create account"}
+                </button>
+              </Link>
             </div>
           </div>
 
-          <div className="animate-fade-up" style={{ animationDelay: "0.12s" }}>
-            <div className="terminal-window">
-              <div className="terminal-topbar">
-                <div style={{ display: "flex", gap: "8px" }}>
-                  <span style={{ width: "8px", height: "8px", borderRadius: 999, background: "var(--border-strong)" }} />
-                  <span style={{ width: "8px", height: "8px", borderRadius: 999, background: "var(--border-strong)" }} />
-                  <span style={{ width: "8px", height: "8px", borderRadius: 999, background: "var(--border-strong)" }} />
+          <div className="landing-preview animate-fade-up" style={{ animationDelay: "0.1s" }}>
+            <div className="product-frame">
+              <div className="product-frame-header">
+                <div>
+                  <div className="eyebrow" style={{ marginBottom: "8px" }}>
+                    Candidate workspace
+                  </div>
+                  <h2 style={{ fontSize: "28px", lineHeight: 1.05 }}>Today&apos;s prep plan</h2>
                 </div>
-                <span className="mono" style={{ fontSize: "10px", color: "var(--muted)" }}>
-                  sys@interview-ace: ~/loop-sim
-                </span>
+                <div className="score-pill">New grad SWE</div>
               </div>
-              <div style={{ padding: "24px", display: "flex", flexDirection: "column", gap: "18px" }}>
-                <div className="mono" style={{ fontSize: "12px", color: "var(--muted)", display: "grid", gap: "4px" }}>
-                  <span>[08:42:11] Target locked: STRIPE / SWE</span>
-                  <span>[08:42:12] Injecting follow-up pressure...</span>
-                  <span style={{ color: "var(--acid)" }}>[08:42:13] Simulation live.</span>
+
+              <div className="preview-grid">
+                <div className="panel preview-card">
+                  <div className="eyebrow" style={{ marginBottom: "10px" }}>
+                    Next interview
+                  </div>
+                  <div style={{ fontSize: "22px", fontWeight: 700, marginBottom: "6px" }}>Distributed systems screen</div>
+                  <p className="muted" style={{ fontSize: "15px", marginBottom: "18px" }}>
+                    Focus on write consistency, retries, and operational tradeoffs.
+                  </p>
+                  <div className="progress-track">
+                    <div className="progress-fill" style={{ width: "68%" }} />
+                  </div>
+                  <div className="preview-meta">
+                    <span>3 of 5 drills completed</span>
+                    <span>Target: Friday</span>
+                  </div>
                 </div>
-                <div style={{ borderLeft: "2px solid var(--acid)", paddingLeft: "16px" }}>
-                  <p style={{ fontFamily: "var(--font-mono)", fontSize: "13px", lineHeight: 1.75 }}>
-                    [Interviewer_AI]: You are designing an idempotency layer for multi-region writes at 80k req/s. Two requests arrive with the same key 3ms apart in different regions. Walk through the design, failure modes, and tradeoffs.
+
+                <div className="panel preview-card">
+                  <div className="eyebrow" style={{ marginBottom: "10px" }}>
+                    Last scorecard
+                  </div>
+                  <div className="score-breakdown">
+                    <ScoreMetric label="Structure" value="8.4" />
+                    <ScoreMetric label="Tradeoffs" value="7.8" />
+                    <ScoreMetric label="Clarity" value="8.9" />
+                  </div>
+                  <p className="muted" style={{ fontSize: "14px", marginTop: "16px" }}>
+                    Strong framing. You lost points when the answer skipped failure handling and monitoring.
                   </p>
                 </div>
-                <div className="mono" style={{ display: "flex", alignItems: "center", gap: "8px", color: "var(--acid)" }}>
-                  <span>{">"}</span>
-                  <span style={{ width: "10px", height: "18px", background: "var(--text)", animation: "blink 1s step-end infinite" }} />
+
+                <div className="panel preview-card preview-card-wide">
+                  <div className="eyebrow" style={{ marginBottom: "10px" }}>
+                    Practice library
+                  </div>
+                  <div className="library-table">
+                    {LIBRARY_ROWS.map((row) => (
+                      <div key={row.track} className="library-row">
+                        <div>
+                          <div style={{ fontWeight: 700 }}>{row.track}</div>
+                          <div className="muted" style={{ fontSize: "14px" }}>
+                            {row.focus}
+                          </div>
+                        </div>
+                        <span className="library-duration">{row.duration}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
-              <div
-                className="mono"
-                style={{
-                  borderTop: "1px solid var(--border)",
-                  padding: "14px 16px",
-                  display: "flex",
-                  justifyContent: "space-between",
-                  fontSize: "10px",
-                  letterSpacing: "0.12em",
-                  textTransform: "uppercase",
-                  color: "var(--muted)",
-                }}
-              >
-                <span>depth: l4</span>
-                <span>threat: <span style={{ color: "var(--acid)" }}>0.92</span></span>
-                <span>elapsed: 03:12</span>
               </div>
             </div>
           </div>
@@ -123,7 +165,7 @@ export default function HomePage() {
       <section style={{ borderTop: "1px solid var(--border)", borderBottom: "1px solid var(--border)", background: "rgba(255,255,255,0.02)" }}>
         <div className="shell-width" style={{ padding: "20px 0" }}>
           <div className="eyebrow" style={{ marginBottom: "12px" }}>
-            // modeled interview loops
+            Interview formats inspired by top hiring bars
           </div>
           <div className="marquee-fade">
             <div
@@ -149,34 +191,140 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="shell-width" style={{ padding: "72px 0 32px" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 0.9fr) minmax(0, 1.1fr)", gap: "24px", marginBottom: "24px" }}>
+      <section className="shell-width landing-stats">
+        {STATS.map((stat) => (
+          <div key={stat.label} className="panel stat-card">
+            <div className="stat-value">{stat.value}</div>
+            <div style={{ fontSize: "18px", fontWeight: 700, marginBottom: "8px" }}>{stat.label}</div>
+            <p className="muted" style={{ fontSize: "14px" }}>
+              {stat.detail}
+            </p>
+          </div>
+        ))}
+      </section>
+
+      <section id="practice-setup" className="shell-width landing-section landing-anchor-section">
+        <div className="landing-section-header">
           <div>
             <div className="eyebrow" style={{ marginBottom: "12px" }}>
-              // 02 - tracks
+              Product tracks
             </div>
-            <h2 style={{ fontSize: "clamp(42px, 5vw, 68px)", lineHeight: 0.92, fontWeight: 700 }}>
-              Four loops.
-              <br />
-              One interface.
-            </h2>
+            <h2 className="landing-section-title">Prepare for the interview you actually have.</h2>
           </div>
+          <p className="muted landing-section-copy">
+            Each track uses its own question style and evaluation criteria so practice feels closer to the loop you are targeting.
+          </p>
         </div>
         <RoleSelector selected={role} onChange={setRole} />
       </section>
 
-      <section className="shell-width" style={{ padding: "28px 0 72px" }}>
-        <div className="eyebrow" style={{ marginBottom: "12px" }}>
-          // 03 - level
-        </div>
-        <div style={{ marginBottom: "20px", maxWidth: "46rem" }}>
-          <h2 style={{ fontSize: "clamp(34px, 4vw, 52px)", lineHeight: 0.94, fontWeight: 700, marginBottom: "10px" }}>
-            Pick the pressure band.
-          </h2>
-          <p className="muted">Choose a question set calibrated for either entry-level fundamentals or new-grad ownership and depth.</p>
+      <section className="shell-width landing-section">
+        <div className="landing-section-header">
+          <div>
+            <div className="eyebrow" style={{ marginBottom: "12px" }}>
+              Calibration
+            </div>
+            <h2 className="landing-section-title">Set the bar before you start.</h2>
+          </div>
+          <p className="muted landing-section-copy">
+            Intern and new-grad sessions are scored differently so you get the right level of scrutiny and follow-up.
+          </p>
         </div>
         <LevelSelector selected={level} onChange={setLevel} />
       </section>
+
+      <section className="section-band">
+        <div className="shell-width landing-section">
+          <div className="landing-section-header">
+            <div>
+              <div className="eyebrow" style={{ marginBottom: "12px" }}>
+                Why it works
+              </div>
+              <h2 className="landing-section-title">More signal, less prompt theater.</h2>
+            </div>
+            <p className="muted landing-section-copy">
+              The experience is designed like a real prep tool: quick setup, focused repetition, and debriefs you can use on the next attempt.
+            </p>
+          </div>
+
+          <div className="feature-grid">
+            {FEATURES.map((feature) => (
+              <div key={feature.title} className="panel feature-card">
+                <div className="feature-kicker" />
+                <h3 style={{ fontSize: "22px", marginBottom: "10px" }}>{feature.title}</h3>
+                <p className="muted" style={{ fontSize: "15px" }}>
+                  {feature.description}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="shell-width landing-section">
+        <div className="landing-section-header">
+          <div>
+            <div className="eyebrow" style={{ marginBottom: "12px" }}>
+              Workflow
+            </div>
+            <h2 className="landing-section-title">A prep loop you can repeat every day.</h2>
+          </div>
+          <p className="muted landing-section-copy">
+            The product stays useful when you are cramming for a screen, building confidence for an onsite, or sharpening a single weak area.
+          </p>
+        </div>
+
+        <div className="workflow-grid">
+          {WORKFLOW.map((item) => (
+            <div key={item.step} className="panel workflow-card">
+              <div className="workflow-step">{item.step}</div>
+              <h3 style={{ fontSize: "24px", marginBottom: "10px" }}>{item.title}</h3>
+              <p className="muted" style={{ fontSize: "15px" }}>
+                {item.description}
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="shell-width landing-section">
+        <div className="cta-band">
+          <div>
+            <div className="eyebrow" style={{ marginBottom: "12px" }}>
+              Start a round
+            </div>
+            <h2 className="landing-section-title" style={{ marginBottom: "12px" }}>
+              Run one focused practice session now.
+            </h2>
+            <p className="muted landing-section-copy" style={{ maxWidth: "38rem" }}>
+              Choose your track, answer a realistic set of questions, and leave with a scorecard you can use immediately.
+            </p>
+          </div>
+          <div className="landing-actions">
+            <button type="button" className="btn-primary" onClick={() => navigate(launchHref)}>
+              Launch interview
+            </button>
+            {!authed ? (
+              <Link to="/auth" className="landing-secondary-link">
+                <button type="button" className="btn-ghost">
+                  Sign in to save history
+                </button>
+              </Link>
+            ) : null}
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function ScoreMetric({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="score-metric">
+      <span className="muted" style={{ fontSize: "13px" }}>
+        {label}
+      </span>
+      <strong style={{ fontSize: "26px" }}>{value}</strong>
     </div>
   );
 }

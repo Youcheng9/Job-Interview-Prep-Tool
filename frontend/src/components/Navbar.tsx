@@ -1,16 +1,40 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { clearToken, isAuthenticated } from "../lib/api";
 import { useTheme } from "./ThemeProvider";
 
 export function Navbar() {
   const location = useLocation();
+  const navigate = useNavigate();
   const authed = isAuthenticated();
   const { theme, toggleTheme } = useTheme();
 
   const navItems = [
-    { path: "/", label: "[Home]" },
-    { path: "/history", label: "[History]" },
+    { path: "/history", label: "Progress" },
   ];
+
+  const scrollToPracticeSetup = () => {
+    window.requestAnimationFrame(() => {
+      const target = document.getElementById("practice-setup");
+      if (target) {
+        target.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    });
+  };
+
+  const handlePracticeClick = () => {
+    if (authed) {
+      navigate("/interview?role=swe&level=new_grad");
+      return;
+    }
+
+    if (location.pathname === "/") {
+      scrollToPracticeSetup();
+      return;
+    }
+
+    navigate("/");
+    window.setTimeout(scrollToPracticeSetup, 0);
+  };
 
   return (
     <nav
@@ -28,11 +52,11 @@ export function Navbar() {
       <div
         className="shell-width"
         style={{
-          minHeight: "72px",
+          minHeight: "88px",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          gap: "20px",
+          gap: "24px",
         }}
       >
         <Link
@@ -41,9 +65,9 @@ export function Navbar() {
             textDecoration: "none",
             display: "flex",
             alignItems: "center",
-            gap: "10px",
+            gap: "12px",
             fontFamily: "var(--font-body)",
-            fontSize: "26px",
+            fontSize: "28px",
             fontWeight: 800,
             letterSpacing: 0,
           }}
@@ -68,11 +92,46 @@ export function Navbar() {
               flexWrap: "wrap",
             }}
           >
+            <Link
+              to="/"
+              style={{
+                textDecoration: "none",
+                fontFamily: "var(--font-body)",
+                fontSize: "16px",
+                fontWeight: 600,
+                textTransform: "uppercase",
+                letterSpacing: "0.02em",
+                color: location.pathname === "/" ? "var(--acid)" : "var(--muted)",
+                border: location.pathname === "/" ? "1px solid rgba(185, 255, 57, 0.35)" : "1px solid transparent",
+                background: location.pathname === "/" ? "var(--acid-soft)" : "transparent",
+                borderRadius: "6px",
+                padding: "10px 14px",
+              }}
+            >
+              Home
+            </Link>
+            <button
+              type="button"
+              onClick={handlePracticeClick}
+              style={{
+                fontFamily: "var(--font-body)",
+                fontSize: "16px",
+                fontWeight: 600,
+                textTransform: "uppercase",
+                letterSpacing: "0.02em",
+                color: location.pathname.startsWith("/interview") ? "var(--acid)" : "var(--muted)",
+                border: location.pathname.startsWith("/interview") ? "1px solid rgba(185, 255, 57, 0.35)" : "1px solid transparent",
+                background: location.pathname.startsWith("/interview") ? "var(--acid-soft)" : "transparent",
+                borderRadius: "6px",
+                padding: "10px 14px",
+                cursor: "pointer",
+              }}
+            >
+              Practice
+            </button>
             {navItems.map((item) => {
               const active =
-                item.path === "/"
-                  ? location.pathname === item.path
-                  : location.pathname.startsWith(item.path);
+                location.pathname.startsWith(item.path);
 
               return (
                 <Link
@@ -81,7 +140,7 @@ export function Navbar() {
                   style={{
                     textDecoration: "none",
                     fontFamily: "var(--font-body)",
-                    fontSize: "15px",
+                    fontSize: "16px",
                     fontWeight: 600,
                     textTransform: "uppercase",
                     letterSpacing: "0.02em",
@@ -89,7 +148,7 @@ export function Navbar() {
                     border: active ? "1px solid rgba(185, 255, 57, 0.35)" : "1px solid transparent",
                     background: active ? "var(--acid-soft)" : "transparent",
                     borderRadius: "6px",
-                    padding: "8px 10px",
+                    padding: "10px 14px",
                   }}
                 >
                   {item.label}
@@ -102,16 +161,16 @@ export function Navbar() {
             type="button"
             className="btn-ghost"
             onClick={toggleTheme}
-            style={{ minHeight: "40px", padding: "0 12px" }}
+            style={{ minHeight: "46px", padding: "0 14px" }}
           >
-            {theme === "dark" ? "Light" : "Dark"}
+            {theme === "dark" ? "Light mode" : "Dark mode"}
           </button>
 
           {authed ? (
             <button
               type="button"
               className="btn-primary"
-              style={{ minHeight: "40px", padding: "0 12px" }}
+              style={{ minHeight: "46px", padding: "0 14px" }}
               onClick={() => {
                 clearToken();
                 window.location.reload();
@@ -121,8 +180,8 @@ export function Navbar() {
             </button>
           ) : (
             <Link to="/auth" style={{ textDecoration: "none" }}>
-              <button type="button" className="btn-primary" style={{ minHeight: "40px", padding: "0 12px" }}>
-                Init →
+              <button type="button" className="btn-primary" style={{ minHeight: "46px", padding: "0 14px" }}>
+                Sign in
               </button>
             </Link>
           )}

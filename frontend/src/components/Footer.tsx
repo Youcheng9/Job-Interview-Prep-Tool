@@ -7,7 +7,7 @@ export function Footer() {
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "2fr 1fr 1fr 1fr",
+            gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
             gap: "28px",
           }}
         >
@@ -19,10 +19,10 @@ export function Footer() {
               </span>
             </div>
             <p className="muted" style={{ maxWidth: "32rem", fontSize: "15px" }}>
-              Adversarial mock interview practice with role-based question banks, scoring, and answer feedback.
+              Structured interview practice with role-based question banks, scoring, and session history.
             </p>
             <div className="eyebrow" style={{ marginTop: "20px" }}>
-              v2.0.0 // status: online
+              Product preview
             </div>
           </div>
 
@@ -35,7 +35,7 @@ export function Footer() {
             ]}
           />
           <FooterColumn
-            title="Tracks"
+            title="Practice"
             links={[
               { label: "SWE", to: "/interview?role=swe&level=new_grad" },
               { label: "Data", to: "/interview?role=data&level=new_grad" },
@@ -43,7 +43,7 @@ export function Footer() {
             ]}
           />
           <FooterColumn
-            title="Access"
+            title="Account"
             links={[
               { label: "Sign In", to: "/auth" },
               { label: "Register", to: "/auth?mode=register" },
@@ -68,8 +68,8 @@ export function Footer() {
             color: "var(--muted)",
           }}
         >
-          <span>© 2026 interview ace ai</span>
-          <span>designed after the reference repo shell language</span>
+          <span>© 2026 InterviewAce</span>
+          <span>Built for repeatable, high-signal interview practice</span>
         </div>
       </div>
     </footer>
@@ -86,7 +86,7 @@ function FooterColumn({
   return (
     <div>
       <div className="eyebrow" style={{ marginBottom: "14px" }}>
-        // {title}
+        {title}
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
         {links.map((link) => (
