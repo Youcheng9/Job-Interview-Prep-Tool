@@ -71,6 +71,12 @@ export default function HomePage() {
   const authed = isAuthenticated();
 
   const launchHref = `/interview?role=${role ?? "swe"}&level=${level}`;
+  const scrollToPracticeSetup = () => {
+    const target = document.getElementById("practice-setup");
+    if (target) {
+      target.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
 
   return (
     <div>
@@ -301,8 +307,8 @@ export default function HomePage() {
             </p>
           </div>
           <div className="landing-actions">
-            <button type="button" className="btn-primary" onClick={() => navigate(launchHref)}>
-              Launch interview
+            <button type="button" className="btn-primary" onClick={scrollToPracticeSetup}>
+              Go To Practice
             </button>
             {!authed ? (
               <Link to="/auth" className="landing-secondary-link">

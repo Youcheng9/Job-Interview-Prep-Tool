@@ -22,11 +22,6 @@ export function Navbar() {
   };
 
   const handlePracticeClick = () => {
-    if (authed) {
-      navigate("/interview?role=swe&level=new_grad");
-      return;
-    }
-
     if (location.pathname === "/") {
       scrollToPracticeSetup();
       return;
