@@ -14,11 +14,11 @@ export function Footer() {
           <div>
             <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "14px" }}>
               <span className="status-dot" />
-              <span style={{ fontFamily: "var(--font-head)", fontWeight: 700, fontSize: "22px" }}>
+              <span style={{ fontFamily: "var(--font-head)", fontWeight: 700, fontSize: "1.8rem" }}>
                 Interview<span style={{ color: "var(--acid)" }}>Ace</span>
               </span>
             </div>
-            <p className="muted" style={{ maxWidth: "32rem", fontSize: "15px" }}>
+            <p className="muted" style={{ maxWidth: "38rem", fontSize: "1.08rem" }}>
               Structured interview practice with role-based question banks, scoring, and session history.
             </p>
             <div className="eyebrow" style={{ marginTop: "20px" }}>
@@ -62,7 +62,7 @@ export function Footer() {
             justifyContent: "space-between",
             gap: "16px",
             flexWrap: "wrap",
-            fontSize: "10px",
+            fontSize: "0.9rem",
             textTransform: "uppercase",
             letterSpacing: "0.12em",
             color: "var(--muted)",
@@ -90,7 +90,7 @@ function FooterColumn({
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
         {links.map((link) => (
-          <Link key={link.to} to={link.to} style={{ textDecoration: "none", color: "var(--muted)", fontSize: "14px" }}>
+          <Link key={link.to} to={link.to} style={{ textDecoration: "none", color: "var(--muted)", fontSize: "1.02rem" }}>
             {link.label}
           </Link>
         ))}

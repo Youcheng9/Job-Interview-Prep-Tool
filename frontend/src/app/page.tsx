@@ -13,33 +13,6 @@ const STATS = [
   { value: "Saved", label: "session history", detail: "Review previous answers, retry weak areas, and track improvement." },
 ];
 
-const FEATURES = [
-  {
-    title: "Role-specific question banks",
-    description: "Switch between SWE, data, PM, and behavioral interviews without leaving the same workflow.",
-  },
-  {
-    title: "Follow-up pressure that adapts",
-    description: "Prompts get sharper when your answer is vague, missing tradeoffs, or light on execution details.",
-  },
-  {
-    title: "Scorecards you can act on",
-    description: "Every round ends with concise scoring and concrete guidance instead of generic encouragement.",
-  },
-  {
-    title: "Practice history and replay",
-    description: "Return to past sessions, compare outcomes, and rerun the same track after you revise your answer.",
-  },
-  {
-    title: "Level calibration",
-    description: "Choose intern or new-grad expectations so the product meets the bar you are actually targeting.",
-  },
-  {
-    title: "Faster prep loops",
-    description: "Run a focused interview in minutes when you need one more rep before an application or onsite.",
-  },
-];
-
 const WORKFLOW = [
   {
     step: "01",
@@ -117,7 +90,7 @@ export default function HomePage() {
                     Next interview
                   </div>
                   <div style={{ fontSize: "22px", fontWeight: 700, marginBottom: "6px" }}>Distributed systems screen</div>
-                  <p className="muted" style={{ fontSize: "15px", marginBottom: "18px" }}>
+                  <p className="muted" style={{ fontSize: "1.02rem", marginBottom: "18px" }}>
                     Focus on write consistency, retries, and operational tradeoffs.
                   </p>
                   <div className="progress-track">
@@ -138,7 +111,7 @@ export default function HomePage() {
                     <ScoreMetric label="Tradeoffs" value="7.8" />
                     <ScoreMetric label="Clarity" value="8.9" />
                   </div>
-                  <p className="muted" style={{ fontSize: "14px", marginTop: "16px" }}>
+                  <p className="muted" style={{ fontSize: "1rem", marginTop: "16px" }}>
                     Strong framing. You lost points when the answer skipped failure handling and monitoring.
                   </p>
                 </div>
@@ -152,7 +125,7 @@ export default function HomePage() {
                       <div key={row.track} className="library-row">
                         <div>
                           <div style={{ fontWeight: 700 }}>{row.track}</div>
-                          <div className="muted" style={{ fontSize: "14px" }}>
+                          <div className="muted" style={{ fontSize: "1rem" }}>
                             {row.focus}
                           </div>
                         </div>
@@ -204,8 +177,8 @@ export default function HomePage() {
         {STATS.map((stat) => (
           <div key={stat.label} className="panel stat-card">
             <div className="stat-value">{stat.value}</div>
-            <div style={{ fontSize: "18px", fontWeight: 700, marginBottom: "8px" }}>{stat.label}</div>
-            <p className="muted" style={{ fontSize: "14px" }}>
+            <div style={{ fontSize: "1.22rem", fontWeight: 700, marginBottom: "8px" }}>{stat.label}</div>
+            <p className="muted" style={{ fontSize: "1rem" }}>
               {stat.detail}
             </p>
           </div>
@@ -242,34 +215,6 @@ export default function HomePage() {
         <LevelSelector selected={level} onChange={setLevel} />
       </section>
 
-      <section className="section-band">
-        <div className="shell-width landing-section">
-          <div className="landing-section-header">
-            <div>
-              <div className="eyebrow" style={{ marginBottom: "12px" }}>
-                Why it works
-              </div>
-              <h2 className="landing-section-title">More signal, less prompt theater.</h2>
-            </div>
-            <p className="muted landing-section-copy">
-              The experience is designed like a real prep tool: quick setup, focused repetition, and debriefs you can use on the next attempt.
-            </p>
-          </div>
-
-          <div className="feature-grid">
-            {FEATURES.map((feature) => (
-              <div key={feature.title} className="panel feature-card">
-                <div className="feature-kicker" />
-                <h3 style={{ fontSize: "22px", marginBottom: "10px" }}>{feature.title}</h3>
-                <p className="muted" style={{ fontSize: "15px" }}>
-                  {feature.description}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       <section className="shell-width landing-section">
         <div className="landing-section-header">
           <div>
@@ -287,8 +232,8 @@ export default function HomePage() {
           {WORKFLOW.map((item) => (
             <div key={item.step} className="panel workflow-card">
               <div className="workflow-step">{item.step}</div>
-              <h3 style={{ fontSize: "24px", marginBottom: "10px" }}>{item.title}</h3>
-              <p className="muted" style={{ fontSize: "15px" }}>
+              <h3 style={{ fontSize: "1.6rem", marginBottom: "10px" }}>{item.title}</h3>
+              <p className="muted" style={{ fontSize: "1.04rem" }}>
                 {item.description}
               </p>
             </div>
