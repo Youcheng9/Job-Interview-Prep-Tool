@@ -154,7 +154,7 @@ h1, h2, h3, h4, h5 {
 
 @keyframes marquee {
   from { transform: translateX(0); }
-  to { transform: translateX(-50%); }
+  to { transform: translateX(calc(-100% / 6)); }
 }
 
 .animate-fade-up {
@@ -215,6 +215,27 @@ h1, h2, h3, h4, h5 {
 .marquee-fade {
   position: relative;
   overflow: hidden;
+}
+
+.marquee-track {
+  display: flex;
+  align-items: center;
+  will-change: transform;
+  width: max-content;
+}
+
+.marquee-group {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  flex: 0 0 auto;
+  margin-right: 22px;
+}
+
+.marquee-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .panel {

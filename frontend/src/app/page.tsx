@@ -5,7 +5,7 @@ import { RoleSelector } from "../components/RoleSelector";
 import { isAuthenticated, type CandidateLevel, type Role } from "../lib/api";
 
 const COMPANIES = ["Google", "Meta", "Stripe", "OpenAI", "NVIDIA", "Databricks", "Airbnb", "Netflix"];
-const MARQUEE_COMPANIES = [...COMPANIES, ...COMPANIES];
+const MARQUEE_GROUP_COUNT = 6;
 
 const STATS = [
   { value: "4", label: "interview tracks", detail: "Software engineering, data, product, and behavioral practice." },
@@ -83,7 +83,6 @@ export default function HomePage() {
       <section className="section-band landing-hero">
         <div className="shell-width landing-hero-inner">
           <div className="landing-copy animate-fade-up">
-            <div className="chip">InterviewAce for technical interview prep</div>
             <h1 className="landing-title">Interview practice that feels like a real hiring loop.</h1>
             <p className="landing-lead">
               Train on role-specific prompts, get sharper follow-up questions, and review structured feedback after every answer. Built for candidates who need repetition, not novelty.
@@ -175,11 +174,10 @@ export default function HomePage() {
           </div>
           <div className="marquee-fade">
             <div
-              className="animate-marquee"
+              className="marquee-track animate-marquee"
               style={{
                 display: "flex",
                 width: "max-content",
-                gap: "22px",
                 fontFamily: "var(--font-head)",
                 fontSize: "34px",
                 fontWeight: 800,
@@ -187,10 +185,15 @@ export default function HomePage() {
                 whiteSpace: "nowrap",
               }}
             >
-              {MARQUEE_COMPANIES.map((company, index) => (
-                <span key={`${company}-${index}`}>
-                  {company} <span style={{ color: "var(--acid)" }}>·</span>
-                </span>
+              {Array.from({ length: MARQUEE_GROUP_COUNT }, (_, group) => (
+                <div key={group} className="marquee-group">
+                  {COMPANIES.map((company) => (
+                    <span key={`${group}-${company}`} className="marquee-item">
+                      <span>{company}</span>
+                      <span style={{ color: "var(--acid)" }}>·</span>
+                    </span>
+                  ))}
+                </div>
               ))}
             </div>
           </div>
