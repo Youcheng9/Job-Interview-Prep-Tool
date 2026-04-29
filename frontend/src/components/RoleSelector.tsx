@@ -31,7 +31,7 @@ export function RoleSelector({ selected, onChange }: Props) {
             type="button"
             onClick={() => onChange(role.id)}
             style={{
-              padding: "26px",
+              padding: "clamp(20px, 1.8vw, 30px)",
               textAlign: "left",
               background: active ? "var(--surface2)" : "var(--surface)",
               border: "none",
@@ -50,7 +50,7 @@ export function RoleSelector({ selected, onChange }: Props) {
             <div
               style={{
                 fontFamily: "var(--font-head)",
-                fontSize: "32px",
+                fontSize: "clamp(1.7rem, 1.3rem + 1vw, 2.2rem)",
                 fontWeight: 700,
                 lineHeight: 0.95,
                 marginBottom: "12px",
@@ -59,7 +59,7 @@ export function RoleSelector({ selected, onChange }: Props) {
             >
               {role.label}
             </div>
-            <p style={{ color: "var(--muted)", fontSize: "14px", maxWidth: "28ch" }}>{role.desc}</p>
+            <p style={{ color: "var(--muted)", fontSize: "0.98rem", maxWidth: "none" }}>{role.desc}</p>
           </button>
         );
       })}

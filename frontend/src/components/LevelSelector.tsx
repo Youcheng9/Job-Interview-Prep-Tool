@@ -27,7 +27,7 @@ const LEVELS: Array<{
 
 export function LevelSelector({ selected, onChange }: Props) {
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "16px" }}>
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "clamp(12px, 1.5vw, 18px)" }}>
       {LEVELS.map((level) => {
         const active = selected === level.id;
         return (
@@ -37,7 +37,7 @@ export function LevelSelector({ selected, onChange }: Props) {
             onClick={() => onChange(level.id)}
             className="panel"
             style={{
-              padding: "22px 24px",
+              padding: "clamp(20px, 1.8vw, 28px)",
               textAlign: "left",
               cursor: "pointer",
               background: active ? "var(--surface2)" : "var(--surface)",
@@ -48,10 +48,10 @@ export function LevelSelector({ selected, onChange }: Props) {
             <div className="chip chip-acid" style={{ marginBottom: "14px" }}>
               {level.code}
             </div>
-            <div style={{ fontFamily: "var(--font-head)", fontSize: "28px", fontWeight: 700, marginBottom: "8px" }}>
+            <div style={{ fontFamily: "var(--font-head)", fontSize: "clamp(1.6rem, 1.25rem + 0.8vw, 2rem)", fontWeight: 700, marginBottom: "8px" }}>
               {level.label}
             </div>
-            <p className="muted" style={{ fontSize: "14px" }}>
+            <p className="muted" style={{ fontSize: "0.98rem" }}>
               {level.desc}
             </p>
           </button>
