@@ -188,6 +188,12 @@ h1, h2, h3, h4, h5 {
   gap: 1px;
 }
 
+.role-card-stack {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1px;
+}
+
 .section-band {
   position: relative;
   border-top: 1px solid var(--border);
@@ -598,23 +604,101 @@ input.input-shell {
   background: linear-gradient(90deg, var(--acid), transparent);
 }
 
-.workflow-grid {
+.workflow-timeline {
+  position: relative;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: clamp(12px, 1.5vw, 18px);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(16px, 2vw, 24px);
+  align-items: start;
 }
 
-.workflow-card {
-  padding: var(--card-padding);
+.workflow-timeline::before {
+  content: "";
+  position: absolute;
+  top: clamp(28px, 2.2vw, 34px);
+  left: calc(100% / 6);
+  right: calc(100% / 6);
+  height: 2px;
+  background: linear-gradient(90deg, rgba(185, 255, 57, 0.2), rgba(185, 255, 57, 0.55), rgba(255, 255, 255, 0.08));
+  z-index: 0;
+}
+
+.workflow-node {
+  position: relative;
+  min-height: 100%;
+  text-align: center;
+  z-index: 1;
+}
+
+.workflow-node-top {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 18px;
+}
+
+.workflow-index-ring {
+  width: clamp(58px, 4vw, 70px);
+  height: clamp(58px, 4vw, 70px);
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(185, 255, 57, 0.22), rgba(185, 255, 57, 0.08) 45%, transparent 46%),
+    var(--surface);
+  border: 1px solid rgba(185, 255, 57, 0.28);
+  box-shadow: 0 0 0 8px rgba(185, 255, 57, 0.05);
+  transition: transform 0.24s ease, box-shadow 0.24s ease, border-color 0.24s ease;
+  flex: 0 0 auto;
+}
+
+.workflow-index {
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--acid);
+}
+
+.workflow-connector {
+  display: none;
+}
+
+.workflow-body {
+  min-height: 100%;
+  padding: clamp(10px, 1vw, 14px) clamp(6px, 1vw, 12px) 0;
+  transition: transform 0.24s ease, color 0.24s ease;
 }
 
 .workflow-step {
   font-family: var(--font-mono);
-  font-size: 0.92rem;
+  font-size: 0.84rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--acid);
-  margin-bottom: 18px;
+  margin-bottom: 10px;
+}
+
+.workflow-title {
+  font-size: clamp(1.35rem, 1.1rem + 0.7vw, 1.8rem);
+  line-height: 1.02;
+  margin-bottom: 12px;
+}
+
+.workflow-description {
+  font-size: 1.02rem;
+  line-height: 1.65;
+  max-width: 26ch;
+  margin: 0 auto;
+}
+
+.workflow-node:hover .workflow-index-ring {
+  transform: translateY(-4px) scale(1.03);
+  border-color: rgba(185, 255, 57, 0.5);
+  box-shadow: 0 0 0 10px rgba(185, 255, 57, 0.08), 0 18px 34px rgba(0, 0, 0, 0.18);
+}
+
+.workflow-node:hover .workflow-body {
+  transform: translateY(-4px);
 }
 
 .cta-band {
@@ -656,8 +740,14 @@ input.input-shell {
     max-width: 16ch;
   }
 
-  .preview-grid {
+  .preview-grid,
+  .landing-stats,
+  .workflow-timeline {
     grid-template-columns: 1fr;
+  }
+
+  .workflow-timeline::before {
+    display: none;
   }
 
   .score-breakdown {
@@ -670,17 +760,25 @@ input.input-shell {
     flex-direction: column;
     align-items: flex-start;
   }
-}
 
-@media (min-width: 700px) {
-  .responsive-card-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .footer-grid,
+  .level-card-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .footer-meta {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }
 
-@media (min-width: 1200px) {
-  .responsive-card-grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+@media (max-width: 1100px) {
+  .landing-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .level-card-grid {
+    grid-template-columns: 1fr !important;
   }
 }
 
@@ -694,10 +792,19 @@ input.input-shell {
     padding: 20px;
     border-radius: 20px;
   }
+
+  .workflow-node-top {
+    gap: 12px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .animate-marquee {
     animation: none;
+  }
+
+  .workflow-index-ring,
+  .workflow-body {
+    transition: none;
   }
 }

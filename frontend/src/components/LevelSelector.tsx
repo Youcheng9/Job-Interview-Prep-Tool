@@ -27,7 +27,7 @@ const LEVELS: Array<{
 
 export function LevelSelector({ selected, onChange }: Props) {
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "clamp(12px, 1.5vw, 18px)" }}>
+    <div className="level-card-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "clamp(12px, 1.5vw, 18px)" }}>
       {LEVELS.map((level) => {
         const active = selected === level.id;
         return (

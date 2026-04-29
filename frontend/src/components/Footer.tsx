@@ -5,6 +5,7 @@ export function Footer() {
     <footer style={{ borderTop: "1px solid var(--border)", marginTop: "96px" }}>
       <div className="shell-width" style={{ padding: "56px 0 24px" }}>
         <div
+          className="footer-grid"
           style={{
             display: "grid",
             gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
@@ -53,7 +54,7 @@ export function Footer() {
         </div>
 
         <div
-          className="mono"
+          className="footer-meta mono"
           style={{
             marginTop: "28px",
             paddingTop: "18px",

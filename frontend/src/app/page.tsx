@@ -228,14 +228,20 @@ export default function HomePage() {
           </p>
         </div>
 
-        <div className="workflow-grid">
+        <div className="workflow-timeline" aria-label="Practice workflow">
           {WORKFLOW.map((item) => (
-            <div key={item.step} className="panel workflow-card">
-              <div className="workflow-step">{item.step}</div>
-              <h3 style={{ fontSize: "1.6rem", marginBottom: "10px" }}>{item.title}</h3>
-              <p className="muted" style={{ fontSize: "1.04rem" }}>
-                {item.description}
-              </p>
+            <div key={item.step} className="workflow-node">
+              <div className="workflow-node-top">
+                <div className="workflow-index-ring">
+                  <span className="workflow-index">{item.step}</span>
+                </div>
+                <div className="workflow-connector" />
+              </div>
+              <div className="workflow-body">
+                <div className="workflow-step">Step {item.step}</div>
+                <h3 className="workflow-title">{item.title}</h3>
+                <p className="muted workflow-description">{item.description}</p>
+              </div>
             </div>
           ))}
         </div>

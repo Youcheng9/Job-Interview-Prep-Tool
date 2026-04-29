@@ -15,7 +15,7 @@ const ROLES: { id: Role; index: string; label: string; desc: string; loops: stri
 export function RoleSelector({ selected, onChange }: Props) {
   return (
     <div
-      className="responsive-card-grid"
+      className="role-card-stack"
       style={{
         background: "var(--border)",
         border: "1px solid var(--border)",
