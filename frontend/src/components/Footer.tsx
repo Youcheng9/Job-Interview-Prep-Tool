@@ -8,49 +8,57 @@ export function Footer() {
           className="footer-grid"
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
-            gap: "28px",
+            gridTemplateColumns: "minmax(260px, 0.7fr) minmax(0, 1.3fr)",
+            gap: "clamp(32px, 5vw, 88px)",
+            alignItems: "start",
           }}
         >
           <div>
             <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "14px" }}>
-              <span className="status-dot" />
-              <span style={{ fontFamily: "var(--font-head)", fontWeight: 700, fontSize: "1.8rem" }}>
+              <span style={{ fontFamily: "var(--font-head)", fontWeight: 700, fontSize: "2.16rem" }}>
                 Interview<span style={{ color: "var(--acid)" }}>Ace</span>
               </span>
             </div>
             <p className="muted" style={{ maxWidth: "38rem", fontSize: "1.08rem" }}>
               Structured interview practice with role-based question banks, scoring, and session history.
             </p>
-            <div className="eyebrow" style={{ marginTop: "20px" }}>
-              Product preview
-            </div>
           </div>
 
-          <FooterColumn
-            title="Routes"
-            links={[
-              { label: "Home", to: "/" },
-              { label: "Practice", to: "/interview?role=swe&level=new_grad" },
-              { label: "History", to: "/history" },
-            ]}
-          />
-          <FooterColumn
-            title="Practice"
-            links={[
-              { label: "SWE", to: "/interview?role=swe&level=new_grad" },
-              { label: "Data", to: "/interview?role=data&level=new_grad" },
-              { label: "PM", to: "/interview?role=pm&level=new_grad" },
-            ]}
-          />
-          <FooterColumn
-            title="Account"
-            links={[
-              { label: "Sign In", to: "/auth" },
-              { label: "Register", to: "/auth?mode=register" },
-              { label: "Behavioral", to: "/interview?role=behavioral&level=new_grad" },
-            ]}
-          />
+          <div className="footer-nav-grid">
+            <FooterColumn
+              title="Routes"
+              align="start"
+              links={[
+                { label: "Home", to: "/" },
+                { label: "Practice", to: "/interview?role=swe&level=new_grad" },
+                { label: "History", to: "/history" },
+              ]}
+            />
+            <FooterColumn
+              title="Practice"
+              columns={2}
+              align="center"
+              links={[
+                { label: "SWE Intern", to: "/interview?role=swe&level=intern" },
+                { label: "SWE New Grad", to: "/interview?role=swe&level=new_grad" },
+                { label: "DSA Intern", to: "/interview?role=data&level=intern" },
+                { label: "DSA New Grad", to: "/interview?role=data&level=new_grad" },
+                { label: "PM Intern", to: "/interview?role=pm&level=intern" },
+                { label: "PM New Grad", to: "/interview?role=pm&level=new_grad" },
+                { label: "Behavioral Intern", to: "/interview?role=behavioral&level=intern" },
+                { label: "Behavioral New Grad", to: "/interview?role=behavioral&level=new_grad" },
+              ]}
+            />
+            <FooterColumn
+              title="Account"
+              align="end"
+              inset
+              links={[
+                { label: "Sign In", to: "/auth" },
+                { label: "Register", to: "/auth?mode=register" },
+              ]}
+            />
+          </div>
         </div>
 
         <div
@@ -80,16 +88,35 @@ export function Footer() {
 function FooterColumn({
   title,
   links,
+  columns = 1,
+  align = "stretch",
+  inset = false,
 }: {
   title: string;
   links: Array<{ label: string; to: string }>;
+  columns?: 1 | 2;
+  align?: "start" | "center" | "end" | "stretch";
+  inset?: boolean;
 }) {
   return (
-    <div>
-      <div className="eyebrow" style={{ marginBottom: "14px" }}>
+    <div
+      style={{
+        justifySelf: align,
+        marginRight: inset ? "clamp(18px, 3vw, 42px)" : undefined,
+        width: columns === 2 ? "min(100%, 26rem)" : "auto",
+      }}
+    >
+      <div className="eyebrow" style={{ marginBottom: "14px", fontSize: "13.2px" }}>
         {title}
       </div>
-      <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: columns === 2 ? "repeat(2, minmax(0, 1fr))" : "1fr",
+          columnGap: "18px",
+          rowGap: "10px",
+        }}
+      >
         {links.map((link) => (
           <Link key={link.to} to={link.to} style={{ textDecoration: "none", color: "var(--muted)", fontSize: "1.02rem" }}>
             {link.label}

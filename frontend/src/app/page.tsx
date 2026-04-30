@@ -40,15 +40,40 @@ const LIBRARY_ROWS = [
 export default function HomePage() {
   const [role, setRole] = useState<Role | null>("swe");
   const [level, setLevel] = useState<CandidateLevel>("new_grad");
+  const [levelConfirmed, setLevelConfirmed] = useState(false);
   const navigate = useNavigate();
   const authed = isAuthenticated();
 
   const launchHref = `/interview?role=${role ?? "swe"}&level=${level}`;
+
+  const hasSavedRound = () => {
+    if (!role) return false;
+    return Boolean(localStorage.getItem(`interview-session:${role}:${level}`));
+  };
+
+  const scrollToLevelSetup = () => {
+    const target = document.getElementById("level-setup");
+    if (target) {
+      target.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
   const scrollToPracticeSetup = () => {
     const target = document.getElementById("practice-setup");
     if (target) {
       target.scrollIntoView({ behavior: "smooth", block: "start" });
     }
+  };
+
+  const handleRoleChange = (nextRole: Role) => {
+    setRole(nextRole);
+    setLevelConfirmed(false);
+    window.requestAnimationFrame(scrollToLevelSetup);
+  };
+
+  const handleLevelChange = (nextLevel: CandidateLevel) => {
+    setLevel(nextLevel);
+    setLevelConfirmed(true);
   };
 
   return (
@@ -60,12 +85,12 @@ export default function HomePage() {
             <p className="landing-lead">
               Train on role-specific prompts, get sharper follow-up questions, and review structured feedback after every answer. Built for candidates who need repetition, not novelty.
             </p>
-            <div className="landing-actions">
-              <button type="button" className="btn-primary" onClick={() => navigate(launchHref)}>
+            <div className="landing-actions hero-actions">
+              <button type="button" className="btn-primary hero-action-button" onClick={() => navigate(launchHref)}>
                 Start practice
               </button>
               <Link to={authed ? "/history" : "/auth"} className="landing-secondary-link">
-                <button type="button" className="btn-ghost">
+                <button type="button" className="btn-ghost hero-action-button">
                   {authed ? "View progress" : "Create account"}
                 </button>
               </Link>
@@ -142,7 +167,7 @@ export default function HomePage() {
 
       <section style={{ borderTop: "1px solid var(--border)", borderBottom: "1px solid var(--border)", background: "rgba(255,255,255,0.02)" }}>
         <div className="shell-width" style={{ padding: "20px 0" }}>
-          <div className="eyebrow" style={{ marginBottom: "12px" }}>
+          <div className="eyebrow landing-eyebrow-large" style={{ marginBottom: "12px" }}>
             Interview formats inspired by top hiring bars
           </div>
           <div className="marquee-fade">
@@ -188,7 +213,7 @@ export default function HomePage() {
       <section id="practice-setup" className="shell-width landing-section landing-anchor-section">
         <div className="landing-section-header">
           <div>
-            <div className="eyebrow" style={{ marginBottom: "12px" }}>
+            <div className="eyebrow landing-eyebrow-large" style={{ marginBottom: "12px" }}>
               Product tracks
             </div>
             <h2 className="landing-section-title">Prepare for the interview you actually have.</h2>
@@ -197,13 +222,13 @@ export default function HomePage() {
             Each track uses its own question style and evaluation criteria so practice feels closer to the loop you are targeting.
           </p>
         </div>
-        <RoleSelector selected={role} onChange={setRole} />
+        <RoleSelector selected={role} onChange={handleRoleChange} />
       </section>
 
-      <section className="shell-width landing-section">
+      <section id="level-setup" className="shell-width landing-section landing-anchor-section">
         <div className="landing-section-header">
           <div>
-            <div className="eyebrow" style={{ marginBottom: "12px" }}>
+            <div className="eyebrow landing-eyebrow-large" style={{ marginBottom: "12px" }}>
               Calibration
             </div>
             <h2 className="landing-section-title">Set the bar before you start.</h2>
@@ -212,13 +237,20 @@ export default function HomePage() {
             Intern and new-grad sessions are scored differently so you get the right level of scrutiny and follow-up.
           </p>
         </div>
-        <LevelSelector selected={level} onChange={setLevel} />
+        <LevelSelector selected={level} onChange={handleLevelChange} />
+        {levelConfirmed ? (
+          <div className="level-start-actions">
+            <button type="button" className="btn-primary level-start-button" onClick={() => navigate(launchHref)}>
+              {hasSavedRound() ? "Continue Questions" : "Start Questions"}
+            </button>
+          </div>
+        ) : null}
       </section>
 
       <section className="shell-width landing-section">
         <div className="landing-section-header">
           <div>
-            <div className="eyebrow" style={{ marginBottom: "12px" }}>
+            <div className="eyebrow landing-eyebrow-large" style={{ marginBottom: "12px" }}>
               Workflow
             </div>
             <h2 className="landing-section-title">A prep loop you can repeat every day.</h2>
@@ -249,8 +281,8 @@ export default function HomePage() {
 
       <section className="shell-width landing-section">
         <div className="cta-band">
-          <div>
-            <div className="eyebrow" style={{ marginBottom: "12px" }}>
+          <div className="cta-content">
+            <div className="eyebrow landing-eyebrow-large" style={{ marginBottom: "12px" }}>
               Start a round
             </div>
             <h2 className="landing-section-title" style={{ marginBottom: "12px" }}>
@@ -260,8 +292,8 @@ export default function HomePage() {
               Choose your track, answer a realistic set of questions, and leave with a scorecard you can use immediately.
             </p>
           </div>
-          <div className="landing-actions">
-            <button type="button" className="btn-primary" onClick={scrollToPracticeSetup}>
+          <div className="landing-actions cta-actions">
+            <button type="button" className="btn-primary cta-practice-button" onClick={scrollToPracticeSetup}>
               Go To Practice
             </button>
             {!authed ? (

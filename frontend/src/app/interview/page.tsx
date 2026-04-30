@@ -128,8 +128,21 @@ function LevelBadge({ level }: { level: CandidateLevel }) {
 }
 
 type Phase = "question" | "submitting" | "result";
+type DifficultyFilter = "all" | Question["difficulty"];
 
 const SESSION_KEY_PREFIX = "interview-session";
+const ROLE_OPTIONS: Array<{ id: Role; label: string }> = [
+  { id: "swe", label: "SWE" },
+  { id: "data", label: "DSA" },
+  { id: "pm", label: "PM" },
+  { id: "behavioral", label: "Behavioral" },
+];
+const DIFFICULTY_FILTERS: Array<{ id: DifficultyFilter; label: string }> = [
+  { id: "all", label: "All" },
+  { id: "easy", label: "Easy" },
+  { id: "medium", label: "Medium" },
+  { id: "hard", label: "Hard" },
+];
 
 function getSessionKey(role: Role, level: CandidateLevel) {
   return `${SESSION_KEY_PREFIX}:${role}:${level}`;
@@ -157,6 +170,20 @@ export default function InterviewPage() {
   const requestedQuestionId = Number(params.get("questionId"));
 
   const [questions, setQuestions] = useState<Question[]>([]);
+  const [sidebarQuestions, setSidebarQuestions] = useState<Record<Role, Question[]>>({
+    swe: [],
+    data: [],
+    pm: [],
+    behavioral: [],
+  });
+  const [openRoles, setOpenRoles] = useState<Record<Role, boolean>>({
+    swe: true,
+    data: false,
+    pm: false,
+    behavioral: false,
+  });
+  const [difficultyFilter, setDifficultyFilter] = useState<DifficultyFilter>("all");
+  const [sidebarError, setSidebarError] = useState<string | null>(null);
   const [qIndex, setQIndex] = useState(0);
   const [answer, setAnswer] = useState("");
   const [phase, setPhase] = useState<Phase>("question");
@@ -263,6 +290,27 @@ export default function InterviewPage() {
   }, [level, role, requestedQuestionId]);
 
   useEffect(() => {
+    setSidebarError(null);
+    Promise.all(ROLE_OPTIONS.map((item) => getQuestions(item.id, level)))
+      .then((results) => {
+        setSidebarQuestions({
+          swe: results[0] ?? [],
+          data: results[1] ?? [],
+          pm: results[2] ?? [],
+          behavioral: results[3] ?? [],
+        });
+      })
+      .catch(() => setSidebarError("Failed to load sidebar questions."));
+  }, [level]);
+
+  useEffect(() => {
+    setOpenRoles((current) => ({
+      ...current,
+      [role]: true,
+    }));
+  }, [role]);
+
+  useEffect(() => {
     if (!authed) {
       setCompletedIds([]);
       return;
@@ -363,6 +411,18 @@ export default function InterviewPage() {
     setTimeout(() => textareaRef.current?.focus(), 100);
   }
 
+  function selectSidebarQuestion(nextRole: Role, nextQuestion: Question) {
+    if (nextRole === role) {
+      const nextIndex = questions.findIndex((item) => item.id === nextQuestion.id);
+      if (nextIndex >= 0) {
+        selectQuestion(nextIndex);
+        return;
+      }
+    }
+
+    navigate(`/interview?role=${nextRole}&level=${level}&questionId=${nextQuestion.id}`);
+  }
+
   function handleNext() {
     if (qIndex + 1 < questions.length) {
       selectQuestion(qIndex + 1);
@@ -452,13 +512,98 @@ export default function InterviewPage() {
         />
       </div>
 
-      <div
-        style={{
-          maxWidth: "1240px",
-          margin: "0 auto",
-          padding: "48px 32px 0",
-        }}
-      >
+      <div className="interview-layout">
+        <aside className="question-sidebar panel" aria-label="Question sidebar">
+          <div className="question-sidebar-header">
+            <div>
+              <div className="mono question-sidebar-kicker">Question Bank</div>
+              <div className="question-sidebar-title">{level === "intern" ? "Intern" : "New Grad"}</div>
+            </div>
+            <div className="mono question-sidebar-count">
+              {completedIds.length} done
+            </div>
+          </div>
+
+          <div className="question-filter-group" aria-label="Filter questions by difficulty">
+            {DIFFICULTY_FILTERS.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                className={`question-filter-button ${difficultyFilter === item.id ? "question-filter-button-active" : ""}`}
+                onClick={() => setDifficultyFilter(item.id)}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+
+          {sidebarError ? (
+            <div className="question-sidebar-error">{sidebarError}</div>
+          ) : (
+            <div className="question-role-list">
+              {ROLE_OPTIONS.map((roleOption) => {
+                const roleQuestions = sidebarQuestions[roleOption.id];
+                const filteredQuestions =
+                  difficultyFilter === "all"
+                    ? roleQuestions
+                    : roleQuestions.filter((item) => item.difficulty === difficultyFilter);
+                const isOpen = openRoles[roleOption.id];
+
+                return (
+                  <div key={roleOption.id} className="question-role-section">
+                    <button
+                      type="button"
+                      className="question-role-toggle"
+                      onClick={() =>
+                        setOpenRoles((current) => ({
+                          ...current,
+                          [roleOption.id]: !current[roleOption.id],
+                        }))
+                      }
+                      aria-expanded={isOpen}
+                    >
+                      <span>{roleOption.label}</span>
+                      <span className="mono">{isOpen ? "Hide" : "Show"}</span>
+                    </button>
+
+                    {isOpen ? (
+                      <div className="question-sidebar-items">
+                        {filteredQuestions.length ? (
+                          filteredQuestions.map((item) => {
+                            const active = roleOption.id === role && question?.id === item.id;
+                            const completed = completedIds.includes(item.id);
+                            const questionNumber = roleQuestions.findIndex((candidate) => candidate.id === item.id) + 1;
+
+                            return (
+                              <button
+                                key={item.id}
+                                type="button"
+                                className={`question-sidebar-item ${active ? "question-sidebar-item-active" : ""}`}
+                                onClick={() => selectSidebarQuestion(roleOption.id, item)}
+                                title={item.text}
+                              >
+                                <span className="mono question-sidebar-number">Q{questionNumber}</span>
+                                <span className="question-sidebar-text">{item.text}</span>
+                                <span className={`question-sidebar-difficulty question-sidebar-difficulty-${item.difficulty}`}>
+                                  {item.difficulty}
+                                </span>
+                                {completed ? <span className="question-sidebar-done">Done</span> : null}
+                              </button>
+                            );
+                          })
+                        ) : (
+                          <div className="question-sidebar-empty">No matching questions.</div>
+                        )}
+                      </div>
+                    ) : null}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </aside>
+
+        <main className="interview-main">
         {error && (
           <div
             style={{
@@ -516,73 +661,6 @@ export default function InterviewPage() {
 
         {question && (
           <>
-            <div
-              className="panel animate-fade-up"
-              style={{ padding: "24px 26px", marginBottom: "24px" }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  gap: "12px",
-                  marginBottom: "14px",
-                  flexWrap: "wrap",
-                }}
-              >
-                <div>
-                  <div
-                    className="mono"
-                    style={{
-                      fontSize: "12px",
-                      letterSpacing: "0.14em",
-                      textTransform: "uppercase",
-                      color: "var(--cyan)",
-                      marginBottom: "4px",
-                    }}
-                  >
-                    Question Navigator
-                  </div>
-                  <div style={{ fontSize: "16px", color: "var(--muted)" }}>
-                    Resume where you left off or jump to any question in this track.
-                  </div>
-                </div>
-                <div className="mono" style={{ fontSize: "13px", color: "var(--muted)" }}>
-                  {completedIds.length} completed
-                </div>
-              </div>
-
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
-                {questions.map((item, index) => {
-                  const active = index === qIndex;
-                  const completed = completedIds.includes(item.id);
-
-                  return (
-                    <button
-                      key={item.id}
-                      onClick={() => selectQuestion(index)}
-                      className="mono"
-                      style={{
-                        fontSize: "12px",
-                        letterSpacing: "0.12em",
-                        textTransform: "uppercase",
-                        padding: "8px 12px",
-                        border: `1px solid ${
-                          active ? "var(--cyan)" : completed ? "#22c55e66" : "var(--border)"
-                        }`,
-                        background: active ? "var(--cyan-glow)" : completed ? "#22c55e12" : "transparent",
-                        color: active ? "var(--cyan)" : completed ? "#22c55e" : "var(--muted)",
-                        cursor: "pointer",
-                      }}
-                      title={item.text}
-                    >
-                      Q{index + 1} {completed ? "Done" : ""}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
             {/* Question panel */}
             <div
               className="panel animate-fade-up"
@@ -840,6 +918,7 @@ export default function InterviewPage() {
             )}
           </>
         )}
+        </main>
       </div>
     </div>
   );

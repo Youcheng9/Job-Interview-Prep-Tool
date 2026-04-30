@@ -40,10 +40,10 @@ export function RoleSelector({ selected, onChange }: Props) {
             }}
           >
             <div style={{ display: "flex", justifyContent: "space-between", gap: "12px", marginBottom: "18px" }}>
-              <span className="mono" style={{ fontSize: "11px", color: active ? "var(--acid)" : "var(--muted)", letterSpacing: "0.12em" }}>
+              <span className="mono" style={{ fontSize: "15.4px", color: active ? "var(--acid)" : "var(--muted)", letterSpacing: "0.12em" }}>
                 {role.index}
               </span>
-              <span className="mono" style={{ fontSize: "11px", color: active ? "var(--acid)" : "var(--muted)", letterSpacing: "0.12em" }}>
+              <span className="mono" style={{ fontSize: "15.4px", color: active ? "var(--acid)" : "var(--muted)", letterSpacing: "0.12em" }}>
                 {role.loops}
               </span>
             </div>
