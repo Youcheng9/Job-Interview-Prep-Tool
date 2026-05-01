@@ -6,10 +6,10 @@ interface Props {
 }
 
 const ROLES: { id: Role; index: string; label: string; desc: string; loops: string }[] = [
-  { id: "swe", index: "Core", label: "Software Engineering", desc: "Algorithms, system design, implementation detail, and tradeoff discussions.", loops: "Design + coding" },
-  { id: "data", index: "Analytics", label: "Data / ML", desc: "Statistics, SQL, experimentation, model debugging, and applied reasoning.", loops: "Model + analysis" },
-  { id: "pm", index: "Product", label: "Product Management", desc: "Execution, product sense, prioritization, metrics, and stakeholder judgment.", loops: "Case + strategy" },
-  { id: "behavioral", index: "Stories", label: "Behavioral", desc: "Ownership, conflict, leadership, collaboration, and structured storytelling.", loops: "STAR + follow-ups" },
+  { id: "swe", index: "Core", label: "Software Engineering", desc: "Algorithms, system design, implementation detail, and tradeoff discussions", loops: "Design + coding" },
+  { id: "data", index: "Analytics", label: "Data / ML", desc: "Statistics, SQL, experimentation, model debugging, and applied reasoning", loops: "Model + analysis" },
+  { id: "pm", index: "Product", label: "Product Management", desc: "Execution, product sense, prioritization, metrics, and stakeholder judgment", loops: "Case + strategy" },
+  { id: "behavioral", index: "Stories", label: "Behavioral", desc: "Ownership, conflict, leadership, collaboration, and structured storytelling", loops: "STAR + follow-ups" },
 ];
 
 export function RoleSelector({ selected, onChange }: Props) {

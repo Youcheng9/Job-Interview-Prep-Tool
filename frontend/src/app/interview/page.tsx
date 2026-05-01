@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { ScoreCard } from "../../components/ScoreCard";
 import { FeedbackPanel } from "../../components/FeedbackPanel";
+import { readSavedQuestionId, saveInterviewSession } from "../../lib/interviewSession";
 import {
   type CandidateLevel,
   clearToken,
@@ -130,7 +131,6 @@ function LevelBadge({ level }: { level: CandidateLevel }) {
 type Phase = "question" | "submitting" | "result";
 type DifficultyFilter = "all" | Question["difficulty"];
 
-const SESSION_KEY_PREFIX = "interview-session";
 const ROLE_OPTIONS: Array<{ id: Role; label: string }> = [
   { id: "swe", label: "SWE" },
   { id: "data", label: "DSA" },
@@ -143,22 +143,6 @@ const DIFFICULTY_FILTERS: Array<{ id: DifficultyFilter; label: string }> = [
   { id: "medium", label: "Medium" },
   { id: "hard", label: "Hard" },
 ];
-
-function getSessionKey(role: Role, level: CandidateLevel) {
-  return `${SESSION_KEY_PREFIX}:${role}:${level}`;
-}
-
-function readSavedQuestionId(role: Role, level: CandidateLevel): number | null {
-  const saved = localStorage.getItem(getSessionKey(role, level));
-  if (!saved) return null;
-
-  const parsed = Number(saved);
-  return Number.isFinite(parsed) ? parsed : null;
-}
-
-function saveQuestionId(role: Role, level: CandidateLevel, questionId: number) {
-  localStorage.setItem(getSessionKey(role, level), String(questionId));
-}
 
 export default function InterviewPage() {
   const [params] = useSearchParams();
@@ -196,6 +180,8 @@ export default function InterviewPage() {
   const [isListening, setIsListening] = useState(false);
   const [speechError, setSpeechError] = useState<string | null>(null);
   const [isGeneratingAiFeedback, setIsGeneratingAiFeedback] = useState(false);
+  const [isQuestionSidebarPinned, setIsQuestionSidebarPinned] = useState(false);
+  const [isQuestionSidebarPreviewed, setIsQuestionSidebarPreviewed] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const recognitionRef = useRef<InstanceType<SpeechRecognitionCtor> | null>(null);
 
@@ -330,11 +316,12 @@ export default function InterviewPage() {
 
   const question = questions[qIndex];
   const progress = questions.length ? ((qIndex + 1) / questions.length) * 100 : 0;
+  const isQuestionSidebarVisible = isQuestionSidebarPinned || isQuestionSidebarPreviewed;
 
   useEffect(() => {
     if (!question) return;
 
-    saveQuestionId(role, level, question.id);
+    saveInterviewSession(role, level, question.id);
     navigate(`/interview?role=${role}&level=${level}&questionId=${question.id}`, { replace: true });
   }, [level, navigate, question, role]);
 
@@ -494,6 +481,7 @@ export default function InterviewPage() {
 
   return (
     <div
+      className={`interview-page ${isQuestionSidebarVisible ? "interview-page-sidebar-visible" : ""}`}
       style={{
         padding: "32px 32px 60px",
         position: "relative",
@@ -512,8 +500,23 @@ export default function InterviewPage() {
         />
       </div>
 
-      <div className="interview-layout">
-        <aside className="question-sidebar panel" aria-label="Question sidebar">
+      <div
+        className={`question-sidebar-drawer ${isQuestionSidebarPinned ? "question-sidebar-drawer-pinned" : ""}`}
+        onMouseEnter={() => setIsQuestionSidebarPreviewed(true)}
+        onMouseLeave={() => setIsQuestionSidebarPreviewed(false)}
+      >
+        <button
+          type="button"
+          className="question-sidebar-rail"
+          onClick={() => setIsQuestionSidebarPinned((current) => !current)}
+          aria-expanded={isQuestionSidebarPinned}
+          aria-controls="question-bank-sidebar"
+          title={isQuestionSidebarPinned ? "Unpin question bank" : "Pin question bank"}
+        >
+          <span>{isQuestionSidebarPinned ? "Hide Questions" : "Questions"}</span>
+        </button>
+
+        <aside id="question-bank-sidebar" className="question-sidebar question-sidebar-panel panel" aria-label="Question sidebar">
           <div className="question-sidebar-header">
             <div>
               <div className="mono question-sidebar-kicker">Question Bank</div>
@@ -522,6 +525,10 @@ export default function InterviewPage() {
             <div className="mono question-sidebar-count">
               {completedIds.length} done
             </div>
+          </div>
+
+          <div className="question-sidebar-progress mono">
+            Question {questions.length ? qIndex + 1 : 0} of {questions.length}
           </div>
 
           <div className="question-filter-group" aria-label="Filter questions by difficulty">
@@ -568,40 +575,61 @@ export default function InterviewPage() {
 
                     {isOpen ? (
                       <div className="question-sidebar-items">
-                        {filteredQuestions.length ? (
-                          filteredQuestions.map((item) => {
-                            const active = roleOption.id === role && question?.id === item.id;
-                            const completed = completedIds.includes(item.id);
-                            const questionNumber = roleQuestions.findIndex((candidate) => candidate.id === item.id) + 1;
+                          {filteredQuestions.length ? (
+                            filteredQuestions.map((item, index) => {
+                              const active = roleOption.id === role && question?.id === item.id;
+                              const completed = completedIds.includes(item.id);
+                              const questionNumber = roleQuestions.findIndex((candidate) => candidate.id === item.id) + 1;
+                              const locked = !authed && index >= 3;
 
-                            return (
-                              <button
-                                key={item.id}
-                                type="button"
-                                className={`question-sidebar-item ${active ? "question-sidebar-item-active" : ""}`}
-                                onClick={() => selectSidebarQuestion(roleOption.id, item)}
-                                title={item.text}
-                              >
-                                <span className="mono question-sidebar-number">Q{questionNumber}</span>
-                                <span className="question-sidebar-text">{item.text}</span>
-                                <span className={`question-sidebar-difficulty question-sidebar-difficulty-${item.difficulty}`}>
-                                  {item.difficulty}
+                              return (
+                                <button
+                                  key={item.id}
+                                  type="button"
+                                  className={`question-sidebar-item ${active ? "question-sidebar-item-active" : ""} ${locked ? "question-sidebar-item-locked" : ""}`}
+                                  onClick={() => {
+                                    if (!locked) {
+                                      selectSidebarQuestion(roleOption.id, item);
+                                    }
+                                  }}
+                                  disabled={locked}
+                                  title={locked ? "Sign in to unlock more questions" : item.text}
+                                >
+                                  <span className="mono question-sidebar-number">Q{questionNumber}</span>
+                                  <span className="question-sidebar-text">{item.text}</span>
+                                  <span className={`question-sidebar-difficulty question-sidebar-difficulty-${item.difficulty}`}>
+                                    {item.difficulty}
                                 </span>
                                 {completed ? <span className="question-sidebar-done">Done</span> : null}
+                                </button>
+                              );
+                            })
+                          ) : (
+                            <div className="question-sidebar-empty">No matching questions.</div>
+                          )}
+                          {!authed && filteredQuestions.length > 3 ? (
+                            <div className="question-sidebar-signin">
+                              <div>Sign in to unlock the full question bank</div>
+                              <button
+                                type="button"
+                                className="btn-primary"
+                                onClick={() => navigate(`/auth?next=${encodeURIComponent(`/interview?role=${role}&level=${level}`)}`)}
+                              >
+                                Sign in for more questions
                               </button>
-                            );
-                          })
-                        ) : (
-                          <div className="question-sidebar-empty">No matching questions.</div>
-                        )}
-                      </div>
-                    ) : null}
+                            </div>
+                          ) : null}
+                        </div>
+                      ) : null}
                   </div>
                 );
               })}
             </div>
           )}
         </aside>
+      </div>
+
+      <div className="interview-layout">
 
         <main className="interview-main">
         {error && (

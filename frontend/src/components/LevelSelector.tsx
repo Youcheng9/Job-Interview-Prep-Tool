@@ -15,13 +15,13 @@ const LEVELS: Array<{
     id: "intern",
     code: "L1",
     label: "Intern",
-    desc: "Foundational interviews focused on fundamentals, clear communication, and coachable reasoning.",
+    desc: "Foundational interviews focused on fundamentals, clear communication, and coachable reasoning",
   },
   {
     id: "new_grad",
     code: "L2",
     label: "New Grad",
-    desc: "A higher bar for ownership, decision quality, and depth under tighter follow-up pressure.",
+    desc: "A higher bar for ownership, decision quality, and depth under tighter follow-up pressure",
   },
 ];
 

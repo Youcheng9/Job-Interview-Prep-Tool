@@ -3,31 +3,32 @@ import { Link, useNavigate } from "react-router-dom";
 import { LevelSelector } from "../components/LevelSelector";
 import { RoleSelector } from "../components/RoleSelector";
 import { isAuthenticated, type CandidateLevel, type Role } from "../lib/api";
+import { getSavedInterviewSession, readSavedQuestionId } from "../lib/interviewSession";
 
 const COMPANIES = ["Google", "Meta", "Stripe", "OpenAI", "NVIDIA", "Databricks", "Airbnb", "Netflix"];
 const MARQUEE_GROUP_COUNT = 6;
 
 const STATS = [
-  { value: "4", label: "interview tracks", detail: "Software engineering, data, product, and behavioral practice." },
-  { value: "Question-level", label: "feedback", detail: "Scorecards break down structure, signal, and technical depth." },
-  { value: "Saved", label: "session history", detail: "Review previous answers, retry weak areas, and track improvement." },
+  { value: "4", label: "interview tracks", detail: "Software engineering, data, product, and behavioral practice" },
+  { value: "Question-level", label: "feedback", detail: "Scorecards break down structure, signal, and technical depth" },
+  { value: "Saved", label: "session history", detail: "Review previous answers, retry weak areas, and track improvement" },
 ];
 
 const WORKFLOW = [
   {
     step: "01",
     title: "Choose the role and level",
-    description: "Start from the interview you are actually preparing for instead of a generic prompt box.",
+    description: "Start from the interview you are actually preparing for instead of a generic prompt box",
   },
   {
     step: "02",
     title: "Answer a realistic round",
-    description: "Move through timed prompts and follow-ups that test communication, judgment, and technical depth.",
+    description: "Move through timed prompts and follow-ups that test communication, judgment, and technical depth",
   },
   {
     step: "03",
     title: "Review the debrief",
-    description: "See where the answer lost signal, then rerun the same category with a sharper response.",
+    description: "See where the answer lost signal, then rerun the same category with a sharper response",
   },
 ];
 
@@ -43,12 +44,13 @@ export default function HomePage() {
   const [levelConfirmed, setLevelConfirmed] = useState(false);
   const navigate = useNavigate();
   const authed = isAuthenticated();
+  const previousWork = authed ? getSavedInterviewSession() : null;
 
   const launchHref = `/interview?role=${role ?? "swe"}&level=${level}`;
 
   const hasSavedRound = () => {
     if (!role) return false;
-    return Boolean(localStorage.getItem(`interview-session:${role}:${level}`));
+    return readSavedQuestionId(role, level) !== null;
   };
 
   const scrollToLevelSetup = () => {
@@ -81,9 +83,9 @@ export default function HomePage() {
       <section className="section-band landing-hero">
         <div className="shell-width landing-hero-inner">
           <div className="landing-copy animate-fade-up">
-            <h1 className="landing-title">Interview practice that feels like a real hiring loop.</h1>
+            <h1 className="landing-title">Interview practice that feels like a real hiring loop</h1>
             <p className="landing-lead">
-              Train on role-specific prompts, get sharper follow-up questions, and review structured feedback after every answer. Built for candidates who need repetition, not novelty.
+              Train on role-specific prompts, get sharper follow-up questions, and review structured feedback after every answer. Built for candidates who need repetition, not novelty
             </p>
             <div className="landing-actions hero-actions">
               <button type="button" className="btn-primary hero-action-button" onClick={() => navigate(launchHref)}>
@@ -94,6 +96,11 @@ export default function HomePage() {
                   {authed ? "View progress" : "Create account"}
                 </button>
               </Link>
+              {previousWork ? (
+                <button type="button" className="btn-resume hero-action-button" onClick={() => navigate(previousWork.href)}>
+                  Resume work
+                </button>
+              ) : null}
             </div>
           </div>
 
@@ -216,11 +223,11 @@ export default function HomePage() {
             <div className="eyebrow landing-eyebrow-large" style={{ marginBottom: "12px" }}>
               Product tracks
             </div>
-            <h2 className="landing-section-title">Prepare for the interview you actually have.</h2>
+            <h2 className="landing-section-title">Prepare for the interview you actually have</h2>
+            <p className="muted landing-section-copy product-tracks-section-copy">
+              Each track uses its own question style and evaluation criteria so practice feels closer to the loop you are targeting
+            </p>
           </div>
-          <p className="muted landing-section-copy">
-            Each track uses its own question style and evaluation criteria so practice feels closer to the loop you are targeting.
-          </p>
         </div>
         <RoleSelector selected={role} onChange={handleRoleChange} />
       </section>
@@ -231,11 +238,11 @@ export default function HomePage() {
             <div className="eyebrow landing-eyebrow-large" style={{ marginBottom: "12px" }}>
               Calibration
             </div>
-            <h2 className="landing-section-title">Set the bar before you start.</h2>
+            <h2 className="landing-section-title">Set the bar before you start</h2>
+            <p className="muted landing-section-copy calibration-section-copy">
+              Intern and new-grad sessions are scored differently so you get the right level of scrutiny and follow-up
+            </p>
           </div>
-          <p className="muted landing-section-copy">
-            Intern and new-grad sessions are scored differently so you get the right level of scrutiny and follow-up.
-          </p>
         </div>
         <LevelSelector selected={level} onChange={handleLevelChange} />
         {levelConfirmed ? (
@@ -253,11 +260,11 @@ export default function HomePage() {
             <div className="eyebrow landing-eyebrow-large" style={{ marginBottom: "12px" }}>
               Workflow
             </div>
-            <h2 className="landing-section-title">A prep loop you can repeat every day.</h2>
+            <h2 className="landing-section-title">A prep loop you can repeat every day</h2>
+            <p className="muted landing-section-copy workflow-section-copy">
+              The product stays useful when you are cramming for a screen, building confidence for an onsite, or sharpening a single weak area
+            </p>
           </div>
-          <p className="muted landing-section-copy">
-            The product stays useful when you are cramming for a screen, building confidence for an onsite, or sharpening a single weak area.
-          </p>
         </div>
 
         <div className="workflow-timeline" aria-label="Practice workflow">
@@ -286,22 +293,20 @@ export default function HomePage() {
               Start a round
             </div>
             <h2 className="landing-section-title" style={{ marginBottom: "12px" }}>
-              Run one focused practice session now.
+              Run one focused practice session now
             </h2>
-            <p className="muted landing-section-copy" style={{ maxWidth: "38rem" }}>
-              Choose your track, answer a realistic set of questions, and leave with a scorecard you can use immediately.
+            <p className="muted landing-section-copy">
+              Choose your track, answer a realistic set of questions, and leave with a scorecard you can use immediately
             </p>
           </div>
           <div className="landing-actions cta-actions">
             <button type="button" className="btn-primary cta-practice-button" onClick={scrollToPracticeSetup}>
               Go To Practice
             </button>
-            {!authed ? (
-              <Link to="/auth" className="landing-secondary-link">
-                <button type="button" className="btn-ghost">
-                  Sign in to save history
-                </button>
-              </Link>
+            {previousWork ? (
+              <button type="button" className="btn-resume cta-practice-button" onClick={() => navigate(previousWork.href)}>
+                Resume work
+              </button>
             ) : null}
           </div>
         </div>

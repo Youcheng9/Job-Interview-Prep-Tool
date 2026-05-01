@@ -1,5 +1,5 @@
 import { useMemo, useState, type FormEvent } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { login, register } from "../../lib/api";
 
 type Mode = "login" | "register";
@@ -20,6 +20,7 @@ export default function AuthPage() {
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [passwordHelp, setPasswordHelp] = useState<string | null>(null);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -57,17 +58,17 @@ export default function AuthPage() {
           <h1 style={{ fontSize: "clamp(42px, 5vw, 76px)", lineHeight: 0.9, marginBottom: "14px" }}>
             Enter the
             <br />
-            scoring loop.
+            scoring loop
           </h1>
           <p className="muted" style={{ fontSize: "17px", maxWidth: "36rem", marginBottom: "28px" }}>
-            Authentication unlocks score persistence, answer history, and AI coach feedback tied to saved attempts.
+            Authentication unlocks score persistence, answer history, and AI coach feedback tied to saved attempts
           </p>
 
           <div style={{ display: "grid", gap: "14px" }}>
             {[
-              ["[01]", "Save every scored attempt by role and level."],
-              ["[02]", "Resume practice flows without losing answered questions."],
-              ["[03]", "Trigger optional AI coach feedback from saved submissions."],
+              ["[01]", "Save every scored attempt by role and level"],
+              ["[02]", "Resume practice flows without losing answered questions"],
+              ["[03]", "Trigger optional AI coach feedback from saved submissions"],
             ].map(([tag, text]) => (
               <div key={tag} className="surface-strip" style={{ padding: "16px 18px", display: "flex", gap: "14px" }}>
                 <span className="mono" style={{ fontSize: "11px", color: "var(--acid)", minWidth: "44px" }}>{tag}</span>
@@ -77,17 +78,8 @@ export default function AuthPage() {
           </div>
         </section>
 
-        <section className="terminal-window">
-          <div className="terminal-topbar">
-            <span className="mono" style={{ fontSize: "10px", color: "var(--muted)" }}>
-              auth@interview-ace: ~/session
-            </span>
-            <span className="chip chip-acid" style={{ padding: "4px 8px", fontSize: "10px" }}>
-              {mode}
-            </span>
-          </div>
-
-          <div style={{ padding: "28px" }}>
+        <section className="terminal-window auth-card">
+          <div className="auth-card-content">
             <div style={{ display: "flex", gap: "10px", marginBottom: "18px" }}>
               {(["login", "register"] as const).map((item) => (
                 <button
@@ -98,6 +90,7 @@ export default function AuthPage() {
                   onClick={() => {
                     setMode(item);
                     setError(null);
+                    setPasswordHelp(null);
                   }}
                 >
                   {item === "login" ? "Sign In" : "Register"}
@@ -119,6 +112,20 @@ export default function AuthPage() {
                 minLength={8}
                 autoComplete={mode === "login" ? "current-password" : "new-password"}
               />
+              {mode === "login" ? (
+                <button
+                  type="button"
+                  className="auth-forgot-password"
+                  onClick={() => setPasswordHelp("Password reset is not available yet. Please contact the project owner or create a new account.")}
+                >
+                  Forgot password?
+                </button>
+              ) : null}
+              {passwordHelp ? (
+                <div className="auth-help-message">
+                  {passwordHelp}
+                </div>
+              ) : null}
 
               {error ? (
                 <div
@@ -140,8 +147,8 @@ export default function AuthPage() {
               </button>
             </form>
 
-            <div style={{ marginTop: "18px", display: "flex", justifyContent: "space-between", gap: "12px", alignItems: "center" }}>
-              <span className="muted" style={{ fontSize: "14px" }}>
+            <div className="auth-switch-row">
+              <span className="muted auth-switch-copy">
                 {mode === "login" ? "Need an account?" : "Already registered?"}
               </span>
               <button
@@ -150,16 +157,11 @@ export default function AuthPage() {
                 onClick={() => {
                   setMode(mode === "login" ? "register" : "login");
                   setError(null);
+                  setPasswordHelp(null);
                 }}
               >
                 {mode === "login" ? "Register" : "Sign In"}
               </button>
-            </div>
-
-            <div style={{ marginTop: "18px" }}>
-              <Link to={next} className="mono" style={{ textDecoration: "none", color: "var(--muted)", fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase" }}>
-                continue without signing in
-              </Link>
             </div>
           </div>
         </section>

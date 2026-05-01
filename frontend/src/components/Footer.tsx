@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 
 export function Footer() {
   return (
-    <footer style={{ borderTop: "1px solid var(--border)", marginTop: "96px" }}>
+    <footer className="site-footer">
       <div className="shell-width" style={{ padding: "56px 0 24px" }}>
         <div
           className="footer-grid"
@@ -20,7 +20,7 @@ export function Footer() {
               </span>
             </div>
             <p className="muted" style={{ maxWidth: "38rem", fontSize: "1.08rem" }}>
-              Structured interview practice with role-based question banks, scoring, and session history.
+              Structured interview practice with role-based question banks, scoring, and session history
             </p>
           </div>
 
