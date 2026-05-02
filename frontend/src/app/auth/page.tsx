@@ -42,51 +42,48 @@ export default function AuthPage() {
   }
 
   return (
-    <div className="shell-width" style={{ padding: "56px 0 0" }}>
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "minmax(0, 0.95fr) minmax(340px, 0.8fr)",
-          gap: "28px",
-          alignItems: "stretch",
-        }}
-      >
-        <section className="panel" style={{ padding: "36px" }}>
-          <div className="eyebrow" style={{ marginBottom: "14px" }}>
-            // access gateway
+    <div className="shell-width auth-page-shell">
+      <div className="auth-page-grid">
+        <section className="auth-stage panel">
+          <div className="eyebrow landing-eyebrow-large" style={{ marginBottom: "16px" }}>
+            Access gateway
           </div>
-          <h1 style={{ fontSize: "clamp(42px, 5vw, 76px)", lineHeight: 0.9, marginBottom: "14px" }}>
-            Enter the
+          <h1 className="auth-stage-title">
+            Save the sessions
             <br />
-            scoring loop
+            worth keeping
           </h1>
-          <p className="muted" style={{ fontSize: "17px", maxWidth: "36rem", marginBottom: "28px" }}>
-            Authentication unlocks score persistence, answer history, and AI coach feedback tied to saved attempts
+          <p className="auth-stage-copy">
+            Sign in to turn one-off practice into a real prep archive. Keep scored answers, revisit weak spots, and
+            continue rounds without losing context.
           </p>
 
-          <div style={{ display: "grid", gap: "14px" }}>
+          <div className="auth-stage-rail" aria-hidden="true">
+            <div className="auth-stage-rail-line" />
+          </div>
+
+          <div className="auth-stage-list">
             {[
-              ["[01]", "Save every scored attempt by role and level"],
-              ["[02]", "Resume practice flows without losing answered questions"],
-              ["[03]", "Trigger optional AI coach feedback from saved submissions"],
+              ["01", "Persist every scored attempt by role and level."],
+              ["02", "Track progress across saved answer history."],
+              ["03", "Unlock AI coach feedback tied to completed submissions."],
             ].map(([tag, text]) => (
-              <div key={tag} className="surface-strip" style={{ padding: "16px 18px", display: "flex", gap: "14px" }}>
-                <span className="mono" style={{ fontSize: "11px", color: "var(--acid)", minWidth: "44px" }}>{tag}</span>
-                <span style={{ color: "var(--muted)" }}>{text}</span>
+              <div key={tag} className="auth-stage-item">
+                <span className="mono auth-stage-item-tag">{tag}</span>
+                <div className="auth-stage-item-copy">{text}</div>
               </div>
             ))}
           </div>
         </section>
 
-        <section className="terminal-window auth-card">
+        <section className="auth-form-shell panel">
           <div className="auth-card-content">
-            <div style={{ display: "flex", gap: "10px", marginBottom: "18px" }}>
+            <div className="auth-toggle-row">
               {(["login", "register"] as const).map((item) => (
                 <button
                   key={item}
                   type="button"
-                  className={mode === item ? "btn-primary" : "btn-ghost"}
-                  style={{ flex: 1 }}
+                  className={`auth-toggle-button${mode === item ? " auth-toggle-button-active" : ""}`}
                   onClick={() => {
                     setMode(item);
                     setError(null);
@@ -97,6 +94,11 @@ export default function AuthPage() {
                 </button>
               ))}
             </div>
+
+            <div className="eyebrow" style={{ marginBottom: "12px" }}>
+              {mode === "login" ? "Sign in" : "Create account"}
+            </div>
+            <h2 className="auth-form-title">{mode === "login" ? "Resume your prep loop" : "Start tracking your practice"}</h2>
 
             <form onSubmit={handleSubmit} style={{ display: "grid", gap: "14px" }}>
               <label className="eyebrow">email</label>

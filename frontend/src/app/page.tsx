@@ -6,7 +6,22 @@ import { isAuthenticated, type CandidateLevel, type Role } from "../lib/api";
 import { getSavedInterviewSession, readSavedQuestionId } from "../lib/interviewSession";
 
 const COMPANIES = ["Google", "Meta", "Stripe", "OpenAI", "NVIDIA", "Databricks", "Airbnb", "Netflix"];
+const AUTH_COMPANIES = [
+  "OpenAI",
+  "Google",
+  "Meta",
+  "Stripe",
+  "NVIDIA",
+  "Databricks",
+  "Airbnb",
+  "Netflix",
+  "Figma",
+  "Notion",
+  "Anthropic",
+  "Scale AI",
+];
 const MARQUEE_GROUP_COUNT = 6;
+const AUTH_COMPANY_PAGE_SIZE = 9;
 
 const STATS = [
   { value: "4", label: "interview tracks", detail: "Software engineering, data, product, and behavioral practice" },
@@ -55,11 +70,13 @@ export default function HomePage() {
   const [role, setRole] = useState<Role | null>("swe");
   const [level, setLevel] = useState<CandidateLevel>("new_grad");
   const [levelConfirmed, setLevelConfirmed] = useState(false);
+  const [selectedCompany, setSelectedCompany] = useState("OpenAI");
+  const [companyPage, setCompanyPage] = useState(0);
   const navigate = useNavigate();
   const authed = isAuthenticated();
   const previousWork = authed ? getSavedInterviewSession() : null;
 
-  const launchHref = `/interview?role=${role ?? "swe"}&level=${level}`;
+  const launchHref = `/interview?role=${role ?? "swe"}&level=${level}&company=${encodeURIComponent(selectedCompany)}`;
 
   const hasSavedRound = () => {
     if (!role) return false;
@@ -90,6 +107,212 @@ export default function HomePage() {
     setLevel(nextLevel);
     setLevelConfirmed(true);
   };
+
+  const companyPageCount = Math.ceil(AUTH_COMPANIES.length / AUTH_COMPANY_PAGE_SIZE);
+  const visibleCompanies = AUTH_COMPANIES.slice(
+    companyPage * AUTH_COMPANY_PAGE_SIZE,
+    (companyPage + 1) * AUTH_COMPANY_PAGE_SIZE,
+  );
+
+  if (authed) {
+    return (
+      <div className="authed-landing">
+        <section className="section-band authed-hero">
+          <div className="shell-width authed-hero-shell">
+            <div className="authed-welcome-card animate-fade-up">
+              <div className="eyebrow landing-eyebrow-large" style={{ marginBottom: "14px" }}>
+                Welcome back
+              </div>
+              <h1 className="authed-hero-title">Shape the next practice session before you start.</h1>
+              <p className="authed-hero-copy">
+                Pick a target company, lock the interview track, set the level, and launch a round that feels intentional instead of generic.
+              </p>
+              <div className="authed-hero-meta">
+                <div className="authed-meta-chip">
+                  <span className="mono">Target</span>
+                  <strong>{selectedCompany}</strong>
+                </div>
+                <div className="authed-meta-chip">
+                  <span className="mono">Track</span>
+                  <strong>{role === "swe" ? "Software Engineering" : role === "data" ? "Data / ML" : role === "pm" ? "Product" : "Behavioral"}</strong>
+                </div>
+                <div className="authed-meta-chip">
+                  <span className="mono">Level</span>
+                  <strong>{level === "intern" ? "Intern" : "New Grad"}</strong>
+                </div>
+              </div>
+              <div className="landing-actions" style={{ marginTop: "10px" }}>
+                {previousWork ? (
+                  <button type="button" className="btn-resume" onClick={() => navigate(previousWork.href)}>
+                    Resume work
+                  </button>
+                ) : null}
+                <Link to="/history" className="landing-secondary-link">
+                  <button type="button" className="btn-ghost">
+                    View progress
+                  </button>
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="shell-width authed-flow">
+          <section className="landing-section landing-anchor-section" id="practice-setup">
+            <div className="landing-section-header">
+              <div>
+                <div className="eyebrow landing-eyebrow-large" style={{ marginBottom: "12px" }}>
+                  01 · Company
+                </div>
+                <h2 className="landing-section-title">Choose the company bar you want to rehearse against</h2>
+                <p className="muted landing-section-copy">
+                  Select the hiring context first. The interface keeps the same visual system across every choice so the flow feels consistent and focused.
+                </p>
+              </div>
+            </div>
+
+            <div className="auth-selection-card auth-company-shell">
+              <div className="auth-company-grid">
+                {visibleCompanies.map((company) => {
+                  const active = selectedCompany === company;
+                  return (
+                    <button
+                      key={company}
+                      type="button"
+                      className={`auth-option-card auth-company-card${active ? " auth-option-card-active" : ""}`}
+                      onClick={() => setSelectedCompany(company)}
+                    >
+                      <span className="mono auth-option-kicker">Company</span>
+                      <span className="auth-option-title">{company}</span>
+                    </button>
+                  );
+                })}
+              </div>
+              {companyPageCount > 1 ? (
+                <div className="auth-pager">
+                  <button
+                    type="button"
+                    className="auth-pager-button"
+                    onClick={() => setCompanyPage((current) => Math.max(0, current - 1))}
+                    disabled={companyPage === 0}
+                  >
+                    Previous page
+                  </button>
+                  <span className="mono auth-pager-meta">Page {companyPage + 1} / {companyPageCount}</span>
+                  <button
+                    type="button"
+                    className="auth-pager-button"
+                    onClick={() => setCompanyPage((current) => Math.min(companyPageCount - 1, current + 1))}
+                    disabled={companyPage === companyPageCount - 1}
+                  >
+                    Next page
+                  </button>
+                </div>
+              ) : null}
+            </div>
+          </section>
+
+          <section className="landing-section landing-anchor-section">
+            <div className="landing-section-header">
+              <div>
+                <div className="eyebrow landing-eyebrow-large" style={{ marginBottom: "12px" }}>
+                  02 · Track
+                </div>
+                <h2 className="landing-section-title">Choose the interview track</h2>
+                <p className="muted landing-section-copy">
+                  Pick the loop you want to sharpen right now. Every option uses the same background tone and typography as the rest of the authenticated experience.
+                </p>
+              </div>
+            </div>
+
+            <div className="auth-selection-grid auth-track-grid">
+              {[
+                { id: "swe" as Role, code: "Core", label: "Software Engineering", desc: "Algorithms, systems, implementation detail, and tradeoff reasoning." },
+                { id: "data" as Role, code: "Analytics", label: "Data / ML", desc: "Statistics, SQL, experimentation, debugging, and model judgment." },
+                { id: "pm" as Role, code: "Product", label: "Product Management", desc: "Execution, prioritization, metrics, strategy, and stakeholder tradeoffs." },
+                { id: "behavioral" as Role, code: "Stories", label: "Behavioral", desc: "Ownership, conflict, leadership, collaboration, and story structure." },
+              ].map((item) => {
+                const active = role === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    className={`auth-option-card auth-track-card${active ? " auth-option-card-active" : ""}`}
+                    onClick={() => handleRoleChange(item.id)}
+                  >
+                    <span className="mono auth-option-kicker">{item.code}</span>
+                    <span className="auth-option-title">{item.label}</span>
+                    <span className="auth-option-copy">{item.desc}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+
+          <section id="level-setup" className="landing-section landing-anchor-section">
+            <div className="landing-section-header">
+              <div>
+                <div className="eyebrow landing-eyebrow-large" style={{ marginBottom: "12px" }}>
+                  03 · Level
+                </div>
+                <h2 className="landing-section-title">Set the level and start the round</h2>
+                <p className="muted landing-section-copy">
+                  Finish by choosing the bar. The launch action stays at the end so the flow reads top to bottom without extra decisions.
+                </p>
+              </div>
+            </div>
+
+            <div className="auth-selection-grid auth-level-grid">
+              {[
+                {
+                  id: "intern" as CandidateLevel,
+                  code: "L1",
+                  label: "Intern",
+                  desc: "Foundational interviews focused on fundamentals, clear communication, and coachable reasoning.",
+                },
+                {
+                  id: "new_grad" as CandidateLevel,
+                  code: "L2",
+                  label: "New Grad",
+                  desc: "A higher bar for ownership, decision quality, and depth under tighter follow-up pressure.",
+                },
+              ].map((item) => {
+                const active = level === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    className={`auth-option-card auth-level-card${active ? " auth-option-card-active" : ""}`}
+                    onClick={() => handleLevelChange(item.id)}
+                  >
+                    <span className="mono auth-option-kicker">{item.code}</span>
+                    <span className="auth-option-title">{item.label}</span>
+                    <span className="auth-option-copy">{item.desc}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="auth-launch-card">
+              <div>
+                <div className="eyebrow" style={{ marginBottom: "8px" }}>
+                  Ready to start
+                </div>
+                <p className="muted">
+                  Practicing for <strong style={{ color: "var(--text)" }}>{selectedCompany}</strong> in a{" "}
+                  <strong style={{ color: "var(--text)" }}>{role === "swe" ? "Software Engineering" : role === "data" ? "Data / ML" : role === "pm" ? "Product" : "Behavioral"}</strong>{" "}
+                  round at the <strong style={{ color: "var(--text)" }}>{level === "intern" ? "Intern" : "New Grad"}</strong> level.
+                </p>
+              </div>
+              <button type="button" className="btn-primary level-start-button" onClick={() => navigate(launchHref)}>
+                {hasSavedRound() ? "Continue Questions" : "Start Practice"}
+              </button>
+            </div>
+          </section>
+        </section>
+      </div>
+    );
+  }
 
   return (
     <div>
