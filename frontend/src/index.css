@@ -576,9 +576,19 @@ h1, h2, h3, h4, h5 {
   overflow: hidden;
   display: grid;
   gap: 14px;
+  padding: 0 16px;
+  border-top: 0 solid transparent;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.015), transparent 100%), var(--surface);
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: padding 0.26s ease, border-top-width 0.26s ease, opacity 0.18s ease, transform 0.18s ease;
+}
+
+.progress-question-details-shell-open .progress-question-details {
   padding: 16px;
   border-top: 1px solid var(--border);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.015), transparent 100%), var(--surface);
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .progress-detail-summary-row {
@@ -604,11 +614,9 @@ h1, h2, h3, h4, h5 {
 .progress-detail-scroll {
   display: grid;
   gap: 18px;
-  max-height: min(42vh, 420px);
-  padding-right: 4px;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  scrollbar-gutter: stable;
+  max-height: none;
+  padding-right: 0;
+  overflow: visible;
 }
 
 .progress-detail-section {
@@ -2470,10 +2478,6 @@ input.input-shell {
   .progress-role-column {
     height: auto;
     max-height: none;
-  }
-
-  .progress-detail-scroll {
-    max-height: 52vh;
   }
 
   .progress-pagination {

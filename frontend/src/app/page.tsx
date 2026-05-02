@@ -101,7 +101,11 @@ export default function HomePage() {
               Train on role-specific prompts, get sharper follow-up questions, and review structured feedback after every answer. Built for candidates who need repetition, not novelty
             </p>
             <div className="landing-actions hero-actions">
-              <button type="button" className="btn-primary hero-action-button" onClick={() => navigate(launchHref)}>
+              <button
+                type="button"
+                className="btn-primary hero-action-button"
+                onClick={() => (authed ? scrollToPracticeSetup() : navigate(launchHref))}
+              >
                 Start practice
               </button>
               <Link to={authed ? "/history" : "/auth"} className="landing-secondary-link">
