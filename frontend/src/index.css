@@ -3,11 +3,11 @@
 
 :root {
   --bg: #07090d;
-  --surface: #1b2028;
-  --surface2: #252c37;
-  --surface3: #303946;
-  --border: #3b4452;
-  --border-strong: #5a6575;
+  --surface: #0b0f14;
+  --surface2: #11161d;
+  --surface3: #171d26;
+  --border: #262f3b;
+  --border-strong: #394556;
   --nav-bg: rgba(7, 9, 13, 0.9);
   --subnav-bg: rgba(20, 24, 31, 0.94);
   --acid: #b9ff39;
@@ -29,9 +29,9 @@
   --green: var(--good);
   --border2: var(--acid);
   --page-grid-line: rgba(255, 255, 255, 0.045);
-  --panel-highlight: rgba(255, 255, 255, 0.045);
+  --panel-highlight: rgba(255, 255, 255, 0.025);
   --hero-soft-glow: rgba(255, 255, 255, 0.06);
-  --footer-bg: #151a22;
+  --footer-bg: #0a0e13;
   --font-head: 'Manrope', sans-serif;
   --font-mono: 'Manrope', sans-serif;
   --font-body: 'Manrope', sans-serif;
@@ -668,7 +668,7 @@ h1, h2, h3, h4, h5 {
   letter-spacing: 0.12em;
   color: var(--muted);
   border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--surface);
   padding: 8px 12px;
 }
 
@@ -1028,7 +1028,7 @@ input.input-shell {
   border: 1px solid var(--border);
   border-radius: 6px;
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.015);
+  background: var(--surface);
 }
 
 .question-role-toggle {

@@ -172,7 +172,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section style={{ borderTop: "1px solid var(--border)", borderBottom: "1px solid var(--border)", background: "rgba(255,255,255,0.02)" }}>
+      <section style={{ borderTop: "1px solid var(--border)", borderBottom: "1px solid var(--border)", background: "var(--surface)" }}>
         <div className="shell-width" style={{ padding: "20px 0" }}>
           <div className="eyebrow landing-eyebrow-large" style={{ marginBottom: "12px" }}>
             Interview formats inspired by top hiring bars

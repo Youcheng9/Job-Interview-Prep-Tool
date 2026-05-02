@@ -781,33 +781,6 @@ export default function InterviewPage() {
                     marginBottom: "16px",
                   }}
                 >
-                  {/* Corner brackets on textarea */}
-                  <div
-                    style={{
-                      position: "absolute",
-                      top: 0,
-                      left: 0,
-                      width: 12,
-                      height: 12,
-                      borderTop: "2px solid var(--cyan)",
-                      borderLeft: "2px solid var(--cyan)",
-                      zIndex: 1,
-                      pointerEvents: "none",
-                    }}
-                  />
-                  <div
-                    style={{
-                      position: "absolute",
-                      bottom: 0,
-                      right: 0,
-                      width: 12,
-                      height: 12,
-                      borderBottom: "2px solid var(--cyan)",
-                      borderRight: "2px solid var(--cyan)",
-                      zIndex: 1,
-                      pointerEvents: "none",
-                    }}
-                  />
                   <textarea
                     ref={textareaRef}
                     value={answer}
