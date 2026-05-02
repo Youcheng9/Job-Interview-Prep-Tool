@@ -129,20 +129,12 @@ function LevelBadge({ level }: { level: CandidateLevel }) {
 }
 
 type Phase = "question" | "submitting" | "result";
-type DifficultyFilter = "all" | Question["difficulty"];
-
-const ROLE_OPTIONS: Array<{ id: Role; label: string }> = [
-  { id: "swe", label: "SWE" },
-  { id: "data", label: "DSA" },
-  { id: "pm", label: "PM" },
-  { id: "behavioral", label: "Behavioral" },
-];
-const DIFFICULTY_FILTERS: Array<{ id: DifficultyFilter; label: string }> = [
-  { id: "all", label: "All" },
-  { id: "easy", label: "Easy" },
-  { id: "medium", label: "Medium" },
-  { id: "hard", label: "Hard" },
-];
+const ROLE_LABELS: Record<Role, string> = {
+  swe: "SWE",
+  data: "DSA",
+  pm: "PM",
+  behavioral: "Behavioral",
+};
 
 export default function InterviewPage() {
   const [params] = useSearchParams();
@@ -154,20 +146,6 @@ export default function InterviewPage() {
   const requestedQuestionId = Number(params.get("questionId"));
 
   const [questions, setQuestions] = useState<Question[]>([]);
-  const [sidebarQuestions, setSidebarQuestions] = useState<Record<Role, Question[]>>({
-    swe: [],
-    data: [],
-    pm: [],
-    behavioral: [],
-  });
-  const [openRoles, setOpenRoles] = useState<Record<Role, boolean>>({
-    swe: true,
-    data: false,
-    pm: false,
-    behavioral: false,
-  });
-  const [difficultyFilter, setDifficultyFilter] = useState<DifficultyFilter>("all");
-  const [sidebarError, setSidebarError] = useState<string | null>(null);
   const [qIndex, setQIndex] = useState(0);
   const [answer, setAnswer] = useState("");
   const [phase, setPhase] = useState<Phase>("question");
@@ -276,27 +254,6 @@ export default function InterviewPage() {
   }, [level, role, requestedQuestionId]);
 
   useEffect(() => {
-    setSidebarError(null);
-    Promise.all(ROLE_OPTIONS.map((item) => getQuestions(item.id, level)))
-      .then((results) => {
-        setSidebarQuestions({
-          swe: results[0] ?? [],
-          data: results[1] ?? [],
-          pm: results[2] ?? [],
-          behavioral: results[3] ?? [],
-        });
-      })
-      .catch(() => setSidebarError("Failed to load sidebar questions."));
-  }, [level]);
-
-  useEffect(() => {
-    setOpenRoles((current) => ({
-      ...current,
-      [role]: true,
-    }));
-  }, [role]);
-
-  useEffect(() => {
     if (!authed) {
       setCompletedIds([]);
       return;
@@ -398,16 +355,11 @@ export default function InterviewPage() {
     setTimeout(() => textareaRef.current?.focus(), 100);
   }
 
-  function selectSidebarQuestion(nextRole: Role, nextQuestion: Question) {
-    if (nextRole === role) {
-      const nextIndex = questions.findIndex((item) => item.id === nextQuestion.id);
-      if (nextIndex >= 0) {
-        selectQuestion(nextIndex);
-        return;
-      }
+  function selectSidebarQuestion(nextQuestion: Question) {
+    const nextIndex = questions.findIndex((item) => item.id === nextQuestion.id);
+    if (nextIndex >= 0) {
+      selectQuestion(nextIndex);
     }
-
-    navigate(`/interview?role=${nextRole}&level=${level}&questionId=${nextQuestion.id}`);
   }
 
   function handleNext() {
@@ -483,23 +435,9 @@ export default function InterviewPage() {
     <div
       className={`interview-page ${isQuestionSidebarVisible ? "interview-page-sidebar-visible" : ""}`}
       style={{
-        padding: "32px 32px 60px",
         position: "relative",
       }}
     >
-      {/* Progress bar */}
-      <div style={{ height: "2px", background: "var(--border)" }}>
-        <div
-          style={{
-            height: "100%",
-            width: `${progress}%`,
-            background: "linear-gradient(90deg, var(--cyan-dim), var(--cyan))",
-            transition: "width 0.6s ease",
-            boxShadow: "0 0 8px var(--cyan)",
-          }}
-        />
-      </div>
-
       <div
         className={`question-sidebar-drawer ${isQuestionSidebarPinned ? "question-sidebar-drawer-pinned" : ""}`}
         onMouseEnter={() => setIsQuestionSidebarPreviewed(true)}
@@ -520,7 +458,9 @@ export default function InterviewPage() {
           <div className="question-sidebar-header">
             <div>
               <div className="mono question-sidebar-kicker">Question Bank</div>
-              <div className="question-sidebar-title">{level === "intern" ? "Intern" : "New Grad"}</div>
+              <div className="question-sidebar-title">
+                {ROLE_LABELS[role]} · {level === "intern" ? "Intern" : "New Grad"}
+              </div>
             </div>
             <div className="mono question-sidebar-count">
               {completedIds.length} done
@@ -531,107 +471,66 @@ export default function InterviewPage() {
             Question {questions.length ? qIndex + 1 : 0} of {questions.length}
           </div>
 
-          <div className="question-filter-group" aria-label="Filter questions by difficulty">
-            {DIFFICULTY_FILTERS.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                className={`question-filter-button ${difficultyFilter === item.id ? "question-filter-button-active" : ""}`}
-                onClick={() => setDifficultyFilter(item.id)}
-              >
-                {item.label}
-              </button>
-            ))}
-          </div>
-
-          {sidebarError ? (
-            <div className="question-sidebar-error">{sidebarError}</div>
-          ) : (
-            <div className="question-role-list">
-              {ROLE_OPTIONS.map((roleOption) => {
-                const roleQuestions = sidebarQuestions[roleOption.id];
-                const filteredQuestions =
-                  difficultyFilter === "all"
-                    ? roleQuestions
-                    : roleQuestions.filter((item) => item.difficulty === difficultyFilter);
-                const isOpen = openRoles[roleOption.id];
+          <div className="question-sidebar-items">
+            {questions.length ? (
+              questions.map((item, index) => {
+                const active = question?.id === item.id;
+                const completed = completedIds.includes(item.id);
+                const questionNumber = index + 1;
+                const locked = !authed && index >= 3;
 
                 return (
-                  <div key={roleOption.id} className="question-role-section">
-                    <button
-                      type="button"
-                      className="question-role-toggle"
-                      onClick={() =>
-                        setOpenRoles((current) => ({
-                          ...current,
-                          [roleOption.id]: !current[roleOption.id],
-                        }))
+                  <button
+                    key={item.id}
+                    type="button"
+                    className={`question-sidebar-item ${active ? "question-sidebar-item-active" : ""} ${locked ? "question-sidebar-item-locked" : ""}`}
+                    onClick={() => {
+                      if (!locked) {
+                        selectSidebarQuestion(item);
                       }
-                      aria-expanded={isOpen}
-                    >
-                      <span>{roleOption.label}</span>
-                      <span className="mono">{isOpen ? "Hide" : "Show"}</span>
-                    </button>
-
-                    {isOpen ? (
-                      <div className="question-sidebar-items">
-                          {filteredQuestions.length ? (
-                            filteredQuestions.map((item, index) => {
-                              const active = roleOption.id === role && question?.id === item.id;
-                              const completed = completedIds.includes(item.id);
-                              const questionNumber = roleQuestions.findIndex((candidate) => candidate.id === item.id) + 1;
-                              const locked = !authed && index >= 3;
-
-                              return (
-                                <button
-                                  key={item.id}
-                                  type="button"
-                                  className={`question-sidebar-item ${active ? "question-sidebar-item-active" : ""} ${locked ? "question-sidebar-item-locked" : ""}`}
-                                  onClick={() => {
-                                    if (!locked) {
-                                      selectSidebarQuestion(roleOption.id, item);
-                                    }
-                                  }}
-                                  disabled={locked}
-                                  title={locked ? "Sign in to unlock more questions" : item.text}
-                                >
-                                  <span className="mono question-sidebar-number">Q{questionNumber}</span>
-                                  <span className="question-sidebar-text">{item.text}</span>
-                                  <span className={`question-sidebar-difficulty question-sidebar-difficulty-${item.difficulty}`}>
-                                    {item.difficulty}
-                                </span>
-                                {completed ? <span className="question-sidebar-done">Done</span> : null}
-                                </button>
-                              );
-                            })
-                          ) : (
-                            <div className="question-sidebar-empty">No matching questions.</div>
-                          )}
-                          {!authed && filteredQuestions.length > 3 ? (
-                            <div className="question-sidebar-signin">
-                              <div>Sign in to unlock the full question bank</div>
-                              <button
-                                type="button"
-                                className="btn-primary"
-                                onClick={() => navigate(`/auth?next=${encodeURIComponent(`/interview?role=${role}&level=${level}`)}`)}
-                              >
-                                Sign in for more questions
-                              </button>
-                            </div>
-                          ) : null}
-                        </div>
-                      ) : null}
-                  </div>
+                    }}
+                    disabled={locked}
+                    title={locked ? "Sign in to unlock more questions" : item.text}
+                  >
+                    <span className="mono question-sidebar-number">Q{questionNumber}</span>
+                    <span className="question-sidebar-text">{item.text}</span>
+                    <span className={`question-sidebar-difficulty question-sidebar-difficulty-${item.difficulty}`}>
+                      {item.difficulty}
+                    </span>
+                    {completed ? <span className="question-sidebar-done">Done</span> : null}
+                  </button>
                 );
-              })}
-            </div>
-          )}
+              })
+            ) : (
+              <div className="question-sidebar-empty">No matching questions.</div>
+            )}
+            {!authed && questions.length > 3 ? (
+              <div className="question-sidebar-signin">
+                <div>Sign in to unlock the full question bank</div>
+                <button
+                  type="button"
+                  className="btn-primary"
+                  onClick={() => navigate(`/auth?next=${encodeURIComponent(`/interview?role=${role}&level=${level}`)}`)}
+                >
+                  Sign in for more questions
+                </button>
+              </div>
+            ) : null}
+          </div>
         </aside>
       </div>
 
       <div className="interview-layout">
 
         <main className="interview-main">
+        <div className="interview-progress-track" aria-hidden="true">
+          <div
+            className="interview-progress-fill"
+            style={{
+              width: `${progress}%`,
+            }}
+          />
+        </div>
         {error && (
           <div
             style={{
@@ -899,6 +798,7 @@ export default function InterviewPage() {
             ) : (
               score && (
                 <div
+                  className="interview-result-grid"
                   style={{
                     display: "grid",
                     gridTemplateColumns: "minmax(0, 1fr) minmax(320px, 360px)",
