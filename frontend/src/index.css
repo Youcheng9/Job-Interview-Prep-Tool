@@ -2211,7 +2211,47 @@ input.input-shell {
 .auth-option-card-active {
   border-color: rgba(185, 255, 57, 0.42);
   box-shadow: inset 0 0 0 1px rgba(185, 255, 57, 0.18);
-  background: linear-gradient(180deg, rgba(185, 255, 57, 0.12), rgba(185, 255, 57, 0.03)), var(--bg);
+  background: linear-gradient(180deg, var(--panel-highlight), transparent 100%), var(--bg);
+}
+
+.auth-option-card-active .auth-option-kicker,
+.auth-option-card-active .auth-option-title,
+.auth-option-card-active .auth-option-copy {
+  color: var(--acid);
+  text-shadow: 0 0 12px rgba(185, 255, 57, 0.16);
+}
+
+html[data-theme="light"] .auth-option-card-active {
+  border-color: #a8b48a;
+  box-shadow: none;
+}
+
+html[data-theme="light"] .auth-option-card-active .auth-option-kicker,
+html[data-theme="light"] .auth-option-card-active .auth-option-title,
+html[data-theme="light"] .auth-option-card-active .auth-option-copy {
+  color: #3f5f00;
+  text-shadow: none;
+}
+
+html[data-theme="light"] .authed-welcome-card,
+html[data-theme="light"] .auth-selection-card,
+html[data-theme="light"] .auth-launch-card,
+html[data-theme="light"] .auth-option-card,
+html[data-theme="light"] .authed-meta-chip,
+html[data-theme="light"] .auth-pager-button {
+  border-color: #bcc6a8;
+}
+
+html[data-theme="light"] .authed-hero-copy,
+html[data-theme="light"] .auth-option-copy,
+html[data-theme="light"] .auth-pager-meta,
+html[data-theme="light"] .authed-meta-chip .mono {
+  color: #495463;
+}
+
+html[data-theme="light"] .auth-option-title,
+html[data-theme="light"] .authed-meta-chip strong {
+  color: #101828;
 }
 
 .auth-option-kicker {

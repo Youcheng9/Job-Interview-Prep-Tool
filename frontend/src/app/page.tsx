@@ -83,13 +83,6 @@ export default function HomePage() {
     return readSavedQuestionId(role, level) !== null;
   };
 
-  const scrollToLevelSetup = () => {
-    const target = document.getElementById("level-setup");
-    if (target) {
-      target.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-  };
-
   const scrollToPracticeSetup = () => {
     const target = document.getElementById("practice-setup");
     if (target) {
@@ -100,7 +93,6 @@ export default function HomePage() {
   const handleRoleChange = (nextRole: Role) => {
     setRole(nextRole);
     setLevelConfirmed(false);
-    window.requestAnimationFrame(scrollToLevelSetup);
   };
 
   const handleLevelChange = (nextLevel: CandidateLevel) => {
