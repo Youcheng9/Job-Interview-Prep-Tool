@@ -20,6 +20,20 @@ const AUTH_COMPANIES = [
   "Anthropic",
   "Scale AI",
 ];
+const COMPANY_LOGOS: Record<string, string> = {
+  OpenAI: "/company-icons/OpenAILogo.png",
+  Google: "/company-icons/GoogleLogo.png",
+  Meta: "/company-icons/MetaLogo.png",
+  Stripe: "/company-icons/StripeLogo.png",
+  NVIDIA: "/company-icons/Nvidia-Logo.png",
+  Databricks: "/company-icons/Databricks_Logo.png",
+  Airbnb: "/company-icons/AirbnbLogo.png",
+  Netflix: "/company-icons/NetflixLogo.png",
+  Figma: "/company-icons/FigmaLogo.png",
+  Notion: "/company-icons/NotionLogo.png",
+  Anthropic: "/company-icons/Anthropic.png",
+  "Scale AI": "/company-icons/ScaleAILogo.png",
+};
 const MARQUEE_GROUP_COUNT = 6;
 const AUTH_COMPANY_PAGE_SIZE = 9;
 
@@ -167,6 +181,7 @@ export default function HomePage() {
               <div className="auth-company-grid">
                 {visibleCompanies.map((company) => {
                   const active = selectedCompany === company;
+                  const logoSrc = COMPANY_LOGOS[company];
                   return (
                     <button
                       key={company}
@@ -174,6 +189,15 @@ export default function HomePage() {
                       className={`auth-option-card auth-company-card${active ? " auth-option-card-active" : ""}`}
                       onClick={() => setSelectedCompany(company)}
                     >
+                      <span className="auth-company-logo-wrap" aria-hidden="true">
+                        {logoSrc ? (
+                          <img
+                            src={logoSrc}
+                            alt=""
+                            className="auth-company-logo"
+                          />
+                        ) : null}
+                      </span>
                       <span className="mono auth-option-kicker">Company</span>
                       <span className="auth-option-title">{company}</span>
                     </button>
