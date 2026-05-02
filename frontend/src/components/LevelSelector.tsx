@@ -41,17 +41,34 @@ export function LevelSelector({ selected, onChange }: Props) {
               textAlign: "left",
               cursor: "pointer",
               background: active ? "var(--surface2)" : "var(--surface)",
-              borderColor: active ? "rgba(185, 255, 57, 0.35)" : "var(--border)",
-              boxShadow: active ? "var(--shadow-acid)" : "none",
             }}
           >
-            <div className="chip chip-acid" style={{ marginBottom: "14px" }}>
+            <div
+              className="chip"
+              style={{
+                marginBottom: "14px",
+                color: active ? "var(--acid)" : "var(--muted)",
+              }}
+            >
               {level.code}
             </div>
-            <div style={{ fontFamily: "var(--font-head)", fontSize: "clamp(1.6rem, 1.25rem + 0.8vw, 2rem)", fontWeight: 700, marginBottom: "8px" }}>
+            <div
+              style={{
+                fontFamily: "var(--font-head)",
+                fontSize: "clamp(1.6rem, 1.25rem + 0.8vw, 2rem)",
+                fontWeight: 700,
+                marginBottom: "8px",
+                color: active ? "var(--acid)" : "var(--text)",
+              }}
+            >
               {level.label}
             </div>
-            <p className="muted" style={{ fontSize: "0.98rem" }}>
+            <p
+              style={{
+                fontSize: "0.98rem",
+                color: active ? "var(--acid)" : "var(--muted)",
+              }}
+            >
               {level.desc}
             </p>
           </button>

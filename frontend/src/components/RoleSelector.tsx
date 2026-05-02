@@ -59,7 +59,9 @@ export function RoleSelector({ selected, onChange }: Props) {
             >
               {role.label}
             </div>
-            <p style={{ color: "var(--muted)", fontSize: "0.98rem", maxWidth: "none" }}>{role.desc}</p>
+            <p style={{ color: active ? "var(--acid)" : "var(--muted)", fontSize: "0.98rem", maxWidth: "none" }}>
+              {role.desc}
+            </p>
           </button>
         );
       })}
