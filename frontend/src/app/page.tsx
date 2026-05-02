@@ -14,6 +14,25 @@ const STATS = [
   { value: "Saved", label: "session history", detail: "Review previous answers, retry weak areas, and track improvement" },
 ];
 
+const PRACTICE_PREVIEW_QUESTIONS = [
+  { id: "Q_001", title: "Caching invalidation tradeoffs", state: "Completed" },
+  { id: "Q_002", title: "Design a rate limiter for a public API", state: "Active" },
+  { id: "Q_003", title: "Retries, backoff, and idempotency", state: "Queued" },
+];
+
+const PRACTICE_PREVIEW_ANSWER = [
+  "I would start with a token bucket per client so bursts are tolerated without losing control of the long-term rate.",
+  "To keep the limit consistent across instances, I would store counters in Redis with short TTL windows and Lua for atomic updates.",
+  "If Redis is unavailable, I would fail open for low-risk traffic but fail closed for expensive write paths and log the fallback.",
+  "I would surface remaining quota headers and monitor rejected requests by tenant to catch abuse and bad defaults early.",
+];
+
+const PRACTICE_PREVIEW_FEEDBACK = [
+  { label: "Structure", value: "8.8/10", width: "88%" },
+  { label: "Tradeoffs", value: "8.1/10", width: "81%" },
+  { label: "Depth", value: "7.9/10", width: "79%" },
+];
+
 const WORKFLOW = [
   {
     step: "01",
@@ -30,12 +49,6 @@ const WORKFLOW = [
     title: "Review the debrief",
     description: "See where the answer lost signal, then rerun the same category with a sharper response",
   },
-];
-
-const LIBRARY_ROWS = [
-  { track: "System design", focus: "tradeoffs, scale, edge cases", duration: "18 min" },
-  { track: "Algorithms", focus: "clarity, complexity, communication", duration: "14 min" },
-  { track: "Behavioral", focus: "story structure, ownership, impact", duration: "11 min" },
 ];
 
 export default function HomePage() {
@@ -105,65 +118,142 @@ export default function HomePage() {
           </div>
 
           <div className="landing-preview animate-fade-up" style={{ animationDelay: "0.1s" }}>
-            <div className="product-frame">
+            <div className="product-frame practice-demo-frame">
               <div className="product-frame-header">
                 <div>
                   <div className="eyebrow" style={{ marginBottom: "8px" }}>
-                    Candidate workspace
+                    Practice interface
                   </div>
-                  <h2 style={{ fontSize: "28px", lineHeight: 1.05 }}>Today&apos;s prep plan</h2>
+                  <h2 style={{ fontSize: "28px", lineHeight: 1.05 }}>Full interview loop, animated</h2>
                 </div>
-                <div className="score-pill">New grad SWE</div>
+                <div className="score-pill">SWE · New grad</div>
               </div>
 
-              <div className="preview-grid">
-                <div className="panel preview-card">
-                  <div className="eyebrow" style={{ marginBottom: "10px" }}>
-                    Next interview
+              <div className="practice-demo-shell" aria-label="Animated practice session preview">
+                <aside className="practice-demo-sidebar panel">
+                  <div className="practice-demo-sidebar-header">
+                    <span className="eyebrow">Question bank</span>
+                    <span className="practice-demo-sidebar-count">3 prompts</span>
                   </div>
-                  <div style={{ fontSize: "22px", fontWeight: 700, marginBottom: "6px" }}>Distributed systems screen</div>
-                  <p className="muted" style={{ fontSize: "1.02rem", marginBottom: "18px" }}>
-                    Focus on write consistency, retries, and operational tradeoffs.
-                  </p>
-                  <div className="progress-track">
-                    <div className="progress-fill" style={{ width: "68%" }} />
-                  </div>
-                  <div className="preview-meta">
-                    <span>3 of 5 drills completed</span>
-                    <span>Target: Friday</span>
-                  </div>
-                </div>
-
-                <div className="panel preview-card">
-                  <div className="eyebrow" style={{ marginBottom: "10px" }}>
-                    Last scorecard
-                  </div>
-                  <div className="score-breakdown">
-                    <ScoreMetric label="Structure" value="8.4" />
-                    <ScoreMetric label="Tradeoffs" value="7.8" />
-                    <ScoreMetric label="Clarity" value="8.9" />
-                  </div>
-                  <p className="muted" style={{ fontSize: "1rem", marginTop: "16px" }}>
-                    Strong framing. You lost points when the answer skipped failure handling and monitoring.
-                  </p>
-                </div>
-
-                <div className="panel preview-card preview-card-wide">
-                  <div className="eyebrow" style={{ marginBottom: "10px" }}>
-                    Practice library
-                  </div>
-                  <div className="library-table">
-                    {LIBRARY_ROWS.map((row) => (
-                      <div key={row.track} className="library-row">
-                        <div>
-                          <div style={{ fontWeight: 700 }}>{row.track}</div>
-                          <div className="muted" style={{ fontSize: "1rem" }}>
-                            {row.focus}
-                          </div>
+                  <div className="practice-demo-sidebar-list">
+                    {PRACTICE_PREVIEW_QUESTIONS.map((item, index) => (
+                      <div
+                        key={item.id}
+                        className={`practice-demo-sidebar-item ${
+                          index === 1 ? "practice-demo-sidebar-item-active" : ""
+                        }`}
+                      >
+                        <div className="practice-demo-sidebar-id mono">{item.id}</div>
+                        <div className="practice-demo-sidebar-copy">
+                          <div className="practice-demo-sidebar-title">{item.title}</div>
+                          <div className="practice-demo-sidebar-state">{item.state}</div>
                         </div>
-                        <span className="library-duration">{row.duration}</span>
                       </div>
                     ))}
+                  </div>
+                </aside>
+
+                <div className="practice-demo-main">
+                  <div className="practice-demo-progress">
+                    <div className="practice-demo-progress-bar">
+                      <div className="practice-demo-progress-fill" />
+                    </div>
+                    <div className="practice-demo-progress-meta">
+                      <span>Question 2 of 5</span>
+                      <span>Generating feedback after submit</span>
+                    </div>
+                  </div>
+
+                  <div className="practice-demo-panel-stack">
+                    <section className="panel practice-demo-question-card">
+                      <div className="practice-demo-loading">
+                        <div className="practice-demo-loading-label mono">Loading next question</div>
+                        <div className="practice-demo-loading-track">
+                          <div className="practice-demo-loading-fill" />
+                        </div>
+                        <div className="practice-demo-loading-dots">
+                          <span />
+                          <span />
+                          <span />
+                        </div>
+                      </div>
+
+                      <div className="practice-demo-question-body">
+                        <div className="practice-demo-question-topline">
+                          <span className="mono">Q_002</span>
+                          <span className="practice-demo-badge">System Design</span>
+                          <span className="practice-demo-badge practice-demo-badge-muted">Medium</span>
+                        </div>
+                        <h3 className="practice-demo-question-title">
+                          Design a rate limiter for a public API used by mobile clients and third-party integrations.
+                        </h3>
+                        <p className="practice-demo-question-copy">
+                          Explain how you would enforce limits across multiple servers, handle bursts, and keep the system fair during partial outages.
+                        </p>
+                      </div>
+                    </section>
+
+                    <section className="practice-demo-answer-card">
+                      <div className="practice-demo-answer-header">
+                        <span className="eyebrow">Candidate response</span>
+                        <span className="practice-demo-answer-status">Typing answer</span>
+                      </div>
+                      <div className="practice-demo-answer-surface">
+                        <div className="practice-demo-answer-lines" aria-hidden="true">
+                          {PRACTICE_PREVIEW_ANSWER.map((line, index) => (
+                            <div key={line} className={`practice-demo-answer-line practice-demo-answer-line-${index + 1}`}>
+                              {line}
+                            </div>
+                          ))}
+                          <div className="practice-demo-answer-caret" />
+                        </div>
+                        <div className="practice-demo-cursor" aria-hidden="true" />
+                      </div>
+                      <div className="practice-demo-answer-footer">
+                        <span className="mono">214 chars</span>
+                        <button type="button" className="btn-primary practice-demo-submit-button">
+                          Submit answer
+                        </button>
+                      </div>
+                    </section>
+
+                    <section className="panel practice-demo-feedback-card">
+                      <div className="practice-demo-feedback-loading">
+                        <span className="eyebrow">Scoring response</span>
+                        <div className="practice-demo-feedback-loader">
+                          <span />
+                          <span />
+                          <span />
+                        </div>
+                        <p className="muted">Comparing structure, tradeoffs, and depth against the rubric.</p>
+                      </div>
+
+                      <div className="practice-demo-feedback-body">
+                        <div className="practice-demo-feedback-header">
+                          <span className="eyebrow">Feedback ready</span>
+                          <span className="practice-demo-feedback-pill">Strong answer</span>
+                        </div>
+                        <div className="practice-demo-feedback-metrics">
+                          {PRACTICE_PREVIEW_FEEDBACK.map((item, index) => (
+                            <div
+                              key={item.label}
+                              className={`practice-demo-feedback-metric practice-demo-feedback-metric-${index + 1}`}
+                            >
+                              <div className="practice-demo-feedback-metric-row">
+                                <span>{item.label}</span>
+                                <strong>{item.value}</strong>
+                              </div>
+                              <div className="practice-demo-feedback-track">
+                                <div className="practice-demo-feedback-fill" style={{ width: item.width }} />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                        <p className="practice-demo-feedback-note">
+                          Clear distributed design. Add explicit tenant isolation and quota reset behavior to push this into top-tier signal.
+                        </p>
+                      </div>
+                    </section>
                   </div>
                 </div>
               </div>
@@ -311,17 +401,6 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-    </div>
-  );
-}
-
-function ScoreMetric({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="score-metric">
-      <span className="muted" style={{ fontSize: "13px" }}>
-        {label}
-      </span>
-      <strong style={{ fontSize: "26px" }}>{value}</strong>
     </div>
   );
 }
