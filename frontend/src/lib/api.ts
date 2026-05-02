@@ -342,42 +342,65 @@ export async function submitAnswer(
 
 export async function getHistory(): Promise<AnswerRecord[]> {
   const data = await request<ApiHistoryResponse>("/history");
+  const historyCombos = Array.from(
+    new Set(data.items.map((item) => `${fromApiRole(item.role)}:${item.level}`)),
+  );
+  const questionBanks = await Promise.all(
+    historyCombos.map(async (combo) => {
+      const [role, level] = combo.split(":") as [Role, CandidateLevel];
+      const questions = await getQuestions(role, level);
+      return { combo, questions };
+    }),
+  );
+  const difficultyByQuestion = new Map<string, Question["difficulty"]>();
 
-  return data.items.map((item, index) => ({
-    id: String(item.answer_id),
-    question: {
-      id: item.question_id,
-      role: fromApiRole(item.role),
-      level: item.level,
-      text: item.prompt,
-      rubric: [],
-      difficulty: getDifficulty(item.level, index),
-    },
-    answer: item.answer_text,
-    created_at: item.created_at,
-    score: {
-      overall: item.overall,
-      technical_depth: item.scores.technical_depth ?? item.overall,
-      clarity: item.scores.clarity ?? item.overall,
-      completeness: item.scores.completeness ?? item.overall,
-      structure: item.scores.structure ?? item.overall,
-      missing_concepts: item.feedback?.missing_keywords ?? [],
-      strengths: item.feedback?.strengths ?? [],
-      weaknesses: item.feedback?.weaknesses ?? [],
-      feedback: formatFeedback(item.feedback),
-      ai_feedback: item.feedback?.ai_feedback?.summary
-        ? {
-            summary: item.feedback.ai_feedback.summary,
-            strengths: item.feedback.ai_feedback.strengths ?? [],
-            weaknesses: item.feedback.ai_feedback.weaknesses ?? [],
-            improvements: item.feedback.ai_feedback.improvements ?? [],
-            improved_answer: item.feedback.ai_feedback.improved_answer ?? "",
-            next_focus: item.feedback.ai_feedback.next_focus ?? "",
-          }
-        : undefined,
-      ai_feedback_error: item.feedback?.ai_feedback_error,
-    },
-  }));
+  questionBanks.forEach(({ combo, questions }) => {
+    questions.forEach((question) => {
+      difficultyByQuestion.set(`${combo}:${question.id}`, question.difficulty);
+    });
+  });
+
+  return data.items.map((item) => {
+    const role = fromApiRole(item.role);
+    const difficulty =
+      difficultyByQuestion.get(`${role}:${item.level}:${item.question_id}`) ?? getDifficulty(item.level, 0);
+
+    return {
+      id: String(item.answer_id),
+      question: {
+        id: item.question_id,
+        role,
+        level: item.level,
+        text: item.prompt,
+        rubric: [],
+        difficulty,
+      },
+      answer: item.answer_text,
+      created_at: item.created_at,
+      score: {
+        overall: item.overall,
+        technical_depth: item.scores.technical_depth ?? item.overall,
+        clarity: item.scores.clarity ?? item.overall,
+        completeness: item.scores.completeness ?? item.overall,
+        structure: item.scores.structure ?? item.overall,
+        missing_concepts: item.feedback?.missing_keywords ?? [],
+        strengths: item.feedback?.strengths ?? [],
+        weaknesses: item.feedback?.weaknesses ?? [],
+        feedback: formatFeedback(item.feedback),
+        ai_feedback: item.feedback?.ai_feedback?.summary
+          ? {
+              summary: item.feedback.ai_feedback.summary,
+              strengths: item.feedback.ai_feedback.strengths ?? [],
+              weaknesses: item.feedback.ai_feedback.weaknesses ?? [],
+              improvements: item.feedback.ai_feedback.improvements ?? [],
+              improved_answer: item.feedback.ai_feedback.improved_answer ?? "",
+              next_focus: item.feedback.ai_feedback.next_focus ?? "",
+            }
+          : undefined,
+        ai_feedback_error: item.feedback?.ai_feedback_error,
+      },
+    };
+  });
 }
 
 export async function generateAIFeedback(answerId: number): Promise<{

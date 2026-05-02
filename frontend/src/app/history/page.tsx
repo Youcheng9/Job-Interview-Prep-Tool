@@ -29,6 +29,13 @@ const DIFFICULTY_LABELS: Record<Difficulty | "all", string> = {
   medium: "Medium",
   hard: "Hard",
 };
+const DATE_FILTER_OPTIONS = [
+  { id: "all", label: "All time" },
+  { id: "7d", label: "Last 7 days" },
+  { id: "30d", label: "Last 30 days" },
+  { id: "90d", label: "Last 90 days" },
+] as const;
+const PAGE_SIZE = 3;
 
 function ScorePill({ value }: { value: number }) {
   const color =
@@ -115,21 +122,16 @@ function HistoryQuestionItem({ record, index }: { record: AnswerRecord; index: n
 
   return (
     <div
-      className="progress-question-card animate-fade-up"
+      className={`progress-question-card animate-fade-up${expanded ? " progress-question-card-expanded" : ""}`}
       style={{
         animationDelay: `${index * 60}ms`,
         borderLeft: `2px solid ${roleColor}`,
       }}
     >
-      <button
-        onClick={() => setExpanded((p) => !p)}
-        className="progress-question-toggle"
-        type="button"
-        aria-expanded={expanded}
-      >
+      <div className="progress-question-toggle">
         <span className="progress-question-copy">
           <span className="progress-question-meta mono">
-            {record.question.difficulty} -{" "}
+            {ROLE_LABELS[record.question.role]} • {record.question.difficulty} •{" "}
             {date.toLocaleDateString("en-US", {
               month: "short",
               day: "numeric",
@@ -142,51 +144,57 @@ function HistoryQuestionItem({ record, index }: { record: AnswerRecord; index: n
         </span>
         <span className="progress-question-score">
           <ScorePill value={record.score.overall} />
-          <span
-            className={`progress-expand-arrow${expanded ? " progress-expand-arrow-open" : ""}`}
-            aria-hidden="true"
-          />
         </span>
+      </div>
+
+      <button
+        onClick={() => setExpanded((p) => !p)}
+        className="progress-question-expand-button"
+        type="button"
+        aria-expanded={expanded}
+      >
+        <span>{expanded ? "Hide evaluation" : "Show evaluation"}</span>
+        <span
+          className={`progress-expand-arrow${expanded ? " progress-expand-arrow-open" : ""}`}
+          aria-hidden="true"
+        />
       </button>
 
-      {expanded && (
+      <div className={`progress-question-details-shell${expanded ? " progress-question-details-shell-open" : ""}`}>
         <div className="progress-question-details">
-          <div className="progress-detail-section">
-            <div className="progress-section-label">Answer</div>
-            <p className="progress-answer-text">{record.answer}</p>
-          </div>
+          <div className="progress-detail-scroll">
+            <div className="progress-detail-section">
+              <div className="progress-section-label">Scoring</div>
+              <ScoreBreakdown record={record} />
+            </div>
 
-          <div className="progress-detail-section">
-            <div className="progress-section-label">Scoring</div>
-            <ScoreBreakdown record={record} />
-          </div>
-
-          <div className="progress-detail-section">
-            <div className="progress-section-label">Evaluation</div>
-            <p className="progress-answer-text">{evaluationSummary}</p>
-            <div className="progress-evaluation-grid">
-              <div>
-                <div className="progress-section-label">Strengths</div>
-                <TextList items={aiFeedback?.strengths?.length ? aiFeedback.strengths : record.score.strengths} />
-              </div>
-              <div>
-                <div className="progress-section-label">Weaknesses</div>
-                <TextList items={aiFeedback?.weaknesses?.length ? aiFeedback.weaknesses : record.score.weaknesses} />
+            <div className="progress-detail-section">
+              <div className="progress-section-label">Evaluation</div>
+              <p className="progress-answer-text">{evaluationSummary}</p>
+              <div className="progress-evaluation-grid">
+                <div>
+                  <div className="progress-section-label">Strengths</div>
+                  <TextList items={aiFeedback?.strengths?.length ? aiFeedback.strengths : record.score.strengths} />
+                </div>
+                <div>
+                  <div className="progress-section-label">Weaknesses</div>
+                  <TextList items={aiFeedback?.weaknesses?.length ? aiFeedback.weaknesses : record.score.weaknesses} />
+                </div>
               </div>
             </div>
-          </div>
 
-          <div className="progress-detail-section">
-            <div className="progress-section-label">Feedback</div>
-            <p className="progress-answer-text">
-              {aiFeedback?.next_focus || record.score.feedback || "No feedback recorded."}
-            </p>
-            {aiFeedback?.improvements?.length ? (
-              <TextList items={aiFeedback.improvements} />
-            ) : null}
+            <div className="progress-detail-section">
+              <div className="progress-section-label">Feedback</div>
+              <p className="progress-answer-text">
+                {aiFeedback?.next_focus || record.score.feedback || "No feedback recorded."}
+              </p>
+              {aiFeedback?.improvements?.length ? (
+                <TextList items={aiFeedback.improvements} />
+              ) : null}
+            </div>
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }
@@ -197,7 +205,14 @@ export default function HistoryPage() {
   const [loading, setLoading] = useState(true);
   const [selectedRoles, setSelectedRoles] = useState<Role[]>(ROLE_ORDER);
   const [difficultyFilter, setDifficultyFilter] = useState<Difficulty | "all">("all");
+  const [dateFilter, setDateFilter] = useState<(typeof DATE_FILTER_OPTIONS)[number]["id"]>("all");
   const [error, setError] = useState<string | null>(null);
+  const [rolePages, setRolePages] = useState<Record<Role, number>>({
+    swe: 1,
+    data: 1,
+    pm: 1,
+    behavioral: 1,
+  });
 
   useEffect(() => {
     if (!isAuthenticated()) {
@@ -231,12 +246,32 @@ export default function HistoryPage() {
     );
   };
 
+  useEffect(() => {
+    setRolePages({
+      swe: 1,
+      data: 1,
+      pm: 1,
+      behavioral: 1,
+    });
+  }, [dateFilter, difficultyFilter, selectedRoles]);
+
+  const now = Date.now();
+
   const filtered = records.filter((record) => {
     const roleMatches = selectedRoles.includes(record.question.role);
     const difficultyMatches =
       difficultyFilter === "all" || record.question.difficulty === difficultyFilter;
+    const createdAt = new Date(record.created_at).getTime();
+    const dateMatches =
+      dateFilter === "all"
+        ? true
+        : dateFilter === "7d"
+          ? createdAt >= now - 7 * 24 * 60 * 60 * 1000
+          : dateFilter === "30d"
+            ? createdAt >= now - 30 * 24 * 60 * 60 * 1000
+            : createdAt >= now - 90 * 24 * 60 * 60 * 1000;
 
-    return roleMatches && difficultyMatches;
+    return roleMatches && difficultyMatches && dateMatches;
   });
 
   const visibleRoles = ROLE_ORDER.filter((role) => selectedRoles.includes(role));
@@ -333,26 +368,46 @@ export default function HistoryPage() {
 
         {/* Filters */}
         <div className="progress-filter-panel panel animate-fade-up">
-          <div className="progress-filter-group">
-            <label className="progress-filter-label" htmlFor="difficulty-filter">
-              Difficulty
-            </label>
-            <select
-              id="difficulty-filter"
-              className="input-shell progress-filter-select"
-              value={difficultyFilter}
-              onChange={(event) => setDifficultyFilter(event.target.value as Difficulty | "all")}
-            >
-              {DIFFICULTY_OPTIONS.map((difficulty) => (
-                <option key={difficulty} value={difficulty}>
-                  {DIFFICULTY_LABELS[difficulty]}
-                </option>
-              ))}
-            </select>
+          <div className="progress-filter-section">
+            <div className="progress-filter-group">
+              <label className="progress-filter-label" htmlFor="date-filter">
+                Date range
+              </label>
+              <select
+                id="date-filter"
+                className="input-shell progress-filter-select"
+                value={dateFilter}
+                onChange={(event) => setDateFilter(event.target.value as (typeof DATE_FILTER_OPTIONS)[number]["id"])}
+              >
+                {DATE_FILTER_OPTIONS.map((option) => (
+                  <option key={option.id} value={option.id}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="progress-filter-group">
+              <label className="progress-filter-label" htmlFor="difficulty-filter">
+                Difficulty
+              </label>
+              <select
+                id="difficulty-filter"
+                className="input-shell progress-filter-select"
+                value={difficultyFilter}
+                onChange={(event) => setDifficultyFilter(event.target.value as Difficulty | "all")}
+              >
+                {DIFFICULTY_OPTIONS.map((difficulty) => (
+                  <option key={difficulty} value={difficulty}>
+                    {DIFFICULTY_LABELS[difficulty]}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
 
           <fieldset className="progress-filter-group">
-            <legend className="progress-filter-label">Roles</legend>
+            <legend className="progress-filter-label">Tracks</legend>
             <div className="progress-role-filter-grid">
               {ROLE_ORDER.map((role) => (
                 <label
@@ -449,34 +504,78 @@ export default function HistoryPage() {
         ) : (
           <div className="progress-role-grid">
             {recordsByRole.map(({ role, records: roleRecords }) => (
-              <section key={role} className="progress-role-column panel">
-                <div
-                  className="progress-role-column-header"
-                  style={{ borderBottomColor: `${ROLE_COLORS[role]}55` }}
-                >
-                  <div>
-                    <div className="eyebrow" style={{ color: ROLE_COLORS[role] }}>
-                      {ROLE_LABELS[role]}
-                    </div>
-                    <h2 className="progress-role-title">{roleRecords.length} answers</h2>
-                  </div>
-                  <span
-                    className="progress-role-dot"
-                    style={{ background: ROLE_COLORS[role] }}
-                    aria-hidden="true"
-                  />
-                </div>
+              (() => {
+                const totalPages = Math.max(1, Math.ceil(roleRecords.length / PAGE_SIZE));
+                const currentPage = Math.min(rolePages[role] ?? 1, totalPages);
+                const start = (currentPage - 1) * PAGE_SIZE;
+                const visibleRecords = roleRecords.slice(start, start + PAGE_SIZE);
 
-                <div className="progress-role-question-list">
-                  {roleRecords.length ? (
-                    roleRecords.map((record, index) => (
-                      <HistoryQuestionItem key={record.id} record={record} index={index} />
-                    ))
-                  ) : (
-                    <div className="progress-column-empty">No matching answers.</div>
-                  )}
-                </div>
-              </section>
+                return (
+                  <section key={role} className="progress-role-column panel">
+                    <div
+                      className="progress-role-column-header"
+                      style={{ borderBottomColor: `${ROLE_COLORS[role]}55` }}
+                    >
+                      <div>
+                        <div className="eyebrow" style={{ color: ROLE_COLORS[role] }}>
+                          {ROLE_LABELS[role]}
+                        </div>
+                        <h2 className="progress-role-title">{roleRecords.length} answers</h2>
+                      </div>
+                      <span
+                        className="progress-role-dot"
+                        style={{ background: ROLE_COLORS[role] }}
+                        aria-hidden="true"
+                      />
+                    </div>
+
+                    <div className="progress-role-question-list">
+                      {roleRecords.length ? (
+                        <>
+                          {visibleRecords.map((record, index) => (
+                            <HistoryQuestionItem key={record.id} record={record} index={index} />
+                          ))}
+                          {totalPages > 1 ? (
+                            <div className="progress-pagination">
+                              <button
+                                type="button"
+                                className="progress-pagination-button"
+                                onClick={() =>
+                                  setRolePages((current) => ({
+                                    ...current,
+                                    [role]: Math.max(1, currentPage - 1),
+                                  }))
+                                }
+                                disabled={currentPage === 1}
+                              >
+                                Previous
+                              </button>
+                              <span className="progress-pagination-meta mono">
+                                Page {currentPage} / {totalPages}
+                              </span>
+                              <button
+                                type="button"
+                                className="progress-pagination-button"
+                                onClick={() =>
+                                  setRolePages((current) => ({
+                                    ...current,
+                                    [role]: Math.min(totalPages, currentPage + 1),
+                                  }))
+                                }
+                                disabled={currentPage === totalPages}
+                              >
+                                Next
+                              </button>
+                            </div>
+                          ) : null}
+                        </>
+                      ) : (
+                        <div className="progress-column-empty">No matching answers.</div>
+                      )}
+                    </div>
+                  </section>
+                );
+              })()
             ))}
           </div>
         )}
