@@ -30,6 +30,7 @@ def _generate_and_store_ai_feedback(
     answer: Answer,
     question: Question,
     score: Score,
+    allow_pending_regeneration: bool = False,
 ) -> tuple[dict | None, str | None]:
     if not feedback_enabled():
         return None, "AI feedback is disabled"
@@ -44,7 +45,7 @@ def _generate_and_store_ai_feedback(
 
     if isinstance(cached_ai_feedback, dict) and not should_retry_model:
         return cached_ai_feedback, None
-    if cached_source == "pending" and not isinstance(cached_ai_feedback, dict):
+    if cached_source == "pending" and not isinstance(cached_ai_feedback, dict) and not allow_pending_regeneration:
         return None, cached_error
 
     try:
@@ -69,6 +70,7 @@ def _generate_and_store_ai_feedback(
             "ai_feedback_error": error_message,
             "ai_feedback_source": "fallback",
             "ai_feedback_pending": False,
+            "ai_feedback_pending_since": None,
         }
         db.add(score)
         db.commit()
@@ -81,6 +83,7 @@ def _generate_and_store_ai_feedback(
         "ai_feedback_error": None,
         "ai_feedback_source": "model",
         "ai_feedback_pending": False,
+        "ai_feedback_pending_since": None,
     }
     db.add(score)
     db.commit()
@@ -107,6 +110,7 @@ def _generate_and_store_ai_feedback_for_answer_id(answer_id: int) -> None:
             answer=answer,
             question=question,
             score=score,
+            allow_pending_regeneration=True,
         )
     except Exception as exc:
         db.rollback()
@@ -140,6 +144,7 @@ def submit_answer(
         if feedback_enabled():
             feedback["ai_feedback_pending"] = True
             feedback["ai_feedback_source"] = "pending"
+            feedback["ai_feedback_pending_since"] = ans.created_at.isoformat()
 
         # 3) Save the score linked to this answer
         sc = Score(answer_id=ans.id, scores=scores_dict, overall=overall_int, feedback=feedback)
@@ -194,6 +199,7 @@ def generate_ai_feedback_for_answer(
         answer=answer,
         question=question,
         score=score,
+        allow_pending_regeneration=True,
     )
 
     return GenerateAIFeedbackResponse(

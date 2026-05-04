@@ -159,6 +159,7 @@ export default function InterviewPage() {
   const [isListening, setIsListening] = useState(false);
   const [speechError, setSpeechError] = useState<string | null>(null);
   const [isGeneratingAiFeedback, setIsGeneratingAiFeedback] = useState(false);
+  const [aiFeedbackPollAttempts, setAiFeedbackPollAttempts] = useState(0);
   const [isQuestionSidebarPinned, setIsQuestionSidebarPinned] = useState(false);
   const [isQuestionSidebarPreviewed, setIsQuestionSidebarPreviewed] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -258,6 +259,7 @@ export default function InterviewPage() {
         setCharCount(0);
         setScore(null);
         setIsGeneratingAiFeedback(false);
+        setAiFeedbackPollAttempts(0);
         setPhase("question");
       })
       .catch(() => setError("Failed to load questions."));
@@ -287,17 +289,18 @@ export default function InterviewPage() {
       !score?.answerId ||
       score.ai_feedback ||
       !score.ai_feedback_pending ||
-      isGeneratingAiFeedback
+      isGeneratingAiFeedback ||
+      aiFeedbackPollAttempts >= 4
     ) {
       return;
     }
 
     const timeoutId = window.setTimeout(() => {
       void handleGenerateAiFeedback();
-    }, 1200);
+    }, 2000);
 
     return () => window.clearTimeout(timeoutId);
-  }, [phase, score, isGeneratingAiFeedback]);
+  }, [phase, score, isGeneratingAiFeedback, aiFeedbackPollAttempts]);
 
   const question = questions[qIndex];
   const progress = questions.length ? ((qIndex + 1) / questions.length) * 100 : 0;
@@ -318,6 +321,7 @@ export default function InterviewPage() {
     }
     setPhase("submitting");
     setIsGeneratingAiFeedback(false);
+    setAiFeedbackPollAttempts(0);
     setError(null);
     try {
       const result = await submitAnswer(question.id, answer, role);
@@ -349,6 +353,8 @@ export default function InterviewPage() {
 
     try {
       const result = await generateAIFeedback(score.answerId);
+      const stillPending = result.ai_feedback_source === "pending" && !result.ai_feedback;
+      setAiFeedbackPollAttempts((attempts) => (stillPending ? attempts + 1 : 0));
       setScore((current) => {
         if (!current) return current;
 
@@ -357,7 +363,7 @@ export default function InterviewPage() {
           ai_feedback: result.ai_feedback,
           ai_feedback_error: result.ai_feedback_error,
           ai_feedback_source: result.ai_feedback_source,
-          ai_feedback_pending: result.ai_feedback_source === "pending" && !result.ai_feedback,
+          ai_feedback_pending: stillPending,
         };
       });
     } catch (err) {
@@ -371,6 +377,7 @@ export default function InterviewPage() {
           ai_feedback_pending: false,
         };
       });
+      setAiFeedbackPollAttempts(0);
     } finally {
       setIsGeneratingAiFeedback(false);
     }
@@ -382,6 +389,7 @@ export default function InterviewPage() {
     setCharCount(0);
     setScore(null);
     setIsGeneratingAiFeedback(false);
+    setAiFeedbackPollAttempts(0);
     setPhase("question");
     setTimeout(() => textareaRef.current?.focus(), 100);
   }
@@ -405,6 +413,7 @@ export default function InterviewPage() {
     setAnswer("");
     setScore(null);
     setIsGeneratingAiFeedback(false);
+    setAiFeedbackPollAttempts(0);
     setPhase("question");
   }
 
@@ -846,8 +855,13 @@ export default function InterviewPage() {
                     score={score}
                     onRetry={handleRetry}
                     onNext={handleNext}
-                    onGenerateAiFeedback={score.ai_feedback ? undefined : handleGenerateAiFeedback}
+                    onGenerateAiFeedback={
+                      score.ai_feedback && score.ai_feedback_source !== "fallback"
+                        ? undefined
+                        : handleGenerateAiFeedback
+                    }
                     isGeneratingAiFeedback={isGeneratingAiFeedback}
+                    aiFeedbackPollAttempts={aiFeedbackPollAttempts}
                   />
                 </div>
               )

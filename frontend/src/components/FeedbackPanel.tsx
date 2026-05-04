@@ -6,6 +6,7 @@ interface Props {
   onNext: () => void;
   onGenerateAiFeedback?: () => void;
   isGeneratingAiFeedback?: boolean;
+  aiFeedbackPollAttempts?: number;
 }
 
 const TIPS: Record<string, string[]> = {
@@ -86,6 +87,7 @@ export function FeedbackPanel({
   onNext,
   onGenerateAiFeedback,
   isGeneratingAiFeedback = false,
+  aiFeedbackPollAttempts = 0,
 }: Props) {
   const weakDims = (
     ["technical_depth", "clarity", "completeness", "structure"] as const
@@ -287,7 +289,9 @@ export function FeedbackPanel({
             }}
           >
             {isAiPending
-              ? "AI coaching is being generated in the background. Refreshing may return the completed result."
+              ? aiFeedbackPollAttempts >= 4
+                ? "AI coaching is taking longer than expected. Use the button below to force a direct generation attempt."
+                : "AI coaching is being generated in the background. We will retry a few times automatically."
               : "Deterministic scoring is ready. AI coaching is optional and may take longer depending on your local Ollama model."}
           </div>
           <button
@@ -302,7 +306,9 @@ export function FeedbackPanel({
           >
             {isGeneratingAiFeedback
               ? "Generating AI Feedback..."
-              : isAiPending
+              : isAiPending && aiFeedbackPollAttempts >= 4
+                ? "Force AI Coach Generation"
+                : isAiPending
                 ? "Refresh AI Coach Feedback"
                 : "Generate AI Coach Feedback"}
           </button>
