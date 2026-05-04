@@ -114,40 +114,8 @@ export default function AuthPage() {
 
   return (
     <div className="shell-width auth-page-shell">
-      <div className="auth-page-grid">
-        <section className="auth-stage panel">
-          <div className="eyebrow landing-eyebrow-large" style={{ marginBottom: "16px" }}>
-            Access gateway
-          </div>
-          <h1 className="auth-stage-title">
-            Save the sessions
-            <br />
-            worth keeping
-          </h1>
-          <p className="auth-stage-copy">
-            Sign in to turn one-off practice into a real prep archive. Keep scored answers, revisit weak spots, and
-            continue rounds without losing context.
-          </p>
-
-          <div className="auth-stage-rail" aria-hidden="true">
-            <div className="auth-stage-rail-line" />
-          </div>
-
-          <div className="auth-stage-list">
-            {[
-              ["01", "Persist every scored attempt by role and level."],
-              ["02", "Track progress across saved answer history."],
-              ["03", "Unlock AI coach feedback tied to completed submissions."],
-            ].map(([tag, text]) => (
-              <div key={tag} className="auth-stage-item">
-                <span className="mono auth-stage-item-tag">{tag}</span>
-                <div className="auth-stage-item-copy">{text}</div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <section className="auth-form-shell panel">
+      <div className="auth-page-grid auth-page-grid-single">
+        <section className="auth-form-shell auth-form-shell-single panel">
           <div className="auth-card-content">
             <div className="auth-toggle-row">
               {(["login", "register"] as const).map((item) => (

@@ -1029,12 +1029,21 @@ input.input-shell {
   align-items: stretch;
 }
 
+.auth-page-grid-single {
+  grid-template-columns: minmax(320px, 680px);
+  justify-content: center;
+}
+
 .auth-stage,
 .auth-form-shell {
   padding: 36px;
   border-radius: 0;
   background: var(--bg);
   box-shadow: none;
+}
+
+.auth-form-shell-single {
+  width: 100%;
 }
 
 .auth-stage {
