@@ -8,6 +8,7 @@ class HistoryItem(BaseModel):
     question_id: int
     role: str
     level: str
+    difficulty: str
     prompt: str
     answer_text: str
     created_at: datetime

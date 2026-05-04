@@ -281,6 +281,24 @@ export default function InterviewPage() {
       });
   }, [authed, level, role]);
 
+  useEffect(() => {
+    if (
+      phase !== "result" ||
+      !score?.answerId ||
+      score.ai_feedback ||
+      !score.ai_feedback_pending ||
+      isGeneratingAiFeedback
+    ) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      void handleGenerateAiFeedback();
+    }, 1200);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [phase, score, isGeneratingAiFeedback]);
+
   const question = questions[qIndex];
   const progress = questions.length ? ((qIndex + 1) / questions.length) * 100 : 0;
   const isQuestionSidebarVisible = isQuestionSidebarPinned || isQuestionSidebarPreviewed;
@@ -338,6 +356,8 @@ export default function InterviewPage() {
           ...current,
           ai_feedback: result.ai_feedback,
           ai_feedback_error: result.ai_feedback_error,
+          ai_feedback_source: result.ai_feedback_source,
+          ai_feedback_pending: result.ai_feedback_source === "pending" && !result.ai_feedback,
         };
       });
     } catch (err) {
@@ -348,6 +368,7 @@ export default function InterviewPage() {
         return {
           ...current,
           ai_feedback_error: message,
+          ai_feedback_pending: false,
         };
       });
     } finally {

@@ -1,7 +1,9 @@
-from fastapi import APIRouter, Depends, HTTPException
+import logging
+
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from backend.models.db import get_db
+from backend.models.db import SessionLocal, get_db
 from backend.models.models import Question, Answer, Score, User
 from backend.schemas.scoring import (
     GenerateAIFeedbackResponse,
@@ -19,6 +21,7 @@ from backend.feedback_agent import (
 from backend.ml.scorer import compute_scores
 
 router = APIRouter(prefix="/scoring", tags=["scoring"])
+logger = logging.getLogger(__name__)
 
 
 def _generate_and_store_ai_feedback(
@@ -41,6 +44,8 @@ def _generate_and_store_ai_feedback(
 
     if isinstance(cached_ai_feedback, dict) and not should_retry_model:
         return cached_ai_feedback, None
+    if cached_source == "pending" and not isinstance(cached_ai_feedback, dict):
+        return None, cached_error
 
     try:
         ai_feedback = generate_agentic_feedback(
@@ -63,6 +68,7 @@ def _generate_and_store_ai_feedback(
             "ai_feedback": fallback_feedback,
             "ai_feedback_error": error_message,
             "ai_feedback_source": "fallback",
+            "ai_feedback_pending": False,
         }
         db.add(score)
         db.commit()
@@ -74,15 +80,44 @@ def _generate_and_store_ai_feedback(
         "ai_feedback": ai_feedback,
         "ai_feedback_error": None,
         "ai_feedback_source": "model",
+        "ai_feedback_pending": False,
     }
     db.add(score)
     db.commit()
     db.refresh(score)
     return ai_feedback, None
 
+
+def _generate_and_store_ai_feedback_for_answer_id(answer_id: int) -> None:
+    db = SessionLocal()
+    try:
+        row = (
+            db.query(Answer, Question, Score)
+            .join(Question, Answer.question_id == Question.id)
+            .join(Score, Score.answer_id == Answer.id)
+            .filter(Answer.id == answer_id)
+            .first()
+        )
+        if not row:
+            return
+
+        answer, question, score = row
+        _generate_and_store_ai_feedback(
+            db=db,
+            answer=answer,
+            question=question,
+            score=score,
+        )
+    except Exception as exc:
+        db.rollback()
+        logger.exception("Background AI feedback generation failed for answer %s: %s", answer_id, exc)
+    finally:
+        db.close()
+
 @router.post("/submit", response_model=SubmitAnswerResponse)
 def submit_answer(
     payload: SubmitAnswerRequest,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
 ):
@@ -104,6 +139,7 @@ def submit_answer(
         scores_dict, overall_int, feedback = compute_scores(payload.answer_text, q.rubric)
         if feedback_enabled():
             feedback["ai_feedback_pending"] = True
+            feedback["ai_feedback_source"] = "pending"
 
         # 3) Save the score linked to this answer
         sc = Score(answer_id=ans.id, scores=scores_dict, overall=overall_int, feedback=feedback)
@@ -111,6 +147,8 @@ def submit_answer(
 
         # 4) Commit once at the end (saves Answer + Score together)
         db.commit()
+        if feedback_enabled():
+            background_tasks.add_task(_generate_and_store_ai_feedback_for_answer_id, ans.id)
 
         # 5) Return the computed score to the client
         return SubmitAnswerResponse(
@@ -162,4 +200,5 @@ def generate_ai_feedback_for_answer(
         answer_id=answer.id,
         ai_feedback=ai_feedback,
         ai_feedback_error=ai_feedback_error,
+        ai_feedback_source=(score.feedback or {}).get("ai_feedback_source"),
     )

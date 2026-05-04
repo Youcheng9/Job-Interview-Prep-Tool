@@ -233,6 +233,25 @@ export function ScoreCard({ score, submittedAnswer }: Props) {
         </div>
       )}
 
+      {(score.scoring_degraded || score.score_confidence) && (
+        <div
+          style={{
+            background: "rgba(245,158,11,0.08)",
+            border: "1px solid rgba(245,158,11,0.22)",
+            borderLeft: "2px solid var(--amber)",
+            padding: "14px 16px",
+            fontSize: "14px",
+            color: "var(--text)",
+            lineHeight: 1.7,
+            marginBottom: "16px",
+          }}
+        >
+          {score.scoring_degraded
+            ? "Scoring ran in degraded mode because the embedding backend was unavailable."
+            : `Scoring confidence: ${score.score_confidence ?? "medium"}.`}
+        </div>
+      )}
+
       {submittedAnswer?.trim() && (
         <div style={{ marginBottom: "16px" }}>
           <div

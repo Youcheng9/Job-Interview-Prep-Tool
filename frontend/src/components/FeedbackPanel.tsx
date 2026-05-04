@@ -93,7 +93,13 @@ export function FeedbackPanel({
   const focusAreaTips = getFocusAreaTips(score);
   const ai = score.ai_feedback;
   const aiError = score.ai_feedback_error;
-  const canGenerateAiFeedback = Boolean(onGenerateAiFeedback) && !ai && !isGeneratingAiFeedback;
+  const aiSource = score.ai_feedback_source;
+  const isFallbackFeedback = aiSource === "fallback";
+  const isAiPending = Boolean(score.ai_feedback_pending) && !ai;
+  const canGenerateAiFeedback =
+    Boolean(onGenerateAiFeedback) &&
+    (!ai || isFallbackFeedback) &&
+    !isGeneratingAiFeedback;
 
   return (
     <div
@@ -142,8 +148,25 @@ export function FeedbackPanel({
               marginBottom: "12px",
             }}
           >
-            AI Coach Summary
+            {isFallbackFeedback ? "Fallback Coach Summary" : "AI Coach Summary"}
           </div>
+
+          {isFallbackFeedback && (
+            <div
+              style={{
+                marginBottom: "12px",
+                padding: "14px 16px",
+                background: "rgba(245,158,11,0.08)",
+                border: "1px solid rgba(245,158,11,0.22)",
+                borderLeft: "2px solid var(--amber)",
+                fontSize: "14px",
+                lineHeight: 1.7,
+                color: "var(--text)",
+              }}
+            >
+              This is fallback guidance from deterministic scoring because the live model response was unavailable.
+            </div>
+          )}
 
           <div
             style={{
@@ -246,7 +269,7 @@ export function FeedbackPanel({
         </div>
       )}
 
-      {!ai && !aiError && onGenerateAiFeedback && (
+      {!ai && (isAiPending || !aiError) && onGenerateAiFeedback && (
         <div
           style={{
             marginBottom: "20px",
@@ -263,7 +286,9 @@ export function FeedbackPanel({
               marginBottom: "12px",
             }}
           >
-            Deterministic scoring is ready. AI coaching is optional and may take longer depending on your local Ollama model.
+            {isAiPending
+              ? "AI coaching is being generated in the background. Refreshing may return the completed result."
+              : "Deterministic scoring is ready. AI coaching is optional and may take longer depending on your local Ollama model."}
           </div>
           <button
             className="btn-ghost"
@@ -275,12 +300,16 @@ export function FeedbackPanel({
               cursor: canGenerateAiFeedback ? "pointer" : "not-allowed",
             }}
           >
-            {isGeneratingAiFeedback ? "Generating AI Feedback..." : "Generate AI Coach Feedback"}
+            {isGeneratingAiFeedback
+              ? "Generating AI Feedback..."
+              : isAiPending
+                ? "Refresh AI Coach Feedback"
+                : "Generate AI Coach Feedback"}
           </button>
         </div>
       )}
 
-      {!ai && aiError && (
+      {aiError && (
         <div
           style={{
             marginBottom: "20px",
@@ -298,6 +327,22 @@ export function FeedbackPanel({
           </span>
           {aiError}
         </div>
+      )}
+
+      {isFallbackFeedback && onGenerateAiFeedback && (
+        <button
+          className="btn-ghost"
+          type="button"
+          onClick={onGenerateAiFeedback}
+          disabled={!canGenerateAiFeedback}
+          style={{
+            marginBottom: "20px",
+            opacity: canGenerateAiFeedback ? 1 : 0.6,
+            cursor: canGenerateAiFeedback ? "pointer" : "not-allowed",
+          }}
+        >
+          {isGeneratingAiFeedback ? "Retrying AI Feedback..." : "Retry With Live AI Model"}
+        </button>
       )}
 
       {focusAreaTips.length > 0 ? (

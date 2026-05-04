@@ -8,10 +8,19 @@ This scorer favors:
 - explainable feedback that still works without an LLM
 """
 
-from typing import List, Dict, Tuple
+from functools import lru_cache
+import logging
 import re
+from typing import Dict, List, Tuple
+
+import numpy as np
 
 from backend.ml.embedder import cosine_similarity_safe, embed_texts
+
+logger = logging.getLogger(__name__)
+
+MATCHED_CONCEPT_THRESHOLD = 0.75
+MISSING_CONCEPT_THRESHOLD = 0.55
 
 
 def _tokenize(text: str) -> List[str]:
@@ -63,9 +72,8 @@ def _semantic_concept_scores(answer_text: str, concepts: List[str]) -> Dict[str,
         normalized_segments = [_normalize_text(answer_text)]
 
     try:
-        embeddings = embed_texts(normalized_segments + concepts)
-        segment_embeddings = embeddings[: len(normalized_segments)]
-        concept_embeddings = embeddings[len(normalized_segments) :]
+        segment_embeddings = embed_texts(normalized_segments)
+        concept_embeddings = _cached_embeddings(tuple(concepts))
 
         for concept, concept_embedding in zip(concepts, concept_embeddings):
             best_similarity = max(
@@ -76,10 +84,51 @@ def _semantic_concept_scores(answer_text: str, concepts: List[str]) -> Dict[str,
             # Map a reasonably strong semantic match into partial/full concept credit.
             semantic_score = max(0.0, min(1.0, (best_similarity - 0.35) / 0.45))
             concept_scores[concept] = max(concept_scores[concept], semantic_score)
-    except Exception:
-        pass
+    except Exception as exc:
+        logger.warning("Concept embedding lookup failed; using lexical scoring only: %s", exc)
 
     return concept_scores
+
+
+@lru_cache(maxsize=512)
+def _cached_embeddings(concepts: tuple[str, ...]) -> np.ndarray:
+    return embed_texts(list(concepts))
+
+
+def _collect_dimension_evidence(
+    answer_text: str,
+    dimension_keywords: Dict[str, List[str]],
+) -> tuple[Dict[str, Dict[str, object]], list[str], set[str]]:
+    evidence: Dict[str, Dict[str, object]] = {}
+    matched_any: set[str] = set()
+    unmatched_any: list[str] = []
+
+    for dimension, keywords in dimension_keywords.items():
+        if not keywords:
+            continue
+
+        dim_cov, dim_scores = concept_coverage(answer_text, keywords)
+        matched = [concept for concept, score in dim_scores.items() if score >= MATCHED_CONCEPT_THRESHOLD]
+        unmatched = [concept for concept, score in dim_scores.items() if score < MISSING_CONCEPT_THRESHOLD]
+
+        matched_any.update(matched)
+        unmatched_any.extend(unmatched)
+        evidence[dimension] = {
+            "coverage": round(dim_cov, 4),
+            "matched_concepts": matched,
+            "unmatched_concepts": unmatched,
+            "concept_scores": {concept: round(score, 4) for concept, score in dim_scores.items()},
+        }
+
+    return evidence, unmatched_any, matched_any
+
+
+def _score_confidence(*, embedding_error: str | None, answer_words: int, keyword_count: int) -> str:
+    if embedding_error:
+        return "low"
+    if answer_words < 25 or keyword_count < 3:
+        return "medium"
+    return "high"
 
 
 def concept_coverage(answer_text: str, concepts: List[str]) -> tuple[float, Dict[str, float]]:
@@ -131,9 +180,11 @@ def compute_scores(
     except Exception as exc:
         similarity = 0.0
         embedding_error = str(exc)
+        logger.warning("Ideal-answer embedding failed; falling back to lexical scoring: %s", exc)
 
     concept_cov_raw, concept_scores = concept_coverage(answer_text, keywords)
-    concept_cov = max(concept_cov_raw, semantic_equivalence * 0.9)
+    concept_cov = concept_cov_raw
+    dimension_evidence, dimension_unmatched, dimension_matched = _collect_dimension_evidence(answer_text, dim_keys)
 
     has_structure = any(
         word in answer_text.lower()
@@ -154,8 +205,7 @@ def compute_scores(
     for dim in dimensions:
         dim_kw = dim_keys.get(dim)
         if dim_kw:
-            dim_cov_raw, _ = concept_coverage(answer_text, dim_kw)
-            dim_cov = max(dim_cov_raw, semantic_equivalence * 0.85)
+            dim_cov = float(dimension_evidence.get(dim, {}).get("coverage", 0.0))
             if dim == "structure":
                 dim_score = 100 * (0.35 * semantic_strength + 0.25 * dim_cov + 0.40 * (1 if has_structure else 0))
             elif dim == "clarity":
@@ -187,16 +237,13 @@ def compute_scores(
 
     overall_score = int(round(max(0, min(100, overall_score))))
 
-    if semantic_equivalence >= 0.8:
-        adjusted_concept_scores = {
-            concept: max(score, semantic_equivalence * 0.8)
-            for concept, score in concept_scores.items()
-        }
-    else:
-        adjusted_concept_scores = concept_scores
+    adjusted_concept_scores = concept_scores
 
-    missing = [concept for concept, score in adjusted_concept_scores.items() if score < 0.55]
-    covered = [concept for concept, score in adjusted_concept_scores.items() if score >= 0.75]
+    missing = [concept for concept, score in adjusted_concept_scores.items() if score < MISSING_CONCEPT_THRESHOLD]
+    covered = [concept for concept, score in adjusted_concept_scores.items() if score >= MATCHED_CONCEPT_THRESHOLD]
+    for concept in dimension_unmatched:
+        if concept not in covered and concept not in missing:
+            missing.append(concept)
 
     strengths = []
     weaknesses = []
@@ -230,6 +277,13 @@ def compute_scores(
     elif answer_words > ideal_words * 2:
         weaknesses.append("Answer is overly verbose - focus on key points.")
 
+    degraded = embedding_error is not None
+    confidence = _score_confidence(
+        embedding_error=embedding_error,
+        answer_words=answer_words,
+        keyword_count=len(keywords),
+    )
+
     feedback = {
         "strengths": strengths,
         "weaknesses": weaknesses,
@@ -237,13 +291,18 @@ def compute_scores(
         "notes": {
             "similarity_raw": similarity,
             "semantic_equivalence": semantic_equivalence,
+            "answer_relevance": semantic_equivalence,
             "keyword_coverage": concept_cov,
             "keyword_coverage_raw": concept_cov_raw,
             "concept_coverage": concept_cov,
             "covered_concepts": covered,
-            "concept_scores": adjusted_concept_scores,
+            "matched_concepts": sorted(dimension_matched),
+            "concept_scores": {concept: round(score, 4) for concept, score in adjusted_concept_scores.items()},
             "length_penalty": length_penalty,
             "embedding_error": embedding_error,
+            "degraded": degraded,
+            "confidence": confidence,
+            "dimension_evidence": dimension_evidence,
             "quality_indicators": {
                 "has_structure": has_structure,
                 "has_examples": has_examples,
