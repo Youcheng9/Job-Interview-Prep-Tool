@@ -1,0 +1,49 @@
+Recommendation
+
+  Use a Service Layer pattern for this project.
+
+  Right now the backend routers are doing HTTP handling, DB access,
+  scoring orchestration, and AI feedback workflow all in one place.
+  The clearest example is backend/routers/scoring.py:1, where the
+  route validates input, creates Answer, computes scores, stores
+  Score, manages pending AI feedback state, and launches background
+  work. That is a service, not just a controller.
+
+  A Service Layer fits this repo because it gives you a clean
+  split:
+
+  - Routers/controllers: request/response only
+  - Services: interview scoring, question flow, auth, history
+    assembly
+  - Repositories/data access: SQLAlchemy queries
+  - Domain/ML helpers: scorer, embedder, feedback agent
+
+  That structure matches what the app already wants to be:
+
+  - backend/routers/auth.py:1, backend/routers/history.py:1, and
+    backend/routers/questions.py:1 all contain business logic that
+    will keep growing.
+  - backend/ml/scorer.py:1 and backend/feedback_agent.py:1 are
+    already service-like dependencies waiting to be orchestrated
+    from one layer up.
+
+  A practical target shape would be:
+
+  backend/
+    services/
+      auth_service.py
+      question_service.py
+      scoring_service.py
+      history_service.py
+    repositories/
+      question_repository.py
+      answer_repository.py
+      user_repository.py
+      score_repository.py
+
+  Example responsibility split:
+
+  - ScoringService.submit_answer(...)
+  - ScoringService.generate_ai_feedback(...)
+  - QuestionService.list_questions(...)
+  - HistoryService.get_user_history(...)

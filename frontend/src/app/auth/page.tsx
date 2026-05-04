@@ -1,8 +1,9 @@
-import { useMemo, useState, type FormEvent } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { login, register } from "../../lib/api";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
-type Mode = "login" | "register";
+import { forgotPassword, login, register, resetPassword } from "../../lib/api";
+
+type Mode = "login" | "register" | "forgot" | "reset";
 
 function normalizeNext(next: string | null) {
   if (!next || !next.startsWith("/")) {
@@ -11,28 +12,80 @@ function normalizeNext(next: string | null) {
   return next;
 }
 
+function getInitialMode(mode: string | null, token: string | null): Mode {
+  if (token) return "reset";
+  if (mode === "register" || mode === "forgot" || mode === "reset") return mode;
+  return "login";
+}
+
 export default function AuthPage() {
   const navigate = useNavigate();
-  const [params] = useSearchParams();
+  const [params, setParams] = useSearchParams();
   const next = useMemo(() => normalizeNext(params.get("next")), [params]);
-  const [mode, setMode] = useState<Mode>((params.get("mode") === "register" ? "register" : "login"));
+  const token = params.get("token") ?? "";
+  const [mode, setMode] = useState<Mode>(getInitialMode(params.get("mode"), params.get("token")));
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
 
-  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
+  useEffect(() => {
+    setMode(getInitialMode(params.get("mode"), params.get("token")));
+  }, [params]);
+
+  function switchMode(nextMode: Mode) {
+    const nextParams = new URLSearchParams(params);
+    if (nextMode === "login") {
+      nextParams.delete("mode");
+      nextParams.delete("token");
+    } else {
+      nextParams.set("mode", nextMode);
+      if (nextMode !== "reset") {
+        nextParams.delete("token");
+      }
+    }
+    setParams(nextParams, { replace: true });
+    setError(null);
+    setNotice(null);
+    setPassword("");
+    setConfirmPassword("");
+  }
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
     setSubmitting(true);
     setError(null);
+    setNotice(null);
 
     try {
       if (mode === "login") {
         await login(email, password);
-      } else {
+        navigate(next, { replace: true });
+      } else if (mode === "register") {
         await register(email, password);
+        navigate(next, { replace: true });
+      } else if (mode === "forgot") {
+        const result = await forgotPassword(email);
+        setNotice(result.message);
+      } else {
+        if (!token) {
+          throw new Error("Reset link is missing or invalid.");
+        }
+        if (password !== confirmPassword) {
+          throw new Error("Passwords do not match.");
+        }
+        const result = await resetPassword(token, password);
+        const nextParams = new URLSearchParams(params);
+        nextParams.delete("token");
+        nextParams.delete("mode");
+        setParams(nextParams, { replace: true });
+        setMode("login");
+        setPassword("");
+        setConfirmPassword("");
+        setNotice(result.message);
       }
-      navigate(next, { replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Authentication failed.");
     } finally {
@@ -40,194 +93,164 @@ export default function AuthPage() {
     }
   }
 
+  const showEmailField = mode !== "reset";
+  const showPasswordField = mode !== "forgot";
+  const title =
+    mode === "login"
+      ? "Resume your prep loop"
+      : mode === "register"
+        ? "Start tracking your practice"
+        : mode === "forgot"
+          ? "Request a reset link"
+          : "Set a new password";
+  const eyebrow =
+    mode === "login"
+      ? "Sign in"
+      : mode === "register"
+        ? "Create account"
+        : mode === "forgot"
+          ? "Forgot password"
+          : "Reset password";
+
   return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "32px 24px",
-      }}
-    >
-      <div
-        className="panel animate-fade-up"
-        style={{
-          width: "100%",
-          maxWidth: "620px",
-          padding: "36px",
-        }}
-      >
-        <div
-          className="mono"
-          style={{
-            fontSize: "13px",
-            letterSpacing: "0.18em",
-            color: "var(--cyan)",
-            marginBottom: "12px",
-          }}
-        >
-          AUTH://ACCESS_GATE
-        </div>
-        <h1 style={{ fontSize: "42px", marginBottom: "12px" }}>
-          {mode === "login" ? "Sign In" : "Create Account"}
-        </h1>
-        <p style={{ color: "var(--muted)", marginBottom: "28px", lineHeight: 1.7, fontSize: "18px" }}>
-          Sign in to score answers and sync your session history with the backend.
-        </p>
-
-        <div style={{ display: "flex", gap: "8px", marginBottom: "20px" }}>
-          {(["login", "register"] as const).map((item) => (
-            <button
-              key={item}
-              type="button"
-              className={mode === item ? "btn-primary" : "btn-ghost"}
-              onClick={() => {
-                setMode(item);
-                setError(null);
-              }}
-              style={{ flex: 1, fontSize: "15px" }}
-            >
-              {item === "login" ? "Sign In" : "Register"}
-            </button>
-          ))}
-        </div>
-
-        <form onSubmit={handleSubmit}>
-          <label
-            style={{
-              display: "block",
-              fontFamily: "var(--font-head)",
-              fontSize: "13px",
-              letterSpacing: "0.12em",
-              textTransform: "uppercase",
-              color: "var(--muted)",
-              marginBottom: "8px",
-            }}
-          >
-            Email
-          </label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            autoComplete="email"
-            style={{
-              width: "100%",
-              marginBottom: "16px",
-              background: "var(--surface2)",
-              border: "1px solid var(--border)",
-              color: "var(--text)",
-              padding: "16px 18px",
-              fontFamily: "var(--font-body)",
-              fontSize: "17px",
-            }}
-          />
-
-          <label
-            style={{
-              display: "block",
-              fontFamily: "var(--font-head)",
-              fontSize: "13px",
-              letterSpacing: "0.12em",
-              textTransform: "uppercase",
-              color: "var(--muted)",
-              marginBottom: "8px",
-            }}
-          >
-            Password
-          </label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            minLength={8}
-            autoComplete={mode === "login" ? "current-password" : "new-password"}
-            style={{
-              width: "100%",
-              marginBottom: "18px",
-              background: "var(--surface2)",
-              border: "1px solid var(--border)",
-              color: "var(--text)",
-              padding: "16px 18px",
-              fontFamily: "var(--font-body)",
-              fontSize: "17px",
-            }}
-          />
-
-          {error && (
-            <div
-              style={{
-                marginBottom: "16px",
-                padding: "10px 12px",
-                borderLeft: "2px solid var(--red)",
-                background: "rgba(239,68,68,0.08)",
-                border: "1px solid rgba(239,68,68,0.24)",
-                color: "#fca5a5",
-                fontSize: "15px",
-              }}
-            >
-              {error}
+    <div className="shell-width auth-page-shell">
+      <div className="auth-page-grid auth-page-grid-single">
+        <section className="auth-form-shell auth-form-shell-single panel">
+          <div className="auth-card-content">
+            <div className="auth-toggle-row">
+              {(["login", "register"] as const).map((item) => (
+                <button
+                  key={item}
+                  type="button"
+                  className={`auth-toggle-button${mode === item ? " auth-toggle-button-active" : ""}`}
+                  onClick={() => switchMode(item)}
+                >
+                  {item === "login" ? "Sign In" : "Register"}
+                </button>
+              ))}
             </div>
-          )}
 
-          <button
-            type="submit"
-            className="btn-primary"
-            disabled={submitting}
-            style={{
-              width: "100%",
-              fontSize: "16px",
-              opacity: submitting ? 0.7 : 1,
-              cursor: submitting ? "wait" : "pointer",
-            }}
-          >
-            {submitting
-              ? "Processing..."
-              : mode === "login"
-              ? "Unlock Session"
-              : "Create Account"}
-          </button>
-        </form>
+            <div className="eyebrow" style={{ marginBottom: "12px" }}>
+              {eyebrow}
+            </div>
+            <h2 className="auth-form-title">{title}</h2>
 
-        <div
-          style={{
-            marginTop: "18px",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            gap: "16px",
-          }}
-        >
-          <span style={{ color: "var(--muted)", fontSize: "15px" }}>
-            {mode === "login" ? "Need an account?" : "Already registered?"}
-          </span>
-          <button
-            type="button"
-            className="btn-ghost"
-            onClick={() => {
-              setMode(mode === "login" ? "register" : "login");
-              setError(null);
-            }}
-            style={{ fontSize: "13px" }}
-          >
-            {mode === "login" ? "Register" : "Sign In"}
-          </button>
-        </div>
+            <form onSubmit={handleSubmit} style={{ display: "grid", gap: "14px" }}>
+              {showEmailField ? (
+                <>
+                  <label className="eyebrow">email</label>
+                  <input
+                    className="input-shell"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    autoComplete="email"
+                  />
+                </>
+              ) : null}
 
-        <div style={{ marginTop: "18px", textAlign: "center" }}>
-          <Link
-            to={next}
-            style={{
-              color: "var(--muted)",
-              textDecoration: "none",
-              fontSize: "14px",
-            }}
-          >
-            Continue without signing in
-          </Link>
-        </div>
+              {showPasswordField ? (
+                <>
+                  <label className="eyebrow">{mode === "reset" ? "new password" : "password"}</label>
+                  <input
+                    className="input-shell"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    minLength={8}
+                    autoComplete={mode === "login" ? "current-password" : "new-password"}
+                  />
+                </>
+              ) : null}
+
+              {mode === "reset" ? (
+                <>
+                  <label className="eyebrow">confirm password</label>
+                  <input
+                    className="input-shell"
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    required
+                    minLength={8}
+                    autoComplete="new-password"
+                  />
+                </>
+              ) : null}
+
+              {mode === "login" ? (
+                <button type="button" className="auth-forgot-password" onClick={() => switchMode("forgot")}>
+                  Forgot password?
+                </button>
+              ) : null}
+
+              {notice ? (
+                <div
+                  className="mono"
+                  style={{
+                    padding: "12px 14px",
+                    border: "1px solid rgba(34, 197, 94, 0.35)",
+                    background: "rgba(34, 197, 94, 0.08)",
+                    color: "#22c55e",
+                    fontSize: "12px",
+                  }}
+                >
+                  {notice}
+                </div>
+              ) : null}
+
+              {error ? (
+                <div
+                  className="mono"
+                  style={{
+                    padding: "12px 14px",
+                    border: "1px solid rgba(239, 83, 80, 0.35)",
+                    background: "rgba(239, 83, 80, 0.08)",
+                    color: "var(--danger)",
+                    fontSize: "12px",
+                  }}
+                >
+                  ERROR: {error}
+                </div>
+              ) : null}
+
+              <button type="submit" className="btn-primary" disabled={submitting} style={{ marginTop: "6px" }}>
+                {submitting
+                  ? "Processing..."
+                  : mode === "login"
+                    ? "Unlock Session"
+                    : mode === "register"
+                      ? "Create Account"
+                      : mode === "forgot"
+                        ? "Send Reset Link"
+                        : "Reset Password"}
+              </button>
+            </form>
+
+            <div className="auth-switch-row">
+              {mode === "forgot" || mode === "reset" ? (
+                <button type="button" className="btn-ghost" onClick={() => switchMode("login")}>
+                  Back To Sign In
+                </button>
+              ) : (
+                <>
+                  <span className="muted auth-switch-copy">
+                    {mode === "login" ? "Need an account?" : "Already registered?"}
+                  </span>
+                  <button
+                    type="button"
+                    className="btn-ghost"
+                    onClick={() => switchMode(mode === "login" ? "register" : "login")}
+                  >
+                    {mode === "login" ? "Register" : "Sign In"}
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        </section>
       </div>
     </div>
   );

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { clearToken, getHistory, isAuthenticated, type AnswerRecord, type Role } from "../../lib/api";
+import { getSavedInterviewSession } from "../../lib/interviewSession";
 
 const ROLE_COLORS: Record<Role, string> = {
   swe: "#0d9488",
@@ -8,6 +9,33 @@ const ROLE_COLORS: Record<Role, string> = {
   pm: "#f59e0b",
   behavioral: "#ec4899",
 };
+
+const ROLE_ORDER: Role[] = ["swe", "data", "pm", "behavioral"];
+
+const ROLE_LABELS: Record<Role, string> = {
+  swe: "Software",
+  data: "Data",
+  pm: "Product",
+  behavioral: "Behavioral",
+};
+
+type Difficulty = AnswerRecord["question"]["difficulty"];
+
+const DIFFICULTY_OPTIONS: Array<Difficulty | "all"> = ["all", "easy", "medium", "hard"];
+
+const DIFFICULTY_LABELS: Record<Difficulty | "all", string> = {
+  all: "All levels",
+  easy: "Easy",
+  medium: "Medium",
+  hard: "Hard",
+};
+const DATE_FILTER_OPTIONS = [
+  { id: "all", label: "All time" },
+  { id: "7d", label: "Last 7 days" },
+  { id: "30d", label: "Last 30 days" },
+  { id: "90d", label: "Last 90 days" },
+] as const;
+const PAGE_SIZE = 3;
 
 function ScorePill({ value }: { value: number }) {
   const color =
@@ -50,185 +78,185 @@ function MiniBar({ value, color }: { value: number; color: string }) {
   );
 }
 
-function HistoryRow({ record, index }: { record: AnswerRecord; index: number }) {
-  const [expanded, setExpanded] = useState(false);
+function ScoreBreakdown({ record }: { record: AnswerRecord }) {
+  return (
+    <div className="progress-score-grid">
+      {[
+        { label: "Tech Depth", val: record.score.technical_depth, c: "#0d9488" },
+        { label: "Clarity", val: record.score.clarity, c: "#6366f1" },
+        { label: "Complete", val: record.score.completeness, c: "#f59e0b" },
+        { label: "Structure", val: record.score.structure, c: "#ec4899" },
+      ].map(({ label, val, c }) => (
+        <div key={label} className="progress-score-metric">
+          <div className="progress-section-label">{label}</div>
+          <div className="progress-score-row">
+            <MiniBar value={val} color={c} />
+            <span className="mono" style={{ color: c }}>
+              {val}
+            </span>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function TextList({ items }: { items: string[] }) {
+  if (!items.length) return <span className="muted">No details recorded.</span>;
+
+  return (
+    <ul className="progress-detail-list">
+      {items.map((item, index) => (
+        <li key={`${item}-${index}`}>{item}</li>
+      ))}
+    </ul>
+  );
+}
+
+function HistoryQuestionItem({
+  record,
+  index,
+  onOpen,
+}: {
+  record: AnswerRecord;
+  index: number;
+  onOpen: (record: AnswerRecord) => void;
+}) {
   const roleColor = ROLE_COLORS[record.question.role] ?? "var(--cyan)";
   const date = new Date(record.created_at);
 
   return (
     <div
-      className="animate-fade-up"
+      className="progress-question-card animate-fade-up"
       style={{
         animationDelay: `${index * 60}ms`,
-        background: "var(--surface)",
-        border: "1px solid var(--border)",
-        borderRadius: "2px",
-        marginBottom: "10px",
-        transition: "border-color 0.2s",
         borderLeft: `2px solid ${roleColor}`,
       }}
     >
-      {/* Row header */}
       <button
-        onClick={() => setExpanded((p) => !p)}
-        style={{
-          width: "100%",
-          background: "transparent",
-          border: "none",
-          cursor: "pointer",
-          padding: "16px 20px",
-          display: "grid",
-          gridTemplateColumns: "auto 1fr auto auto auto",
-          alignItems: "center",
-          gap: "16px",
-          textAlign: "left",
-          color: "var(--text)",
-        }}
+        className="progress-question-toggle"
+        type="button"
+        onClick={() => onOpen(record)}
       >
-        {/* Index */}
-        <span
-          className="mono"
-          style={{ fontSize: "13px", color: "var(--muted)", width: "40px" }}
-        >
-          #{String(index + 1).padStart(3, "0")}
+        <span className="progress-question-copy">
+          <span className="progress-question-meta mono">
+            {ROLE_LABELS[record.question.role]} • {record.question.difficulty} •{" "}
+            {date.toLocaleDateString("en-US", {
+              month: "short",
+              day: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+            })}
+          </span>
+          <span className="progress-question-title">{record.question.text}</span>
+          <span className="progress-question-answer-preview">{record.answer}</span>
         </span>
-
-        {/* Question */}
-        <span
-          style={{
-            fontFamily: "var(--font-head)",
-            fontSize: "18px",
-            letterSpacing: "0.02em",
-            color: "var(--text)",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
-          }}
-        >
-          {record.question.text}
+        <span className="progress-question-score">
+          <ScorePill value={record.score.overall} />
+          <span className="progress-expand-arrow" aria-hidden="true" />
         </span>
-
-        {/* Role tag */}
-        <span
-          className="mono"
-          style={{
-            fontSize: "12px",
-            letterSpacing: "0.1em",
-            textTransform: "uppercase",
-            color: roleColor,
-            background: `${roleColor}15`,
-            border: `1px solid ${roleColor}40`,
-            padding: "2px 8px",
-            whiteSpace: "nowrap",
-          }}
-        >
-          {record.question.role}
-        </span>
-
-        {/* Date */}
-        <span
-          className="mono"
-          style={{ fontSize: "13px", color: "var(--muted)", whiteSpace: "nowrap" }}
-        >
-          {date.toLocaleDateString("en-US", {
-            month: "short",
-            day: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-          })}
-        </span>
-
-        {/* Score */}
-        <ScorePill value={record.score.overall} />
       </button>
 
-      {/* Expanded content */}
-      {expanded && (
-        <div
-          style={{
-            borderTop: "1px solid var(--border)",
-            padding: "20px",
-          }}
-        >
-          {/* Dimension bars */}
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(4, 1fr)",
-              gap: "16px",
-              marginBottom: "20px",
-            }}
-          >
-            {[
-              { label: "Tech Depth", val: record.score.technical_depth, c: "#0d9488" },
-              { label: "Clarity", val: record.score.clarity, c: "#6366f1" },
-              { label: "Complete", val: record.score.completeness, c: "#f59e0b" },
-              { label: "Structure", val: record.score.structure, c: "#ec4899" },
-            ].map(({ label, val, c }) => (
-              <div key={label} style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-                <div
-                  style={{
-                    fontFamily: "var(--font-head)",
-                    fontSize: "11px",
-                    letterSpacing: "0.12em",
-                    textTransform: "uppercase",
-                    color: "var(--muted)",
-                  }}
-                >
-                  {label}
+      <button
+        onClick={() => onOpen(record)}
+        className="progress-question-expand-button"
+        type="button"
+      >
+        <span>View answer and results</span>
+        <span className="progress-expand-arrow" aria-hidden="true" />
+      </button>
+    </div>
+  );
+}
+
+function HistoryResultModal({ record, onClose }: { record: AnswerRecord; onClose: () => void }) {
+  const roleColor = ROLE_COLORS[record.question.role] ?? "var(--cyan)";
+  const date = new Date(record.created_at);
+  const aiFeedback = record.score.ai_feedback;
+  const evaluationSummary = aiFeedback?.summary || record.score.feedback || "No evaluation recorded.";
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        onClose();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [onClose]);
+
+  return (
+    <div className="progress-result-modal-backdrop" role="presentation" onMouseDown={onClose}>
+      <section
+        className="progress-result-modal panel"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="progress-result-modal-title"
+        onMouseDown={(event) => event.stopPropagation()}
+      >
+        <div className="progress-result-modal-header" style={{ borderTopColor: roleColor }}>
+          <div>
+            <div className="progress-question-meta mono">
+              {ROLE_LABELS[record.question.role]} • {record.question.difficulty} •{" "}
+              {date.toLocaleDateString("en-US", {
+                month: "short",
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
+            </div>
+            <h2 id="progress-result-modal-title" className="progress-result-modal-title">
+              {record.question.text}
+            </h2>
+          </div>
+          <div className="progress-result-modal-score">
+            <ScorePill value={record.score.overall} />
+            <button type="button" className="progress-result-modal-close" onClick={onClose} aria-label="Close result">
+              Close
+            </button>
+          </div>
+        </div>
+
+        <div className="progress-result-modal-body">
+          <div className="progress-detail-scroll">
+            <div className="progress-detail-section">
+              <div className="progress-section-label">Your Answer</div>
+              <p className="progress-answer-text progress-answer-text-strong">{record.answer}</p>
+            </div>
+
+            <div className="progress-detail-section">
+              <div className="progress-section-label">Scoring</div>
+              <ScoreBreakdown record={record} />
+            </div>
+
+            <div className="progress-detail-section">
+              <div className="progress-section-label">Evaluation</div>
+              <p className="progress-answer-text">{evaluationSummary}</p>
+              <div className="progress-evaluation-grid">
+                <div>
+                  <div className="progress-section-label">Strengths</div>
+                  <TextList items={aiFeedback?.strengths?.length ? aiFeedback.strengths : record.score.strengths} />
                 </div>
-                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                  <MiniBar value={val} color={c} />
-                  <span className="mono" style={{ fontSize: "14px", color: c }}>{val}</span>
+                <div>
+                  <div className="progress-section-label">Weaknesses</div>
+                  <TextList items={aiFeedback?.weaknesses?.length ? aiFeedback.weaknesses : record.score.weaknesses} />
                 </div>
               </div>
-            ))}
-          </div>
-
-          {/* Answer preview */}
-          <div
-            style={{
-              background: "var(--surface2)",
-              border: "1px solid var(--border)",
-              padding: "18px 20px",
-              fontSize: "16px",
-              color: "var(--muted)",
-              lineHeight: 1.7,
-              maxHeight: "120px",
-              overflow: "hidden",
-              position: "relative",
-            }}
-          >
-            {record.answer}
-            <div
-              style={{
-                position: "absolute",
-                bottom: 0,
-                left: 0,
-                right: 0,
-                height: "40px",
-                background: "linear-gradient(transparent, var(--surface2))",
-              }}
-            />
-          </div>
-
-          {/* Feedback */}
-          {record.score.feedback && (
-            <div
-              style={{
-                marginTop: "12px",
-                borderLeft: "2px solid var(--cyan)",
-                paddingLeft: "14px",
-                fontSize: "15px",
-                color: "var(--muted)",
-                lineHeight: 1.7,
-              }}
-            >
-              {record.score.feedback}
             </div>
-          )}
+
+            <div className="progress-detail-section">
+              <div className="progress-section-label">Feedback</div>
+              <p className="progress-answer-text">
+                {aiFeedback?.next_focus || record.score.feedback || "No feedback recorded."}
+              </p>
+              {aiFeedback?.improvements?.length ? (
+                <TextList items={aiFeedback.improvements} />
+              ) : null}
+            </div>
+          </div>
         </div>
-      )}
+      </section>
     </div>
   );
 }
@@ -237,8 +265,17 @@ export default function HistoryPage() {
   const navigate = useNavigate();
   const [records, setRecords] = useState<AnswerRecord[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<Role | "all">("all");
+  const [selectedRoles, setSelectedRoles] = useState<Role[]>(ROLE_ORDER);
+  const [difficultyFilter, setDifficultyFilter] = useState<Difficulty | "all">("all");
+  const [dateFilter, setDateFilter] = useState<(typeof DATE_FILTER_OPTIONS)[number]["id"]>("all");
   const [error, setError] = useState<string | null>(null);
+  const [selectedRecord, setSelectedRecord] = useState<AnswerRecord | null>(null);
+  const [rolePages, setRolePages] = useState<Record<Role, number>>({
+    swe: 1,
+    data: 1,
+    pm: 1,
+    behavioral: 1,
+  });
 
   useEffect(() => {
     if (!isAuthenticated()) {
@@ -264,17 +301,84 @@ export default function HistoryPage() {
       .finally(() => setLoading(false));
   }, [navigate]);
 
-  const filtered =
-    filter === "all" ? records : records.filter((r) => r.question.role === filter);
+  const toggleRole = (role: Role) => {
+    setSelectedRoles((current) =>
+      current.includes(role)
+        ? current.filter((item) => item !== role)
+        : ROLE_ORDER.filter((item) => current.includes(item) || item === role),
+    );
+  };
+
+  useEffect(() => {
+    setRolePages({
+      swe: 1,
+      data: 1,
+      pm: 1,
+      behavioral: 1,
+    });
+  }, [dateFilter, difficultyFilter, selectedRoles]);
+
+  const now = Date.now();
+
+  const filtered = records.filter((record) => {
+    const roleMatches = selectedRoles.includes(record.question.role);
+    const difficultyMatches =
+      difficultyFilter === "all" || record.question.difficulty === difficultyFilter;
+    const createdAt = new Date(record.created_at).getTime();
+    const dateMatches =
+      dateFilter === "all"
+        ? true
+        : dateFilter === "7d"
+          ? createdAt >= now - 7 * 24 * 60 * 60 * 1000
+          : dateFilter === "30d"
+            ? createdAt >= now - 30 * 24 * 60 * 60 * 1000
+            : createdAt >= now - 90 * 24 * 60 * 60 * 1000;
+
+    return roleMatches && difficultyMatches && dateMatches;
+  });
+
+  const visibleRoles = ROLE_ORDER.filter((role) => selectedRoles.includes(role));
+  const recordsByRole = visibleRoles.map((role) => ({
+    role,
+    records: filtered.filter((record) => record.question.role === role),
+  }));
 
   const avgScore =
     records.length
       ? Math.round(records.reduce((s, r) => s + r.score.overall, 0) / records.length)
       : 0;
+  const previousWork = isAuthenticated() ? getSavedInterviewSession() : null;
 
   return (
-    <div style={{ padding: "32px" }}>
-      <div style={{ maxWidth: "1240px", margin: "0 auto", padding: "48px 32px 72px" }}>
+    <div className="progress-page">
+      <div className="progress-content">
+        {previousWork ? (
+          <div
+            className="panel animate-fade-up"
+            style={{
+              padding: "20px",
+              marginBottom: "24px",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              gap: "16px",
+              flexWrap: "wrap",
+            }}
+          >
+            <div>
+              <div className="eyebrow" style={{ marginBottom: "6px" }}>
+                Resume
+              </div>
+              <div style={{ color: "var(--muted)", fontSize: "1rem" }}>
+                Continue from your last saved interview question
+              </div>
+            </div>
+            <button type="button" className="btn-resume" onClick={() => navigate(previousWork.href)}>
+              Resume work
+            </button>
+          </div>
+        ) : null}
+
         {/* Stats summary */}
         <div
           className="animate-fade-up"
@@ -325,46 +429,73 @@ export default function HistoryPage() {
           ))}
         </div>
 
-        {/* Filter tabs */}
-        <div
-          className="animate-fade-up"
-          style={{
-            display: "flex",
-            gap: "8px",
-            marginBottom: "24px",
-            animationDelay: "200ms",
-          }}
-        >
-          {(["all", "swe", "data", "pm", "behavioral"] as const).map((r) => (
-            <button
-              key={r}
-              onClick={() => setFilter(r)}
-              className="mono"
-              style={{
-                fontSize: "12px",
-                letterSpacing: "0.12em",
-                textTransform: "uppercase",
-                padding: "8px 16px",
-                border: `1px solid ${filter === r ? (r === "all" ? "var(--cyan)" : ROLE_COLORS[r as Role]) : "var(--border)"}`,
-                background:
-                  filter === r
-                    ? r === "all"
-                      ? "var(--cyan-glow)"
-                      : `${ROLE_COLORS[r as Role]}15`
-                    : "transparent",
-                color:
-                  filter === r
-                    ? r === "all"
-                      ? "var(--cyan)"
-                      : ROLE_COLORS[r as Role]
-                    : "var(--muted)",
-                cursor: "pointer",
-                transition: "all 0.15s",
-              }}
-            >
-              {r}
-            </button>
-          ))}
+        {/* Filters */}
+        <div className="progress-filter-panel panel animate-fade-up">
+          <div className="progress-filter-section">
+            <div className="progress-filter-group">
+              <label className="progress-filter-label" htmlFor="date-filter">
+                Date range
+              </label>
+              <select
+                id="date-filter"
+                className="input-shell progress-filter-select"
+                value={dateFilter}
+                onChange={(event) => setDateFilter(event.target.value as (typeof DATE_FILTER_OPTIONS)[number]["id"])}
+              >
+                {DATE_FILTER_OPTIONS.map((option) => (
+                  <option key={option.id} value={option.id}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="progress-filter-group">
+              <label className="progress-filter-label" htmlFor="difficulty-filter">
+                Difficulty
+              </label>
+              <select
+                id="difficulty-filter"
+                className="input-shell progress-filter-select"
+                value={difficultyFilter}
+                onChange={(event) => setDifficultyFilter(event.target.value as Difficulty | "all")}
+              >
+                {DIFFICULTY_OPTIONS.map((difficulty) => (
+                  <option key={difficulty} value={difficulty}>
+                    {DIFFICULTY_LABELS[difficulty]}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <fieldset className="progress-filter-group">
+            <legend className="progress-filter-label">Tracks</legend>
+            <div className="progress-role-filter-grid">
+              {ROLE_ORDER.map((role) => (
+                <label
+                  key={role}
+                  className="progress-role-filter"
+                  style={{
+                    borderColor: selectedRoles.includes(role)
+                      ? `${ROLE_COLORS[role]}80`
+                      : "var(--border)",
+                    color: selectedRoles.includes(role) ? ROLE_COLORS[role] : "var(--muted)",
+                    background: selectedRoles.includes(role)
+                      ? `${ROLE_COLORS[role]}15`
+                      : "transparent",
+                  }}
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedRoles.includes(role)}
+                    onChange={() => toggleRole(role)}
+                  />
+                  <span>{ROLE_LABELS[role]}</span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
         </div>
 
         {/* Records */}
@@ -429,16 +560,97 @@ export default function HistoryPage() {
             </div>
             <Link to="/">
               <button className="btn-primary" style={{ fontSize: "15px" }}>
-                Start First Session →
+                Start First Session
               </button>
             </Link>
           </div>
         ) : (
-          filtered.map((r, i) => (
-            <HistoryRow key={r.id} record={r} index={i} />
-          ))
+          <div className="progress-role-grid">
+            {recordsByRole.map(({ role, records: roleRecords }) => (
+              (() => {
+                const totalPages = Math.max(1, Math.ceil(roleRecords.length / PAGE_SIZE));
+                const currentPage = Math.min(rolePages[role] ?? 1, totalPages);
+                const start = (currentPage - 1) * PAGE_SIZE;
+                const visibleRecords = roleRecords.slice(start, start + PAGE_SIZE);
+
+                return (
+                  <section key={role} className="progress-role-column panel">
+                    <div
+                      className="progress-role-column-header"
+                      style={{ borderBottomColor: `${ROLE_COLORS[role]}55` }}
+                    >
+                      <div>
+                        <div className="eyebrow" style={{ color: ROLE_COLORS[role] }}>
+                          {ROLE_LABELS[role]}
+                        </div>
+                        <h2 className="progress-role-title">{roleRecords.length} answers</h2>
+                      </div>
+                      <span
+                        className="progress-role-dot"
+                        style={{ background: ROLE_COLORS[role] }}
+                        aria-hidden="true"
+                      />
+                    </div>
+
+                    <div className="progress-role-question-list">
+                      {roleRecords.length ? (
+                        <>
+                          {visibleRecords.map((record, index) => (
+                            <HistoryQuestionItem
+                              key={record.id}
+                              record={record}
+                              index={index}
+                              onOpen={setSelectedRecord}
+                            />
+                          ))}
+                          {totalPages > 1 ? (
+                            <div className="progress-pagination">
+                              <button
+                                type="button"
+                                className="progress-pagination-button"
+                                onClick={() =>
+                                  setRolePages((current) => ({
+                                    ...current,
+                                    [role]: Math.max(1, currentPage - 1),
+                                  }))
+                                }
+                                disabled={currentPage === 1}
+                              >
+                                Previous
+                              </button>
+                              <span className="progress-pagination-meta mono">
+                                Page {currentPage} / {totalPages}
+                              </span>
+                              <button
+                                type="button"
+                                className="progress-pagination-button"
+                                onClick={() =>
+                                  setRolePages((current) => ({
+                                    ...current,
+                                    [role]: Math.min(totalPages, currentPage + 1),
+                                  }))
+                                }
+                                disabled={currentPage === totalPages}
+                              >
+                                Next
+                              </button>
+                            </div>
+                          ) : null}
+                        </>
+                      ) : (
+                        <div className="progress-column-empty">No matching answers.</div>
+                      )}
+                    </div>
+                  </section>
+                );
+              })()
+            ))}
+          </div>
         )}
       </div>
+      {selectedRecord ? (
+        <HistoryResultModal record={selectedRecord} onClose={() => setSelectedRecord(null)} />
+      ) : null}
     </div>
   );
 }

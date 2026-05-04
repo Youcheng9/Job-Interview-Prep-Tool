@@ -1,136 +1,109 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { clearToken, isAuthenticated } from "../lib/api";
 import { useTheme } from "./ThemeProvider";
 
 export function Navbar() {
   const location = useLocation();
+  const navigate = useNavigate();
   const authed = isAuthenticated();
   const { theme, toggleTheme } = useTheme();
 
   const navItems = [
-    { path: "/", label: "Home" },
-    { path: "/interview", label: "Interview" },
-    { path: "/history", label: "History" },
+    { path: "/history", label: "Progress" },
   ];
 
+  const scrollToPracticeSetup = () => {
+    window.requestAnimationFrame(() => {
+      const target = document.getElementById("practice-setup");
+      if (target) {
+        target.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    });
+  };
+
+  const handlePracticeClick = () => {
+    if (location.pathname === "/") {
+      scrollToPracticeSetup();
+      return;
+    }
+
+    navigate("/");
+    window.setTimeout(scrollToPracticeSetup, 0);
+  };
+
   return (
-    <nav
-      style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        right: 0,
-        background: "var(--surface)",
-        borderBottom: "1px solid var(--border)",
-        padding: "0 32px",
-        zIndex: 1000,
-        backdropFilter: "blur(10px)",
-      }}
-    >
-      <div
-        style={{
-          maxWidth: "1180px",
-          margin: "0 auto",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          height: "64px",
-        }}
-      >
-        {/* Logo/Title */}
-        <Link
-          to="/"
-          style={{
-            textDecoration: "none",
-            fontFamily: "var(--font-head)",
-            fontSize: "20px",
-            fontWeight: "700",
-            letterSpacing: "0.1em",
-            color: "var(--text)",
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-          }}
-        >
-          <div
-            style={{
-              width: "8px",
-              height: "8px",
-              background: "var(--cyan)",
-              borderRadius: "50%",
-              boxShadow: "0 0 8px var(--cyan-glow)",
-            }}
-          />
-          INTERVIEW <span style={{ color: "var(--cyan)" }}>INTEL</span>
-        </Link>
-
-        {/* Navigation Links */}
-        <div style={{ display: "flex", alignItems: "center", gap: "24px" }}>
-          <button
-            className="btn-ghost"
-            onClick={toggleTheme}
-            style={{
-              fontSize: "13px",
-              padding: "6px 16px",
-            }}
+    <>
+      <nav className="site-navbar">
+        <div className="shell-width navbar-shell">
+          <Link
+            to="/"
+            className="navbar-brand"
           >
-            {theme === "dark" ? "Light Mode" : "Dark Mode"}
-          </button>
+            <span>Interview<span style={{ color: "var(--acid)" }}>Ace</span></span>
+          </Link>
 
-          {navItems.map(({ path, label }) => (
-            <Link
-              key={path}
-              to={path}
-              style={{
-                textDecoration: "none",
-                fontFamily: "var(--font-head)",
-                fontSize: "14px",
-                fontWeight: "500",
-                letterSpacing: "0.08em",
-                textTransform: "uppercase",
-                color: location.pathname === path ? "var(--cyan)" : "var(--muted)",
-                transition: "color 0.2s",
-                padding: "8px 12px",
-                borderRadius: "4px",
-                border: location.pathname === path ? "1px solid var(--cyan)" : "1px solid transparent",
-              }}
-            >
-              {label}
-            </Link>
-          ))}
-
-          {/* Auth Button */}
-          {authed ? (
-            <button
-              className="btn-ghost"
-              onClick={() => {
-                clearToken();
-                window.location.reload();
-              }}
-              style={{
-                fontSize: "13px",
-                padding: "6px 16px",
-                marginLeft: "8px",
-              }}
-            >
-              Sign Out
-            </button>
-          ) : (
-            <Link to="/auth" style={{ textDecoration: "none" }}>
+          <div className="navbar-controls">
+            <div className="navbar-links">
+              <Link
+                to="/"
+                className={`navbar-link ${location.pathname === "/" ? "navbar-link-active" : ""}`}
+              >
+                Home
+              </Link>
               <button
-                className="btn-ghost"
-                style={{
-                  fontSize: "13px",
-                  padding: "6px 16px",
-                  marginLeft: "8px",
+                type="button"
+                onClick={handlePracticeClick}
+                className={`navbar-link ${location.pathname.startsWith("/interview") ? "navbar-link-active" : ""}`}
+              >
+                Practice
+              </button>
+              {navItems.map((item) => {
+                const active =
+                  location.pathname.startsWith(item.path);
+
+                return (
+                  <Link
+                    key={item.path}
+                    to={item.path}
+                    className={`navbar-link ${active ? "navbar-link-active" : ""}`}
+                  >
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </div>
+
+            {authed ? (
+              <button
+                type="button"
+                className="btn-primary navbar-action-button"
+                onClick={() => {
+                  clearToken();
+                  window.location.reload();
                 }}
               >
-                Sign In
+                Sign Out
               </button>
-            </Link>
-          )}
+            ) : (
+              <Link to="/auth" style={{ textDecoration: "none" }}>
+                <button type="button" className="btn-primary navbar-action-button">
+                  Sign in
+                </button>
+              </Link>
+            )}
+          </div>
         </div>
-      </div>
-    </nav>
+      </nav>
+
+      <button
+        type="button"
+        className="theme-toggle-button"
+        onClick={toggleTheme}
+        aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+        title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+      >
+        <span className="theme-toggle-icon" aria-hidden="true" />
+      </button>
+    </>
   );
 }

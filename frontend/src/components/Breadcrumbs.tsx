@@ -2,76 +2,50 @@ import { Link, useLocation } from "react-router-dom";
 
 export function Breadcrumbs() {
   const location = useLocation();
-  const pathnames = location.pathname.split('/').filter(x => x);
+  const pathnames = location.pathname.split("/").filter(Boolean);
 
   const breadcrumbNameMap: Record<string, string> = {
-    'interview': 'Interview',
-    'history': 'Session History',
-    'auth': 'Authentication',
+    interview: "Practice",
+    history: "History",
+    auth: "Access",
   };
 
   return (
-    <nav
-      style={{
-        padding: "16px 32px",
-        borderBottom: "1px solid var(--border)",
-        background: "var(--surface)",
-      }}
-    >
-      <div style={{ maxWidth: "1180px", margin: "0 auto" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <Link
-            to="/"
-            style={{
-              textDecoration: "none",
-              color: "var(--muted)",
-              fontSize: "14px",
-              fontFamily: "var(--font-head)",
-              textTransform: "uppercase",
-              letterSpacing: "0.08em",
-            }}
-          >
-            Home
-          </Link>
-          {pathnames.map((pathname, index) => {
-            const routeTo = `/${pathnames.slice(0, index + 1).join('/')}`;
-            const isLast = index === pathnames.length - 1;
-            const displayName = breadcrumbNameMap[pathname] || pathname;
+    <nav style={{ borderBottom: "1px solid var(--border)", background: "var(--subnav-bg)" }}>
+      <div
+        className="shell-width mono"
+        style={{
+          minHeight: "48px",
+          display: "flex",
+          alignItems: "center",
+          gap: "8px",
+          fontSize: "11px",
+          textTransform: "uppercase",
+          letterSpacing: "0.12em",
+          color: "var(--muted)",
+        }}
+      >
+        <Link to="/" style={{ textDecoration: "none" }}>
+          root
+        </Link>
+        {pathnames.map((pathname, index) => {
+          const routeTo = `/${pathnames.slice(0, index + 1).join("/")}`;
+          const isLast = index === pathnames.length - 1;
+          const displayName = breadcrumbNameMap[pathname] || pathname;
 
-            return (
-              <div key={pathname} style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                <span style={{ color: "var(--muted)", fontSize: "12px" }}>→</span>
-                {isLast ? (
-                  <span
-                    style={{
-                      color: "var(--cyan)",
-                      fontSize: "14px",
-                      fontFamily: "var(--font-head)",
-                      textTransform: "uppercase",
-                      letterSpacing: "0.08em",
-                    }}
-                  >
-                    {displayName}
-                  </span>
-                ) : (
-                  <Link
-                    to={routeTo}
-                    style={{
-                      textDecoration: "none",
-                      color: "var(--muted)",
-                      fontSize: "14px",
-                      fontFamily: "var(--font-head)",
-                      textTransform: "uppercase",
-                      letterSpacing: "0.08em",
-                    }}
-                  >
-                    {displayName}
-                  </Link>
-                )}
-              </div>
-            );
-          })}
-        </div>
+          return (
+            <span key={routeTo} style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <span style={{ color: "var(--acid)" }}>{">"}</span>
+              {isLast ? (
+                <span style={{ color: "var(--text)" }}>{displayName}</span>
+              ) : (
+                <Link to={routeTo} style={{ textDecoration: "none" }}>
+                  {displayName}
+                </Link>
+              )}
+            </span>
+          );
+        })}
       </div>
     </nav>
   );

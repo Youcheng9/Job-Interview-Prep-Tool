@@ -12,3 +12,5 @@ backend/.env
 
 # Alembic cache
 backend/migrations/__pycache__/
+
+.codex/

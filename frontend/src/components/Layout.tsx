@@ -10,15 +10,13 @@ interface LayoutProps {
 
 export function Layout({ children }: LayoutProps) {
   const location = useLocation();
-  const showBreadcrumbs = location.pathname !== '/';
+  const showBreadcrumbs = location.pathname !== "/";
 
   return (
-    <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
+    <div className="site-shell">
       <Navbar />
-      {showBreadcrumbs && <Breadcrumbs />}
-      <main style={{ flex: 1, paddingTop: showBreadcrumbs ? "0" : "64px" }}>
-        {children}
-      </main>
+      {showBreadcrumbs ? <Breadcrumbs /> : null}
+      <main className="shell-main">{children}</main>
       <Footer />
     </div>
   );

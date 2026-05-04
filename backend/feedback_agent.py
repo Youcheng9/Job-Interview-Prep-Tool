@@ -165,6 +165,7 @@ def build_fallback_feedback(
         "improvements": improvements,
         "improved_answer": improved_answer,
         "next_focus": next_focus,
+        "label": "fallback",
     }
 
 

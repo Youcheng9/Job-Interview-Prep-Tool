@@ -9,6 +9,8 @@ This module owns:
 
 from __future__ import annotations
 
+from functools import lru_cache
+
 import numpy as np
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
@@ -27,10 +29,29 @@ def get_model() -> SentenceTransformer:
     return _MODEL
 
 
+def warm_model() -> SentenceTransformer:
+    """
+    Load the model during app startup to avoid first-request latency.
+    """
+    return get_model()
+
+
+@lru_cache(maxsize=4096)
+def embed_text_cached(text: str) -> tuple[float, ...]:
+    vector = get_model().encode([text], convert_to_numpy=True, show_progress_bar=False)[0]
+    return tuple(float(value) for value in vector)
+
+
 def embed_texts(texts: list[str]) -> np.ndarray:
     """
     Embed a list of texts and return a numpy array of shape (n, dim).
     """
+    if not texts:
+        return np.empty((0, 0))
+
+    if len(texts) == 1:
+        return np.array([embed_text_cached(texts[0])], dtype=float)
+
     model = get_model()
     return model.encode(texts, convert_to_numpy=True, show_progress_bar=False)
 

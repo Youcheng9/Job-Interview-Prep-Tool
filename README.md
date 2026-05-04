@@ -22,6 +22,7 @@ SWE-Interview-AI/
 ## What Works
 
 - user registration and login
+- forgot-password and reset-password flow
 - question retrieval by role
 - protected answer scoring
 - protected history view
@@ -76,6 +77,15 @@ DATABASE_URL=postgresql+psycopg2://postgres:YOUR_PASSWORD@localhost:5432/intervi
 JWT_SECRET=CHANGE_ME_TO_A_LONG_RANDOM_STRING
 JWT_ALGORITHM=HS256
 ACCESS_TOKEN_EXPIRE_MINUTES=10080
+PASSWORD_RESET_TOKEN_EXPIRE_MINUTES=30
+PASSWORD_RESET_URL_BASE=http://localhost:5173/auth?mode=reset
+
+EMAIL_FROM=no-reply@interviewprep.local
+SMTP_HOST=
+SMTP_PORT=587
+SMTP_USERNAME=
+SMTP_PASSWORD=
+SMTP_USE_TLS=true
 
 OLLAMA_URL=http://127.0.0.1:11434/api/generate
 OLLAMA_MODEL=llama3.1:8b

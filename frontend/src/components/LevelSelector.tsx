@@ -7,86 +7,70 @@ interface Props {
 
 const LEVELS: Array<{
   id: CandidateLevel;
+  code: string;
   label: string;
-  tag: string;
   desc: string;
-  accent: string;
 }> = [
   {
     id: "intern",
+    code: "L1",
     label: "Intern",
-    tag: "Level 01",
-    desc: "Foundational questions focused on basics, clear thinking, and coachable reasoning.",
-    accent: "#22c55e",
+    desc: "Foundational interviews focused on fundamentals, clear communication, and coachable reasoning",
   },
   {
     id: "new_grad",
+    code: "L2",
     label: "New Grad",
-    tag: "Level 02",
-    desc: "Questions with more ownership, stronger tradeoffs, and deeper expected detail.",
-    accent: "#0d9488",
+    desc: "A higher bar for ownership, decision quality, and depth under tighter follow-up pressure",
   },
 ];
 
 export function LevelSelector({ selected, onChange }: Props) {
   return (
-    <div
-      style={{
-        display: "grid",
-        gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-        gap: "18px",
-      }}
-    >
+    <div className="level-card-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "clamp(12px, 1.5vw, 18px)" }}>
       {LEVELS.map((level) => {
-        const isActive = selected === level.id;
+        const active = selected === level.id;
         return (
           <button
             key={level.id}
             type="button"
             onClick={() => onChange(level.id)}
+            className="panel"
             style={{
-              background: isActive
-                ? `linear-gradient(135deg, ${level.accent}18, ${level.accent}08)`
-                : "var(--surface)",
-              border: `1px solid ${isActive ? level.accent : "var(--border)"}`,
-              borderRadius: "2px",
-              padding: "22px 24px",
+              padding: "clamp(20px, 1.8vw, 28px)",
               textAlign: "left",
               cursor: "pointer",
-              boxShadow: isActive ? `0 0 22px ${level.accent}24` : "none",
-              transition: "all 0.2s ease",
+              background: active ? "var(--surface2)" : "var(--surface)",
             }}
           >
             <div
-              className="mono"
+              className="chip"
               style={{
-                display: "inline-block",
-                fontSize: "12px",
-                letterSpacing: "0.12em",
-                color: level.accent,
-                background: `${level.accent}18`,
-                border: `1px solid ${level.accent}40`,
-                padding: "4px 10px",
                 marginBottom: "14px",
+                color: active ? "var(--acid)" : "var(--muted)",
               }}
             >
-              {level.tag}
+              {level.code}
             </div>
             <div
               style={{
                 fontFamily: "var(--font-head)",
-                fontSize: "22px",
-                letterSpacing: "0.04em",
-                textTransform: "uppercase",
-                color: isActive ? level.accent : "var(--text)",
-                marginBottom: "10px",
+                fontSize: "clamp(1.6rem, 1.25rem + 0.8vw, 2rem)",
+                fontWeight: 700,
+                marginBottom: "8px",
+                color: active ? "var(--acid)" : "var(--text)",
               }}
             >
               {level.label}
             </div>
-            <div style={{ fontSize: "15px", lineHeight: 1.7, color: "var(--muted)" }}>
+            <p
+              style={{
+                fontSize: "0.98rem",
+                color: active ? "var(--acid)" : "var(--muted)",
+              }}
+            >
               {level.desc}
-            </div>
+            </p>
           </button>
         );
       })}

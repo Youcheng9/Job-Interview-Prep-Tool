@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import type { ScoreResult } from "../lib/api";
 
 interface Props {
@@ -6,6 +7,7 @@ interface Props {
   onNext: () => void;
   onGenerateAiFeedback?: () => void;
   isGeneratingAiFeedback?: boolean;
+  aiFeedbackPollAttempts?: number;
 }
 
 const TIPS: Record<string, string[]> = {
@@ -35,6 +37,8 @@ const TIPS: Record<string, string[]> = {
   ],
 };
 
+const scaledFont = (px: number) => `calc(${px}px * var(--result-card-font-scale))`;
+
 function ImprovementTip({ tip }: { tip: string }) {
   return (
     <div
@@ -45,7 +49,7 @@ function ImprovementTip({ tip }: { tip: string }) {
         background: "var(--surface2)",
         border: "1px solid var(--border)",
         marginBottom: "8px",
-        fontSize: "15px",
+        fontSize: scaledFont(15),
         color: "var(--muted)",
         lineHeight: 1.6,
       }}
@@ -86,6 +90,7 @@ export function FeedbackPanel({
   onNext,
   onGenerateAiFeedback,
   isGeneratingAiFeedback = false,
+  aiFeedbackPollAttempts = 0,
 }: Props) {
   const weakDims = (
     ["technical_depth", "clarity", "completeness", "structure"] as const
@@ -93,17 +98,27 @@ export function FeedbackPanel({
   const focusAreaTips = getFocusAreaTips(score);
   const ai = score.ai_feedback;
   const aiError = score.ai_feedback_error;
-  const canGenerateAiFeedback = Boolean(onGenerateAiFeedback) && !ai && !isGeneratingAiFeedback;
+  const aiSource = score.ai_feedback_source;
+  const isFallbackFeedback = aiSource === "fallback";
+  const isAiPending = Boolean(score.ai_feedback_pending) && !ai;
+  const canGenerateAiFeedback =
+    Boolean(onGenerateAiFeedback) &&
+    (!ai || isFallbackFeedback) &&
+    !isGeneratingAiFeedback;
 
   return (
     <div
       className="panel animate-fade-up"
-      style={{ padding: "30px", animationDelay: "150ms" }}
+      style={{
+        padding: "30px",
+        animationDelay: "150ms",
+        "--result-card-font-scale": 1.2,
+      } as CSSProperties}
     >
       <div
         style={{
           fontFamily: "var(--font-head)",
-          fontSize: "16px",
+          fontSize: scaledFont(16),
           fontWeight: 600,
           letterSpacing: "0.12em",
           textTransform: "uppercase",
@@ -135,15 +150,32 @@ export function FeedbackPanel({
           <div
             style={{
               fontFamily: "var(--font-head)",
-              fontSize: "12px",
+              fontSize: scaledFont(12),
               letterSpacing: "0.1em",
               textTransform: "uppercase",
               color: "var(--cyan)",
               marginBottom: "12px",
             }}
           >
-            AI Coach Summary
+            {isFallbackFeedback ? "Fallback Coach Summary" : "AI Coach Summary"}
           </div>
+
+          {isFallbackFeedback && (
+            <div
+              style={{
+                marginBottom: "12px",
+                padding: "14px 16px",
+                background: "rgba(245,158,11,0.08)",
+                border: "1px solid rgba(245,158,11,0.22)",
+                borderLeft: "2px solid var(--amber)",
+                fontSize: scaledFont(14),
+                lineHeight: 1.7,
+                color: "var(--text)",
+              }}
+            >
+              This is fallback guidance from deterministic scoring because the live model response was unavailable.
+            </div>
+          )}
 
           <div
             style={{
@@ -151,7 +183,7 @@ export function FeedbackPanel({
               background: "var(--surface2)",
               border: "1px solid var(--border)",
               borderLeft: "2px solid var(--cyan)",
-              fontSize: "15px",
+              fontSize: scaledFont(15),
               lineHeight: 1.7,
               color: "var(--text)",
               marginBottom: "12px",
@@ -165,7 +197,7 @@ export function FeedbackPanel({
               <div
                 style={{
                   fontFamily: "var(--font-head)",
-                  fontSize: "12px",
+                  fontSize: scaledFont(12),
                   letterSpacing: "0.1em",
                   textTransform: "uppercase",
                   color: "var(--muted)",
@@ -184,7 +216,7 @@ export function FeedbackPanel({
                     background: "var(--surface2)",
                     border: "1px solid var(--border)",
                     marginBottom: "8px",
-                    fontSize: "15px",
+                    fontSize: scaledFont(15),
                     color: "var(--muted)",
                     lineHeight: 1.6,
                   }}
@@ -203,7 +235,7 @@ export function FeedbackPanel({
                 padding: "14px 16px",
                 background: "var(--surface2)",
                 border: "1px solid var(--border)",
-                fontSize: "14px",
+                fontSize: scaledFont(14),
                 color: "var(--text)",
               }}
             >
@@ -219,7 +251,7 @@ export function FeedbackPanel({
               <summary
                 style={{
                   fontFamily: "var(--font-head)",
-                  fontSize: "12px",
+                  fontSize: scaledFont(12),
                   letterSpacing: "0.1em",
                   textTransform: "uppercase",
                   color: "var(--muted)",
@@ -234,7 +266,7 @@ export function FeedbackPanel({
                   padding: "16px 18px",
                   background: "var(--surface2)",
                   border: "1px solid var(--border)",
-                  fontSize: "15px",
+                  fontSize: scaledFont(15),
                   color: "var(--muted)",
                   lineHeight: 1.75,
                 }}
@@ -246,7 +278,7 @@ export function FeedbackPanel({
         </div>
       )}
 
-      {!ai && !aiError && onGenerateAiFeedback && (
+      {!ai && (isAiPending || !aiError) && onGenerateAiFeedback && (
         <div
           style={{
             marginBottom: "20px",
@@ -257,13 +289,17 @@ export function FeedbackPanel({
         >
           <div
             style={{
-              fontSize: "14px",
+              fontSize: scaledFont(14),
               lineHeight: 1.7,
               color: "var(--muted)",
               marginBottom: "12px",
             }}
           >
-            Deterministic scoring is ready. AI coaching is optional and may take longer depending on your local Ollama model.
+            {isAiPending
+              ? aiFeedbackPollAttempts >= 4
+                ? "AI coaching is taking longer than expected. Use the button below to force a direct generation attempt."
+                : "AI coaching is being generated in the background. We will retry a few times automatically."
+              : "Deterministic scoring is ready. AI coaching is optional and may take longer depending on your local Ollama model."}
           </div>
           <button
             className="btn-ghost"
@@ -275,12 +311,18 @@ export function FeedbackPanel({
               cursor: canGenerateAiFeedback ? "pointer" : "not-allowed",
             }}
           >
-            {isGeneratingAiFeedback ? "Generating AI Feedback..." : "Generate AI Coach Feedback"}
+            {isGeneratingAiFeedback
+              ? "Generating AI Feedback..."
+              : isAiPending && aiFeedbackPollAttempts >= 4
+                ? "Force AI Coach Generation"
+                : isAiPending
+                ? "Refresh AI Coach Feedback"
+                : "Generate AI Coach Feedback"}
           </button>
         </div>
       )}
 
-      {!ai && aiError && (
+      {aiError && (
         <div
           style={{
             marginBottom: "20px",
@@ -288,7 +330,7 @@ export function FeedbackPanel({
             background: "rgba(245,158,11,0.08)",
             border: "1px solid rgba(245,158,11,0.22)",
             borderLeft: "2px solid var(--amber)",
-            fontSize: "14px",
+            fontSize: scaledFont(14),
             lineHeight: 1.7,
             color: "var(--text)",
           }}
@@ -300,12 +342,28 @@ export function FeedbackPanel({
         </div>
       )}
 
+      {isFallbackFeedback && onGenerateAiFeedback && (
+        <button
+          className="btn-ghost"
+          type="button"
+          onClick={onGenerateAiFeedback}
+          disabled={!canGenerateAiFeedback}
+          style={{
+            marginBottom: "20px",
+            opacity: canGenerateAiFeedback ? 1 : 0.6,
+            cursor: canGenerateAiFeedback ? "pointer" : "not-allowed",
+          }}
+        >
+          {isGeneratingAiFeedback ? "Retrying AI Feedback..." : "Retry With Live AI Model"}
+        </button>
+      )}
+
       {focusAreaTips.length > 0 ? (
         <>
           <div
             style={{
               fontFamily: "var(--font-head)",
-              fontSize: "12px",
+              fontSize: scaledFont(12),
               letterSpacing: "0.1em",
               textTransform: "uppercase",
               color: "var(--muted)",
@@ -324,7 +382,7 @@ export function FeedbackPanel({
             textAlign: "center",
             padding: "20px",
             fontFamily: "var(--font-head)",
-            fontSize: "18px",
+            fontSize: scaledFont(18),
             letterSpacing: "0.08em",
             color: "#22c55e",
           }}
@@ -347,7 +405,7 @@ export function FeedbackPanel({
         <span
           style={{
             fontFamily: "var(--font-head)",
-            fontSize: "12px",
+            fontSize: scaledFont(12),
             letterSpacing: "0.12em",
             textTransform: "uppercase",
             color: "var(--muted)",
@@ -355,9 +413,9 @@ export function FeedbackPanel({
         >
           Dimensions at target
         </span>
-        <span className="mono" style={{ fontSize: "24px", color: "var(--cyan)" }}>
+        <span className="mono" style={{ fontSize: scaledFont(24), color: "var(--cyan)" }}>
           {4 - weakDims.length}
-          <span style={{ color: "var(--muted)", fontSize: "16px" }}> / 4</span>
+          <span style={{ color: "var(--muted)", fontSize: scaledFont(16) }}> / 4</span>
         </span>
       </div>
 

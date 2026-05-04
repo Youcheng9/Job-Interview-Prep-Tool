@@ -5,6 +5,7 @@ from backend.routers.dbcheck import router as db_router
 from backend.routers.scoring import router as scoring_router
 from backend.routers.auth import router as auth_router
 from backend.routers.history import router as history_router
+from backend.ml.embedder import warm_model
 
 app = FastAPI(title="InterviewPrep API")
 
@@ -42,3 +43,11 @@ app.include_router(scoring_router)
 app.include_router(auth_router)
 
 app.include_router(history_router)
+
+
+@app.on_event("startup")
+def warm_embedding_model() -> None:
+    try:
+        warm_model()
+    except Exception:
+        pass
