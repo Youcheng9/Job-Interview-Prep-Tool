@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useSearchParams, useNavigate, useLocation } from "react-router-dom";
 import { ScoreCard } from "../../components/ScoreCard";
 import { FeedbackPanel } from "../../components/FeedbackPanel";
 import { readSavedQuestionId, saveInterviewSession } from "../../lib/interviewSession";
@@ -139,6 +139,7 @@ const ROLE_LABELS: Record<Role, string> = {
 export default function InterviewPage() {
   const [params] = useSearchParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const roleParam = params.get("role");
   const role = roleParam === "data" || roleParam === "pm" || roleParam === "behavioral" ? roleParam : "swe";
   const levelParam = params.get("level");
@@ -162,6 +163,13 @@ export default function InterviewPage() {
   const [isQuestionSidebarPreviewed, setIsQuestionSidebarPreviewed] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const recognitionRef = useRef<InstanceType<SpeechRecognitionCtor> | null>(null);
+
+  useEffect(() => {
+    if (authed) return;
+
+    const next = `${location.pathname}${location.search}`;
+    navigate(`/auth?next=${encodeURIComponent(next)}`, { replace: true });
+  }, [authed, location.pathname, location.search, navigate]);
 
   useEffect(() => {
     const Recognition = window.SpeechRecognition ?? window.webkitSpeechRecognition;
@@ -226,6 +234,8 @@ export default function InterviewPage() {
   }, []);
 
   useEffect(() => {
+    if (!authed) return;
+
     setError(null);
     getQuestions(role, level)
       .then((loadedQuestions) => {
@@ -251,7 +261,7 @@ export default function InterviewPage() {
         setPhase("question");
       })
       .catch(() => setError("Failed to load questions."));
-  }, [level, role, requestedQuestionId]);
+  }, [authed, level, role, requestedQuestionId]);
 
   useEffect(() => {
     if (!authed) {
@@ -392,6 +402,10 @@ export default function InterviewPage() {
 
     textareaRef.current?.focus();
     recognitionRef.current.start();
+  }
+
+  if (!authed) {
+    return null;
   }
 
   // Loading state

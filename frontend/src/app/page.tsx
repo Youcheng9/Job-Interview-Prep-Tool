@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { LevelSelector } from "../components/LevelSelector";
 import { RoleSelector } from "../components/RoleSelector";
@@ -43,23 +43,19 @@ const STATS = [
   { value: "Saved", label: "session history", detail: "Review previous answers, retry weak areas, and track improvement" },
 ];
 
-const PRACTICE_PREVIEW_QUESTIONS = [
-  { id: "Q_001", title: "Caching invalidation tradeoffs", state: "Completed" },
-  { id: "Q_002", title: "Design a rate limiter for a public API", state: "Active" },
-  { id: "Q_003", title: "Retries, backoff, and idempotency", state: "Queued" },
-];
+const PRACTICE_PREVIEW_QUESTION = {
+  id: "Q_001",
+  title: "Describe the difference between an array and a linked list.",
+  detail: "Keep the answer short and explain the tradeoff in access and insertion.",
+};
 
-const PRACTICE_PREVIEW_ANSWER = [
-  "I would start with a token bucket per client so bursts are tolerated without losing control of the long-term rate.",
-  "To keep the limit consistent across instances, I would store counters in Redis with short TTL windows and Lua for atomic updates.",
-  "If Redis is unavailable, I would fail open for low-risk traffic but fail closed for expensive write paths and log the fallback.",
-  "I would surface remaining quota headers and monitor rejected requests by tenant to catch abuse and bad defaults early.",
-];
+const PRACTICE_PREVIEW_ANSWER_TEXT =
+  "An array gives fast index access, while a linked list is better for inserts and deletes because you do not have to shift elements.";
 
 const PRACTICE_PREVIEW_FEEDBACK = [
-  { label: "Structure", value: "8.8/10", width: "88%" },
-  { label: "Tradeoffs", value: "8.1/10", width: "81%" },
-  { label: "Depth", value: "7.9/10", width: "79%" },
+  { label: "Clarity", value: "8.9/10", width: 89 },
+  { label: "Accuracy", value: "8.6/10", width: 86 },
+  { label: "Depth", value: "7.8/10", width: 78 },
 ];
 
 const WORKFLOW = [
@@ -80,17 +76,48 @@ const WORKFLOW = [
   },
 ];
 
+const COMPARISON_ROWS = [
+  {
+    feature: "Real intern + new-grad loops by company",
+    ours: true,
+    others: "—",
+  },
+  {
+    feature: "Voice answers, not just text",
+    ours: true,
+    others: "—",
+  },
+  {
+    feature: "Scored against an ideal answer",
+    ours: true,
+    others: "Pass / fail",
+  },
+  {
+    feature: "Behavioral + system design + DS/ML",
+    ours: true,
+    others: "DSA only",
+  },
+  {
+    feature: "Targeted feedback in <10s",
+    ours: true,
+    others: "Peer-graded",
+  },
+] as const;
+
 export default function HomePage() {
   const [role, setRole] = useState<Role | null>("swe");
   const [level, setLevel] = useState<CandidateLevel>("new_grad");
   const [levelConfirmed, setLevelConfirmed] = useState(false);
   const [selectedCompany, setSelectedCompany] = useState("OpenAI");
   const [companyPage, setCompanyPage] = useState(0);
+  const [previewTypedCount, setPreviewTypedCount] = useState(0);
+  const [previewPhase, setPreviewPhase] = useState<"typing" | "submitting" | "feedback">("typing");
   const navigate = useNavigate();
   const authed = isAuthenticated();
   const previousWork = authed ? getSavedInterviewSession() : null;
 
   const launchHref = `/interview?role=${role ?? "swe"}&level=${level}&company=${encodeURIComponent(selectedCompany)}`;
+  const authHref = `/auth?next=${encodeURIComponent(launchHref)}`;
 
   const hasSavedRound = () => {
     if (!role) return false;
@@ -119,6 +146,65 @@ export default function HomePage() {
     companyPage * AUTH_COMPANY_PAGE_SIZE,
     (companyPage + 1) * AUTH_COMPANY_PAGE_SIZE,
   );
+  const previewVisibleAnswer = PRACTICE_PREVIEW_ANSWER_TEXT.slice(0, previewTypedCount);
+  const previewFeedbackVisible = previewPhase === "feedback";
+  const previewEvaluationLabel =
+    previewPhase === "typing" ? "Evaluation pending" : previewPhase === "submitting" ? "Evaluating answer" : "Feedback ready";
+
+  const getPreviewTypingDelay = (nextChar: string) => {
+    if (/[.,]/.test(nextChar)) return 220;
+    if (/\s/.test(nextChar)) return 40;
+    return 82;
+  };
+
+  useEffect(() => {
+    let typingTimeoutId: number | undefined;
+    let submitTimeoutId: number | undefined;
+    let resetTimeoutId: number | undefined;
+    let cancelled = false;
+
+    const typePreview = (nextIndex: number) => {
+      if (cancelled) return;
+
+      setPreviewTypedCount(nextIndex);
+
+      if (nextIndex >= PRACTICE_PREVIEW_ANSWER_TEXT.length) {
+        submitTimeoutId = window.setTimeout(() => {
+          if (cancelled) return;
+          setPreviewPhase("submitting");
+
+          resetTimeoutId = window.setTimeout(() => {
+            if (cancelled) return;
+            setPreviewPhase("feedback");
+
+            resetTimeoutId = window.setTimeout(() => {
+              if (cancelled) return;
+              setPreviewPhase("typing");
+              setPreviewTypedCount(0);
+              typingTimeoutId = window.setTimeout(() => typePreview(1), 900);
+            }, 2200);
+          }, 2200);
+        }, 900);
+        return;
+      }
+
+      typingTimeoutId = window.setTimeout(
+        () => typePreview(nextIndex + 1),
+        getPreviewTypingDelay(PRACTICE_PREVIEW_ANSWER_TEXT.charAt(nextIndex)),
+      );
+    };
+
+    setPreviewTypedCount(0);
+    setPreviewPhase("typing");
+    typingTimeoutId = window.setTimeout(() => typePreview(1), 600);
+
+    return () => {
+      cancelled = true;
+      if (typingTimeoutId !== undefined) window.clearTimeout(typingTimeoutId);
+      if (submitTimeoutId !== undefined) window.clearTimeout(submitTimeoutId);
+      if (resetTimeoutId !== undefined) window.clearTimeout(resetTimeoutId);
+    };
+  }, []);
 
   if (authed) {
     return (
@@ -343,11 +429,11 @@ export default function HomePage() {
               <button
                 type="button"
                 className="btn-primary hero-action-button"
-                onClick={() => (authed ? scrollToPracticeSetup() : navigate(launchHref))}
+                onClick={scrollToPracticeSetup}
               >
                 Start practice
               </button>
-              <Link to={authed ? "/history" : "/auth"} className="landing-secondary-link">
+              <Link to={authed ? "/history" : authHref} className="landing-secondary-link">
                 <button type="button" className="btn-ghost hero-action-button">
                   {authed ? "View progress" : "Create account"}
                 </button>
@@ -367,71 +453,42 @@ export default function HomePage() {
                   <div className="eyebrow" style={{ marginBottom: "8px" }}>
                     Practice interface
                   </div>
-                  <h2 style={{ fontSize: "28px", lineHeight: 1.05 }}>Full interview loop, animated</h2>
+                  <h2 style={{ fontSize: "28px", lineHeight: 1.05 }}>Practice session preview</h2>
                 </div>
-                <div className="score-pill">SWE · New grad</div>
+                <div className="score-pill">DSA · Intern</div>
               </div>
 
               <div className="practice-demo-shell" aria-label="Animated practice session preview">
                 <aside className="practice-demo-sidebar panel">
                   <div className="practice-demo-sidebar-header">
                     <span className="eyebrow">Question bank</span>
-                    <span className="practice-demo-sidebar-count">3 prompts</span>
+                    <span className="practice-demo-sidebar-count">1 prompt</span>
                   </div>
                   <div className="practice-demo-sidebar-list">
-                    {PRACTICE_PREVIEW_QUESTIONS.map((item, index) => (
-                      <div
-                        key={item.id}
-                        className={`practice-demo-sidebar-item ${
-                          index === 1 ? "practice-demo-sidebar-item-active" : ""
-                        }`}
-                      >
-                        <div className="practice-demo-sidebar-id mono">{item.id}</div>
-                        <div className="practice-demo-sidebar-copy">
-                          <div className="practice-demo-sidebar-title">{item.title}</div>
-                          <div className="practice-demo-sidebar-state">{item.state}</div>
-                        </div>
+                    <div className="practice-demo-sidebar-item practice-demo-sidebar-item-active">
+                      <div className="practice-demo-sidebar-id mono">{PRACTICE_PREVIEW_QUESTION.id}</div>
+                      <div className="practice-demo-sidebar-copy">
+                        <div className="practice-demo-sidebar-title">{PRACTICE_PREVIEW_QUESTION.title}</div>
+                        <div className="practice-demo-sidebar-state">Active</div>
                       </div>
-                    ))}
+                    </div>
                   </div>
                 </aside>
 
                 <div className="practice-demo-main">
-                  <div className="practice-demo-progress">
-                    <div className="practice-demo-progress-bar">
-                      <div className="practice-demo-progress-fill" />
-                    </div>
-                    <div className="practice-demo-progress-meta">
-                      <span>Question 2 of 5</span>
-                      <span>Generating feedback after submit</span>
-                    </div>
-                  </div>
-
                   <div className="practice-demo-panel-stack">
                     <section className="panel practice-demo-question-card">
-                      <div className="practice-demo-loading">
-                        <div className="practice-demo-loading-label mono">Loading next question</div>
-                        <div className="practice-demo-loading-track">
-                          <div className="practice-demo-loading-fill" />
-                        </div>
-                        <div className="practice-demo-loading-dots">
-                          <span />
-                          <span />
-                          <span />
-                        </div>
-                      </div>
-
                       <div className="practice-demo-question-body">
                         <div className="practice-demo-question-topline">
-                          <span className="mono">Q_002</span>
-                          <span className="practice-demo-badge">System Design</span>
-                          <span className="practice-demo-badge practice-demo-badge-muted">Medium</span>
+                          <span className="mono">{PRACTICE_PREVIEW_QUESTION.id}</span>
+                          <span className="practice-demo-badge">Data Structures</span>
+                          <span className="practice-demo-badge practice-demo-badge-muted">Intern</span>
                         </div>
                         <h3 className="practice-demo-question-title">
-                          Design a rate limiter for a public API used by mobile clients and third-party integrations.
+                          {PRACTICE_PREVIEW_QUESTION.title}
                         </h3>
                         <p className="practice-demo-question-copy">
-                          Explain how you would enforce limits across multiple servers, handle bursts, and keep the system fair during partial outages.
+                          {PRACTICE_PREVIEW_QUESTION.detail}
                         </p>
                       </div>
                     </section>
@@ -439,63 +496,83 @@ export default function HomePage() {
                     <section className="practice-demo-answer-card">
                       <div className="practice-demo-answer-header">
                         <span className="eyebrow">Candidate response</span>
-                        <span className="practice-demo-answer-status">Typing answer</span>
+                        <span className="practice-demo-answer-status">
+                          {previewPhase === "typing" ? "Typing answer" : previewPhase === "submitting" ? "Submitting answer" : "Answer scored"}
+                        </span>
                       </div>
                       <div className="practice-demo-answer-surface">
-                        <div className="practice-demo-answer-lines" aria-hidden="true">
-                          {PRACTICE_PREVIEW_ANSWER.map((line, index) => (
-                            <div key={line} className={`practice-demo-answer-line practice-demo-answer-line-${index + 1}`}>
-                              {line}
-                            </div>
-                          ))}
-                          <div className="practice-demo-answer-caret" />
-                        </div>
-                        <div className="practice-demo-cursor" aria-hidden="true" />
+                        <p className="practice-demo-answer-text" aria-hidden="true">
+                          {previewVisibleAnswer}
+                          {previewPhase === "typing" ? <span className="practice-demo-answer-caret" /> : null}
+                        </p>
                       </div>
                       <div className="practice-demo-answer-footer">
-                        <span className="mono">214 chars</span>
-                        <button type="button" className="btn-primary practice-demo-submit-button">
-                          Submit answer
-                        </button>
+                        <span className="mono">{previewTypedCount} chars</span>
+                        <div className="practice-demo-submit-wrap">
+                          <button
+                            type="button"
+                            className={`btn-primary practice-demo-submit-button${previewPhase === "submitting" ? " practice-demo-submit-button-active" : ""}`}
+                          >
+                            Submit answer
+                          </button>
+                          <div
+                            className={`practice-demo-cursor${previewPhase === "submitting" ? " practice-demo-cursor-active" : ""}`}
+                            aria-hidden="true"
+                          />
+                        </div>
                       </div>
                     </section>
 
                     <section className="panel practice-demo-feedback-card">
-                      <div className="practice-demo-feedback-loading">
-                        <span className="eyebrow">Scoring response</span>
-                        <div className="practice-demo-feedback-loader">
-                          <span />
-                          <span />
-                          <span />
-                        </div>
-                        <p className="muted">Comparing structure, tradeoffs, and depth against the rubric.</p>
-                      </div>
-
-                      <div className="practice-demo-feedback-body">
-                        <div className="practice-demo-feedback-header">
-                          <span className="eyebrow">Feedback ready</span>
-                          <span className="practice-demo-feedback-pill">Strong answer</span>
-                        </div>
-                        <div className="practice-demo-feedback-metrics">
-                          {PRACTICE_PREVIEW_FEEDBACK.map((item, index) => (
-                            <div
-                              key={item.label}
-                              className={`practice-demo-feedback-metric practice-demo-feedback-metric-${index + 1}`}
-                            >
-                              <div className="practice-demo-feedback-metric-row">
-                                <span>{item.label}</span>
-                                <strong>{item.value}</strong>
+                      {previewFeedbackVisible ? (
+                        <div className="practice-demo-feedback-body">
+                          <div className="practice-demo-feedback-header">
+                            <span className="eyebrow">{previewEvaluationLabel}</span>
+                            <span className="practice-demo-feedback-pill">Good foundation</span>
+                          </div>
+                          <div className="practice-demo-feedback-metrics">
+                            {PRACTICE_PREVIEW_FEEDBACK.map((item, index) => (
+                              <div
+                                key={item.label}
+                                className={`practice-demo-feedback-metric practice-demo-feedback-metric-${index + 1}`}
+                              >
+                                <div className="practice-demo-feedback-metric-row">
+                                  <span>{item.label}</span>
+                                  <strong>{item.value}</strong>
+                                </div>
+                                <div className="practice-demo-feedback-track">
+                                  <div className="practice-demo-feedback-fill" style={{ width: `${item.width}%` }} />
+                                </div>
                               </div>
-                              <div className="practice-demo-feedback-track">
-                                <div className="practice-demo-feedback-fill" style={{ width: item.width }} />
-                              </div>
-                            </div>
-                          ))}
+                            ))}
+                          </div>
+                          <p className="practice-demo-feedback-note">
+                            Clear comparison. Add one quick example of when inserts are cheaper in a linked list.
+                          </p>
                         </div>
-                        <p className="practice-demo-feedback-note">
-                          Clear distributed design. Add explicit tenant isolation and quota reset behavior to push this into top-tier signal.
-                        </p>
-                      </div>
+                      ) : (
+                        <div className={`practice-demo-feedback-loading${previewPhase === "submitting" ? " practice-demo-feedback-loading-active" : ""}`}>
+                          <div className="practice-demo-feedback-header">
+                            <span className="eyebrow">{previewEvaluationLabel}</span>
+                            <span className="practice-demo-feedback-pill practice-demo-feedback-pill-muted">
+                              {previewPhase === "typing" ? "Waiting for submit" : "Scoring"}
+                            </span>
+                          </div>
+                          <div className="practice-demo-eval-track" aria-hidden="true">
+                            <div className={`practice-demo-eval-fill${previewPhase === "submitting" ? " practice-demo-eval-fill-active" : ""}`} />
+                          </div>
+                          <div className="practice-demo-feedback-loader">
+                            <span />
+                            <span />
+                            <span />
+                          </div>
+                          <p className={`muted practice-demo-eval-copy${previewPhase === "submitting" ? " practice-demo-eval-copy-active" : ""}`}>
+                            {previewPhase === "typing"
+                              ? "The evaluator is ready once the answer is submitted."
+                              : "Scoring clarity, correctness, and tradeoff awareness."}
+                          </p>
+                        </div>
+                      )}
                     </section>
                   </div>
                 </div>
@@ -580,8 +657,12 @@ export default function HomePage() {
         <LevelSelector selected={level} onChange={handleLevelChange} />
         {levelConfirmed ? (
           <div className="level-start-actions">
-            <button type="button" className="btn-primary level-start-button" onClick={() => navigate(launchHref)}>
-              {hasSavedRound() ? "Continue Questions" : "Start Questions"}
+            <button
+              type="button"
+              className="btn-primary level-start-button"
+              onClick={() => navigate(authed ? launchHref : authHref)}
+            >
+              {authed && hasSavedRound() ? "Continue Questions" : "Start Practice"}
             </button>
           </div>
         ) : null}
@@ -613,6 +694,47 @@ export default function HomePage() {
                 <div className="workflow-step">Step {item.step}</div>
                 <h3 className="workflow-title">{item.title}</h3>
                 <p className="muted workflow-description">{item.description}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="shell-width landing-section">
+        <div className="landing-section-header">
+          <div>
+            <div className="eyebrow landing-eyebrow-large" style={{ marginBottom: "12px" }}>
+              COMPARISON
+            </div>
+            <h2 className="landing-section-title comparison-title" style={{ marginBottom: "12px" }}>
+              <span className="comparison-title-primary">InterviewAI</span>{" "}
+              <span className="comparison-title-secondary">vs the rest.</span>
+            </h2>
+          </div>
+        </div>
+
+        <div className="comparison-table-shell" role="table" aria-label="Comparison between InterviewAI and other services">
+          <div className="comparison-table-header" role="row">
+            <div className="comparison-table-cell comparison-table-cell-head comparison-table-cell-feature" role="columnheader">
+              Feature
+            </div>
+            <div className="comparison-table-cell comparison-table-cell-head comparison-table-cell-ours-head" role="columnheader">
+              InterviewAI
+            </div>
+            <div className="comparison-table-cell comparison-table-cell-head comparison-table-cell-others-head" role="columnheader">
+              Others
+            </div>
+          </div>
+          {COMPARISON_ROWS.map((row) => (
+            <div key={row.feature} className="comparison-table-row" role="row">
+              <div className="comparison-table-cell comparison-table-cell-feature" role="cell" data-label="Feature">
+                {row.feature}
+              </div>
+              <div className="comparison-table-cell comparison-table-cell-ours" role="cell" data-label="InterviewAI">
+                {row.ours ? <span className="comparison-table-check" aria-label="Included">✓</span> : "—"}
+              </div>
+              <div className="comparison-table-cell comparison-table-cell-others" role="cell" data-label="Others">
+                {row.others}
               </div>
             </div>
           ))}
