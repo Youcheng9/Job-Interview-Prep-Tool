@@ -80,6 +80,34 @@ const WORKFLOW = [
   },
 ];
 
+const COMPARISON_ROWS = [
+  {
+    feature: "Real intern + new-grad loops by company",
+    ours: true,
+    others: "—",
+  },
+  {
+    feature: "Voice answers, not just text",
+    ours: true,
+    others: "—",
+  },
+  {
+    feature: "Scored against an ideal answer",
+    ours: true,
+    others: "Pass / fail",
+  },
+  {
+    feature: "Behavioral + system design + DS/ML",
+    ours: true,
+    others: "DSA only",
+  },
+  {
+    feature: "Targeted feedback in <10s",
+    ours: true,
+    others: "Peer-graded",
+  },
+] as const;
+
 export default function HomePage() {
   const [role, setRole] = useState<Role | null>("swe");
   const [level, setLevel] = useState<CandidateLevel>("new_grad");
@@ -613,6 +641,47 @@ export default function HomePage() {
                 <div className="workflow-step">Step {item.step}</div>
                 <h3 className="workflow-title">{item.title}</h3>
                 <p className="muted workflow-description">{item.description}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="shell-width landing-section">
+        <div className="landing-section-header">
+          <div>
+            <div className="eyebrow landing-eyebrow-large" style={{ marginBottom: "12px" }}>
+              05 — DIFF
+            </div>
+            <h2 className="landing-section-title comparison-title" style={{ marginBottom: "12px" }}>
+              <span className="comparison-title-primary">InterviewAI</span>{" "}
+              <span className="comparison-title-secondary">vs the rest.</span>
+            </h2>
+          </div>
+        </div>
+
+        <div className="comparison-table-shell" role="table" aria-label="Comparison between InterviewAI and other services">
+          <div className="comparison-table-header" role="row">
+            <div className="comparison-table-cell comparison-table-cell-head comparison-table-cell-feature" role="columnheader">
+              Feature
+            </div>
+            <div className="comparison-table-cell comparison-table-cell-head comparison-table-cell-ours-head" role="columnheader">
+              InterviewAI
+            </div>
+            <div className="comparison-table-cell comparison-table-cell-head comparison-table-cell-others-head" role="columnheader">
+              Others
+            </div>
+          </div>
+          {COMPARISON_ROWS.map((row) => (
+            <div key={row.feature} className="comparison-table-row" role="row">
+              <div className="comparison-table-cell comparison-table-cell-feature" role="cell" data-label="Feature">
+                {row.feature}
+              </div>
+              <div className="comparison-table-cell comparison-table-cell-ours" role="cell" data-label="InterviewAI">
+                {row.ours ? <span className="comparison-table-check" aria-label="Included">✓</span> : "—"}
+              </div>
+              <div className="comparison-table-cell comparison-table-cell-others" role="cell" data-label="Others">
+                {row.others}
               </div>
             </div>
           ))}

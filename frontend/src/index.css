@@ -2582,6 +2582,95 @@ html[data-theme="light"] .authed-meta-chip strong {
   transform: translateY(-4px);
 }
 
+.comparison-title {
+  text-transform: none;
+}
+
+.comparison-title-primary {
+  color: var(--acid);
+  text-shadow: 0 0 18px rgba(185, 255, 57, 0.28);
+}
+
+.comparison-title-secondary {
+  color: var(--text);
+}
+
+.comparison-table-shell {
+  display: grid;
+  overflow: hidden;
+  border: 1px solid #2a2a2a;
+  border-radius: 0;
+  background: #07090d;
+}
+
+.comparison-table-header,
+.comparison-table-row {
+  display: grid;
+  grid-template-columns: minmax(260px, 1.35fr) minmax(140px, 0.55fr) minmax(180px, 0.8fr);
+}
+
+.comparison-table-row {
+  border-top: 1px solid #2a2a2a;
+}
+
+.comparison-table-cell {
+  min-width: 0;
+  padding: 22px 24px;
+  border-left: 1px solid #2a2a2a;
+  background: #07090d;
+  color: var(--text);
+}
+
+.comparison-table-cell:first-child {
+  border-left: 0;
+}
+
+.comparison-table-cell-head {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.comparison-table-cell-feature {
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.comparison-table-cell-ours-head {
+  justify-content: center;
+  text-align: center;
+  color: var(--acid);
+  text-shadow: 0 0 14px rgba(185, 255, 57, 0.24);
+}
+
+.comparison-table-cell-others-head {
+  justify-content: center;
+  text-align: center;
+}
+
+.comparison-table-cell-others-head,
+.comparison-table-cell-others {
+  color: #7b7f87;
+}
+
+.comparison-table-cell-ours,
+.comparison-table-cell-others {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.comparison-table-check {
+  color: var(--acid);
+  font-size: 1.45rem;
+  font-weight: 800;
+  line-height: 1;
+  text-shadow: 0 0 16px rgba(185, 255, 57, 0.5);
+}
+
 .cta-band {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(18rem, auto);
@@ -2671,6 +2760,43 @@ html[data-theme="light"] .authed-meta-chip strong {
   .landing-stats,
   .workflow-timeline {
     grid-template-columns: 1fr;
+  }
+
+  .comparison-table-header,
+  .comparison-table-row {
+    grid-template-columns: 1fr;
+  }
+
+  .comparison-table-header {
+    display: none;
+  }
+
+  .comparison-table-row {
+    border-top: 1px solid #2a2a2a;
+  }
+
+  .comparison-table-cell {
+    padding: 16px 18px;
+    border-left: 0;
+    border-top: 1px solid #2a2a2a;
+    justify-content: flex-start;
+    text-align: left;
+  }
+
+  .comparison-table-row .comparison-table-cell:first-child {
+    border-top: 0;
+  }
+
+  .comparison-table-cell::before {
+    content: attr(data-label);
+    display: block;
+    margin-bottom: 8px;
+    color: #7b7f87;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
   }
 
   .progress-content {
