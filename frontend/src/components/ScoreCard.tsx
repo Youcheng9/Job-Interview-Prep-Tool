@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type CSSProperties } from "react";
 import type { ScoreResult } from "../lib/api";
 
 interface Props {
@@ -12,6 +12,8 @@ const DIMS: { key: keyof ScoreResult; label: string; color: string }[] = [
   { key: "completeness",    label: "Completeness",     color: "#f59e0b" },
   { key: "structure",       label: "Structure",        color: "#ec4899" },
 ];
+
+const scaledFont = (px: number) => `calc(${px}px * var(--result-card-font-scale))`;
 
 function ScoreBar({
   label,
@@ -47,7 +49,7 @@ function ScoreBar({
         <span
           style={{
             fontFamily: "var(--font-head)",
-            fontSize: "13px",
+            fontSize: scaledFont(13),
             letterSpacing: "0.1em",
             textTransform: "uppercase",
             color: "var(--muted)",
@@ -57,7 +59,7 @@ function ScoreBar({
         </span>
         <span
           className="mono"
-          style={{ fontSize: "16px", color }}
+          style={{ fontSize: scaledFont(16), color }}
         >
           {value}
         </span>
@@ -127,14 +129,14 @@ function RingScore({ value }: { value: number }) {
       >
         <span
           className="mono"
-          style={{ fontSize: "34px", color, lineHeight: 1 }}
+          style={{ fontSize: scaledFont(34), color, lineHeight: 1 }}
         >
           {value}
         </span>
         <span
           style={{
             fontFamily: "var(--font-head)",
-            fontSize: "11px",
+            fontSize: scaledFont(11),
             letterSpacing: "0.12em",
             color: "var(--muted)",
             textTransform: "uppercase",
@@ -151,7 +153,14 @@ export function ScoreCard({ score, submittedAnswer }: Props) {
   return (
     <div
       className="panel animate-fade-up"
-      style={{ padding: "30px", gap: "28px" }}
+      style={{
+        padding: "30px",
+        gap: "28px",
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+        "--result-card-font-scale": 1.2,
+      } as CSSProperties}
     >
       {/* Header */}
       <div
@@ -169,7 +178,7 @@ export function ScoreCard({ score, submittedAnswer }: Props) {
           <div
             style={{
               fontFamily: "var(--font-head)",
-              fontSize: "13px",
+              fontSize: scaledFont(13),
               letterSpacing: "0.15em",
               color: "var(--muted)",
               textTransform: "uppercase",
@@ -181,7 +190,7 @@ export function ScoreCard({ score, submittedAnswer }: Props) {
           <div
             style={{
               fontFamily: "var(--font-head)",
-              fontSize: "28px",
+              fontSize: scaledFont(28),
               fontWeight: 700,
               letterSpacing: "0.05em",
               textTransform: "uppercase",
@@ -223,7 +232,7 @@ export function ScoreCard({ score, submittedAnswer }: Props) {
             border: "1px solid var(--border)",
             borderLeft: "2px solid var(--cyan)",
             padding: "18px 20px",
-            fontSize: "16px",
+            fontSize: scaledFont(16),
             color: "var(--text)",
             lineHeight: 1.7,
             marginBottom: "16px",
@@ -233,12 +242,39 @@ export function ScoreCard({ score, submittedAnswer }: Props) {
         </div>
       )}
 
+      {(score.scoring_degraded || score.score_confidence) && (
+        <div
+          style={{
+            background: "rgba(245,158,11,0.08)",
+            border: "1px solid rgba(245,158,11,0.22)",
+            borderLeft: "2px solid var(--amber)",
+            padding: "14px 16px",
+            fontSize: scaledFont(14),
+            color: "var(--text)",
+            lineHeight: 1.7,
+            marginBottom: "16px",
+          }}
+        >
+          {score.scoring_degraded
+            ? "Scoring ran in degraded mode because the embedding backend was unavailable."
+            : `Scoring confidence: ${score.score_confidence ?? "medium"}.`}
+        </div>
+      )}
+
       {submittedAnswer?.trim() && (
-        <div style={{ marginBottom: "16px" }}>
+        <div
+          style={{
+            marginBottom: "16px",
+            flex: "1 1 auto",
+            minHeight: "220px",
+            display: "flex",
+            flexDirection: "column",
+          }}
+        >
           <div
             style={{
               fontFamily: "var(--font-head)",
-              fontSize: "12px",
+              fontSize: scaledFont(12),
               letterSpacing: "0.12em",
               textTransform: "uppercase",
               color: "var(--cyan)",
@@ -252,12 +288,13 @@ export function ScoreCard({ score, submittedAnswer }: Props) {
               background: "var(--surface2)",
               border: "1px solid var(--border)",
               padding: "18px 20px",
-              fontSize: "15px",
+              fontSize: scaledFont(15),
               color: "var(--text)",
               lineHeight: 1.8,
               whiteSpace: "pre-wrap",
               wordBreak: "break-word",
-              maxHeight: "320px",
+              flex: "1 1 auto",
+              minHeight: 0,
               overflowY: "auto",
             }}
           >
@@ -273,7 +310,7 @@ export function ScoreCard({ score, submittedAnswer }: Props) {
             <div
               style={{
                 fontFamily: "var(--font-head)",
-                fontSize: "12px",
+                fontSize: scaledFont(12),
                 letterSpacing: "0.12em",
                 textTransform: "uppercase",
                 color: "#22c55e",
@@ -286,7 +323,7 @@ export function ScoreCard({ score, submittedAnswer }: Props) {
               <div
                 key={s}
                 style={{
-                  fontSize: "15px",
+                  fontSize: scaledFont(15),
                   color: "var(--muted)",
                   paddingLeft: "12px",
                   borderLeft: "1px solid #22c55e40",
@@ -304,7 +341,7 @@ export function ScoreCard({ score, submittedAnswer }: Props) {
             <div
               style={{
                 fontFamily: "var(--font-head)",
-                fontSize: "12px",
+                fontSize: scaledFont(12),
                 letterSpacing: "0.12em",
                 textTransform: "uppercase",
                 color: "#ef4444",
@@ -317,7 +354,7 @@ export function ScoreCard({ score, submittedAnswer }: Props) {
               <div
                 key={c}
                 style={{
-                  fontSize: "15px",
+                  fontSize: scaledFont(15),
                   color: "var(--muted)",
                   paddingLeft: "12px",
                   borderLeft: "1px solid #ef444440",

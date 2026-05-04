@@ -113,22 +113,31 @@ function TextList({ items }: { items: string[] }) {
   );
 }
 
-function HistoryQuestionItem({ record, index }: { record: AnswerRecord; index: number }) {
-  const [expanded, setExpanded] = useState(false);
+function HistoryQuestionItem({
+  record,
+  index,
+  onOpen,
+}: {
+  record: AnswerRecord;
+  index: number;
+  onOpen: (record: AnswerRecord) => void;
+}) {
   const roleColor = ROLE_COLORS[record.question.role] ?? "var(--cyan)";
   const date = new Date(record.created_at);
-  const aiFeedback = record.score.ai_feedback;
-  const evaluationSummary = aiFeedback?.summary || record.score.feedback || "No evaluation recorded.";
 
   return (
     <div
-      className={`progress-question-card animate-fade-up${expanded ? " progress-question-card-expanded" : ""}`}
+      className="progress-question-card animate-fade-up"
       style={{
         animationDelay: `${index * 60}ms`,
         borderLeft: `2px solid ${roleColor}`,
       }}
     >
-      <div className="progress-question-toggle">
+      <button
+        className="progress-question-toggle"
+        type="button"
+        onClick={() => onOpen(record)}
+      >
         <span className="progress-question-copy">
           <span className="progress-question-meta mono">
             {ROLE_LABELS[record.question.role]} • {record.question.difficulty} •{" "}
@@ -144,25 +153,78 @@ function HistoryQuestionItem({ record, index }: { record: AnswerRecord; index: n
         </span>
         <span className="progress-question-score">
           <ScorePill value={record.score.overall} />
+          <span className="progress-expand-arrow" aria-hidden="true" />
         </span>
-      </div>
-
-      <button
-        onClick={() => setExpanded((p) => !p)}
-        className="progress-question-expand-button"
-        type="button"
-        aria-expanded={expanded}
-      >
-        <span>{expanded ? "Hide evaluation" : "Show evaluation"}</span>
-        <span
-          className={`progress-expand-arrow${expanded ? " progress-expand-arrow-open" : ""}`}
-          aria-hidden="true"
-        />
       </button>
 
-      <div className={`progress-question-details-shell${expanded ? " progress-question-details-shell-open" : ""}`}>
-        <div className="progress-question-details">
+      <button
+        onClick={() => onOpen(record)}
+        className="progress-question-expand-button"
+        type="button"
+      >
+        <span>View answer and results</span>
+        <span className="progress-expand-arrow" aria-hidden="true" />
+      </button>
+    </div>
+  );
+}
+
+function HistoryResultModal({ record, onClose }: { record: AnswerRecord; onClose: () => void }) {
+  const roleColor = ROLE_COLORS[record.question.role] ?? "var(--cyan)";
+  const date = new Date(record.created_at);
+  const aiFeedback = record.score.ai_feedback;
+  const evaluationSummary = aiFeedback?.summary || record.score.feedback || "No evaluation recorded.";
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        onClose();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [onClose]);
+
+  return (
+    <div className="progress-result-modal-backdrop" role="presentation" onMouseDown={onClose}>
+      <section
+        className="progress-result-modal panel"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="progress-result-modal-title"
+        onMouseDown={(event) => event.stopPropagation()}
+      >
+        <div className="progress-result-modal-header" style={{ borderTopColor: roleColor }}>
+          <div>
+            <div className="progress-question-meta mono">
+              {ROLE_LABELS[record.question.role]} • {record.question.difficulty} •{" "}
+              {date.toLocaleDateString("en-US", {
+                month: "short",
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
+            </div>
+            <h2 id="progress-result-modal-title" className="progress-result-modal-title">
+              {record.question.text}
+            </h2>
+          </div>
+          <div className="progress-result-modal-score">
+            <ScorePill value={record.score.overall} />
+            <button type="button" className="progress-result-modal-close" onClick={onClose} aria-label="Close result">
+              Close
+            </button>
+          </div>
+        </div>
+
+        <div className="progress-result-modal-body">
           <div className="progress-detail-scroll">
+            <div className="progress-detail-section">
+              <div className="progress-section-label">Your Answer</div>
+              <p className="progress-answer-text progress-answer-text-strong">{record.answer}</p>
+            </div>
+
             <div className="progress-detail-section">
               <div className="progress-section-label">Scoring</div>
               <ScoreBreakdown record={record} />
@@ -194,7 +256,7 @@ function HistoryQuestionItem({ record, index }: { record: AnswerRecord; index: n
             </div>
           </div>
         </div>
-      </div>
+      </section>
     </div>
   );
 }
@@ -207,6 +269,7 @@ export default function HistoryPage() {
   const [difficultyFilter, setDifficultyFilter] = useState<Difficulty | "all">("all");
   const [dateFilter, setDateFilter] = useState<(typeof DATE_FILTER_OPTIONS)[number]["id"]>("all");
   const [error, setError] = useState<string | null>(null);
+  const [selectedRecord, setSelectedRecord] = useState<AnswerRecord | null>(null);
   const [rolePages, setRolePages] = useState<Record<Role, number>>({
     swe: 1,
     data: 1,
@@ -533,7 +596,12 @@ export default function HistoryPage() {
                       {roleRecords.length ? (
                         <>
                           {visibleRecords.map((record, index) => (
-                            <HistoryQuestionItem key={record.id} record={record} index={index} />
+                            <HistoryQuestionItem
+                              key={record.id}
+                              record={record}
+                              index={index}
+                              onOpen={setSelectedRecord}
+                            />
                           ))}
                           {totalPages > 1 ? (
                             <div className="progress-pagination">
@@ -580,6 +648,9 @@ export default function HistoryPage() {
           </div>
         )}
       </div>
+      {selectedRecord ? (
+        <HistoryResultModal record={selectedRecord} onClose={() => setSelectedRecord(null)} />
+      ) : null}
     </div>
   );
 }

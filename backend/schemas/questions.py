@@ -20,6 +20,7 @@ class QuestionItem(BaseModel):
     role: str
     level: str
     prompt: str
+    difficulty: str
 
 
 class QuestionsResponse(BaseModel):

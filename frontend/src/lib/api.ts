@@ -19,6 +19,8 @@ export interface Question {
   difficulty: "easy" | "medium" | "hard";
 }
 
+export type AIFeedbackSource = "model" | "fallback" | "pending";
+
 export interface ScoreResult {
   answerId?: number;
   overall: number;
@@ -30,6 +32,8 @@ export interface ScoreResult {
   strengths: string[];
   weaknesses: string[];
   feedback: string;
+  ai_feedback_source?: AIFeedbackSource;
+  ai_feedback_pending?: boolean;
   ai_feedback?: {
     summary: string;
     strengths: string[];
@@ -37,8 +41,11 @@ export interface ScoreResult {
     improvements: string[];
     improved_answer: string;
     next_focus: string;
+    label?: string;
   };
   ai_feedback_error?: string;
+  score_confidence?: "low" | "medium" | "high";
+  scoring_degraded?: boolean;
 }
 
 export interface AnswerRecord {
@@ -55,6 +62,7 @@ interface ApiQuestionsResponse {
     role: ApiRole;
     level: CandidateLevel;
     prompt: string;
+    difficulty: Question["difficulty"];
   }>;
 }
 
@@ -73,6 +81,8 @@ interface ApiSubmitAnswerResponse {
     strengths?: string[];
     weaknesses?: string[];
     missing_keywords?: string[];
+    ai_feedback_source?: AIFeedbackSource;
+    ai_feedback_pending?: boolean;
     ai_feedback?: {
       summary?: string;
       strengths?: string[];
@@ -80,12 +90,15 @@ interface ApiSubmitAnswerResponse {
       improvements?: string[];
       improved_answer?: string;
       next_focus?: string;
+      label?: string;
     };
     ai_feedback_error?: string;
     notes?: {
       similarity_raw?: number;
       keyword_coverage?: number;
       ideal_snippet?: string | null;
+      confidence?: "low" | "medium" | "high";
+      degraded?: boolean;
     };
   };
 }
@@ -99,8 +112,10 @@ interface ApiGenerateAIFeedbackResponse {
     improvements?: string[];
     improved_answer?: string;
     next_focus?: string;
+    label?: string;
   } | null;
   ai_feedback_error?: string | null;
+  ai_feedback_source?: AIFeedbackSource | null;
 }
 
 interface ApiHistoryResponse {
@@ -109,6 +124,7 @@ interface ApiHistoryResponse {
     question_id: number;
     role: ApiRole;
     level: CandidateLevel;
+    difficulty: Question["difficulty"];
     prompt: string;
     answer_text: string;
     created_at: string;
@@ -184,6 +200,8 @@ function normalizeScore(payload: ApiSubmitAnswerResponse): ScoreResult {
     strengths: payload.feedback?.strengths ?? [],
     weaknesses: payload.feedback?.weaknesses ?? [],
     feedback: formatFeedback(payload.feedback),
+    ai_feedback_source: payload.feedback?.ai_feedback_source,
+    ai_feedback_pending: payload.feedback?.ai_feedback_pending,
     ai_feedback: payload.feedback?.ai_feedback?.summary
       ? {
           summary: payload.feedback.ai_feedback.summary,
@@ -192,9 +210,12 @@ function normalizeScore(payload: ApiSubmitAnswerResponse): ScoreResult {
           improvements: payload.feedback.ai_feedback.improvements ?? [],
           improved_answer: payload.feedback.ai_feedback.improved_answer ?? "",
           next_focus: payload.feedback.ai_feedback.next_focus ?? "",
+          label: payload.feedback.ai_feedback.label,
         }
       : undefined,
     ai_feedback_error: payload.feedback?.ai_feedback_error,
+    score_confidence: payload.feedback?.notes?.confidence,
+    scoring_degraded: payload.feedback?.notes?.degraded,
   };
 }
 
@@ -210,6 +231,7 @@ function normalizeAiFeedback(
     improvements: payload.improvements ?? [],
     improved_answer: payload.improved_answer ?? "",
     next_focus: payload.next_focus ?? "",
+    label: payload.label,
   };
 }
 
@@ -292,6 +314,20 @@ export async function login(email: string, password: string): Promise<AuthRespon
   return data;
 }
 
+export async function forgotPassword(email: string): Promise<{ message: string }> {
+  return request<{ message: string }>("/auth/forgot-password", {
+    method: "POST",
+    body: JSON.stringify({ email }),
+  });
+}
+
+export async function resetPassword(token: string, newPassword: string): Promise<{ message: string }> {
+  return request<{ message: string }>("/auth/reset-password", {
+    method: "POST",
+    body: JSON.stringify({ token, new_password: newPassword }),
+  });
+}
+
 export async function getQuestions(role: Role, level: CandidateLevel): Promise<Question[]> {
   const params = new URLSearchParams({
     role: toApiRole(role),
@@ -305,7 +341,7 @@ export async function getQuestions(role: Role, level: CandidateLevel): Promise<Q
     level: item.level,
     text: item.prompt,
     rubric: [],
-    difficulty: getDifficulty(item.level, index),
+    difficulty: item.difficulty ?? getDifficulty(item.level, index),
   }));
 }
 
@@ -342,28 +378,8 @@ export async function submitAnswer(
 
 export async function getHistory(): Promise<AnswerRecord[]> {
   const data = await request<ApiHistoryResponse>("/history");
-  const historyCombos = Array.from(
-    new Set(data.items.map((item) => `${fromApiRole(item.role)}:${item.level}`)),
-  );
-  const questionBanks = await Promise.all(
-    historyCombos.map(async (combo) => {
-      const [role, level] = combo.split(":") as [Role, CandidateLevel];
-      const questions = await getQuestions(role, level);
-      return { combo, questions };
-    }),
-  );
-  const difficultyByQuestion = new Map<string, Question["difficulty"]>();
-
-  questionBanks.forEach(({ combo, questions }) => {
-    questions.forEach((question) => {
-      difficultyByQuestion.set(`${combo}:${question.id}`, question.difficulty);
-    });
-  });
-
   return data.items.map((item) => {
     const role = fromApiRole(item.role);
-    const difficulty =
-      difficultyByQuestion.get(`${role}:${item.level}:${item.question_id}`) ?? getDifficulty(item.level, 0);
 
     return {
       id: String(item.answer_id),
@@ -373,7 +389,7 @@ export async function getHistory(): Promise<AnswerRecord[]> {
         level: item.level,
         text: item.prompt,
         rubric: [],
-        difficulty,
+        difficulty: item.difficulty,
       },
       answer: item.answer_text,
       created_at: item.created_at,
@@ -387,6 +403,8 @@ export async function getHistory(): Promise<AnswerRecord[]> {
         strengths: item.feedback?.strengths ?? [],
         weaknesses: item.feedback?.weaknesses ?? [],
         feedback: formatFeedback(item.feedback),
+        ai_feedback_source: item.feedback?.ai_feedback_source,
+        ai_feedback_pending: item.feedback?.ai_feedback_pending,
         ai_feedback: item.feedback?.ai_feedback?.summary
           ? {
               summary: item.feedback.ai_feedback.summary,
@@ -395,9 +413,12 @@ export async function getHistory(): Promise<AnswerRecord[]> {
               improvements: item.feedback.ai_feedback.improvements ?? [],
               improved_answer: item.feedback.ai_feedback.improved_answer ?? "",
               next_focus: item.feedback.ai_feedback.next_focus ?? "",
+              label: item.feedback.ai_feedback.label,
             }
           : undefined,
         ai_feedback_error: item.feedback?.ai_feedback_error,
+        score_confidence: item.feedback?.notes?.confidence,
+        scoring_degraded: item.feedback?.notes?.degraded,
       },
     };
   });
@@ -406,6 +427,7 @@ export async function getHistory(): Promise<AnswerRecord[]> {
 export async function generateAIFeedback(answerId: number): Promise<{
   ai_feedback?: ScoreResult["ai_feedback"];
   ai_feedback_error?: string;
+  ai_feedback_source?: AIFeedbackSource;
 }> {
   const data = await request<ApiGenerateAIFeedbackResponse>(`/scoring/${answerId}/ai-feedback`, {
     method: "POST",
@@ -414,5 +436,6 @@ export async function generateAIFeedback(answerId: number): Promise<{
   return {
     ai_feedback: normalizeAiFeedback(data.ai_feedback),
     ai_feedback_error: data.ai_feedback_error ?? undefined,
+    ai_feedback_source: data.ai_feedback_source ?? undefined,
   };
 }
