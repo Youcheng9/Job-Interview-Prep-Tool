@@ -119,6 +119,7 @@ export default function HomePage() {
   const previousWork = authed ? getSavedInterviewSession() : null;
 
   const launchHref = `/interview?role=${role ?? "swe"}&level=${level}&company=${encodeURIComponent(selectedCompany)}`;
+  const authHref = `/auth?next=${encodeURIComponent(launchHref)}`;
 
   const hasSavedRound = () => {
     if (!role) return false;
@@ -371,11 +372,11 @@ export default function HomePage() {
               <button
                 type="button"
                 className="btn-primary hero-action-button"
-                onClick={() => (authed ? scrollToPracticeSetup() : navigate(launchHref))}
+                onClick={scrollToPracticeSetup}
               >
                 Start practice
               </button>
-              <Link to={authed ? "/history" : "/auth"} className="landing-secondary-link">
+              <Link to={authed ? "/history" : authHref} className="landing-secondary-link">
                 <button type="button" className="btn-ghost hero-action-button">
                   {authed ? "View progress" : "Create account"}
                 </button>
@@ -608,8 +609,12 @@ export default function HomePage() {
         <LevelSelector selected={level} onChange={handleLevelChange} />
         {levelConfirmed ? (
           <div className="level-start-actions">
-            <button type="button" className="btn-primary level-start-button" onClick={() => navigate(launchHref)}>
-              {hasSavedRound() ? "Continue Questions" : "Start Questions"}
+            <button
+              type="button"
+              className="btn-primary level-start-button"
+              onClick={() => navigate(authed ? launchHref : authHref)}
+            >
+              {authed && hasSavedRound() ? "Continue Questions" : "Start Practice"}
             </button>
           </div>
         ) : null}
@@ -651,7 +656,7 @@ export default function HomePage() {
         <div className="landing-section-header">
           <div>
             <div className="eyebrow landing-eyebrow-large" style={{ marginBottom: "12px" }}>
-              05 — DIFF
+              COMPARISON
             </div>
             <h2 className="landing-section-title comparison-title" style={{ marginBottom: "12px" }}>
               <span className="comparison-title-primary">InterviewAI</span>{" "}
