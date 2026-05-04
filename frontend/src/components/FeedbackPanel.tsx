@@ -1,5 +1,5 @@
-import type { CSSProperties } from "react";
-import type { ScoreResult } from "../lib/api";
+import { useEffect, useState, type CSSProperties, type FormEvent } from "react";
+import type { FeedbackChatMessage, ScoreResult } from "../lib/api";
 
 interface Props {
   score: ScoreResult;
@@ -8,6 +8,11 @@ interface Props {
   onGenerateAiFeedback?: () => void;
   isGeneratingAiFeedback?: boolean;
   aiFeedbackPollAttempts?: number;
+  chatMessages?: FeedbackChatMessage[];
+  chatError?: string | null;
+  isLoadingChat?: boolean;
+  isSendingChat?: boolean;
+  onSendChatMessage?: (content: string) => Promise<void> | void;
 }
 
 const TIPS: Record<string, string[]> = {
@@ -91,7 +96,13 @@ export function FeedbackPanel({
   onGenerateAiFeedback,
   isGeneratingAiFeedback = false,
   aiFeedbackPollAttempts = 0,
+  chatMessages = [],
+  chatError = null,
+  isLoadingChat = false,
+  isSendingChat = false,
+  onSendChatMessage,
 }: Props) {
+  const [chatDraft, setChatDraft] = useState("");
   const weakDims = (
     ["technical_depth", "clarity", "completeness", "structure"] as const
   ).filter((d) => (score[d] as number) < 80);
@@ -105,6 +116,19 @@ export function FeedbackPanel({
     Boolean(onGenerateAiFeedback) &&
     (!ai || isFallbackFeedback) &&
     !isGeneratingAiFeedback;
+  const canSendChat = Boolean(onSendChatMessage) && Boolean(score.answerId);
+
+  useEffect(() => {
+    setChatDraft("");
+  }, [score.answerId]);
+
+  async function handleChatSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!canSendChat || isSendingChat || !chatDraft.trim()) return;
+    const nextMessage = chatDraft.trim();
+    setChatDraft("");
+    await onSendChatMessage?.(nextMessage);
+  }
 
   return (
     <div
@@ -418,6 +442,131 @@ export function FeedbackPanel({
           <span style={{ color: "var(--muted)", fontSize: scaledFont(16) }}> / 4</span>
         </span>
       </div>
+
+      {canSendChat && (
+        <div
+          style={{
+            marginTop: "20px",
+            padding: "18px",
+            background: "var(--surface2)",
+            border: "1px solid var(--border)",
+          }}
+        >
+          <div
+            style={{
+              fontFamily: "var(--font-head)",
+              fontSize: scaledFont(12),
+              letterSpacing: "0.1em",
+              textTransform: "uppercase",
+              color: "var(--cyan)",
+              marginBottom: "12px",
+            }}
+          >
+            Coach Chat
+          </div>
+
+          <div
+            style={{
+              fontSize: scaledFont(14),
+              lineHeight: 1.6,
+              color: "var(--muted)",
+              marginBottom: "12px",
+            }}
+          >
+            Ask focused follow-ups about this answer only. Keep prompts short for the fastest response.
+          </div>
+
+          <div
+            style={{
+              display: "grid",
+              gap: "10px",
+              maxHeight: "260px",
+              overflowY: "auto",
+              marginBottom: "12px",
+            }}
+          >
+            {isLoadingChat ? (
+              <div style={{ fontSize: scaledFont(14), color: "var(--muted)" }}>Loading coach chat...</div>
+            ) : chatMessages.length === 0 ? (
+              <div style={{ fontSize: scaledFont(14), color: "var(--muted)" }}>
+                Try: “Why was my completeness low?” or “Rewrite this more strongly.”
+              </div>
+            ) : (
+              chatMessages.map((message) => (
+                <div
+                  key={message.id}
+                  style={{
+                    padding: "12px 14px",
+                    border: "1px solid var(--border)",
+                    background: message.role === "assistant" ? "rgba(185,255,57,0.08)" : "var(--bg)",
+                  }}
+                >
+                  <div
+                    className="mono"
+                    style={{
+                      fontSize: scaledFont(11),
+                      letterSpacing: "0.1em",
+                      textTransform: "uppercase",
+                      color: message.role === "assistant" ? "var(--cyan)" : "var(--muted)",
+                      marginBottom: "6px",
+                    }}
+                  >
+                    {message.role === "assistant" ? "Coach" : "You"}
+                  </div>
+                  <div style={{ fontSize: scaledFont(14), color: "var(--text)", lineHeight: 1.65 }}>
+                    {message.content}
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+
+          {chatError && (
+            <div
+              style={{
+                marginBottom: "12px",
+                padding: "12px 14px",
+                background: "rgba(245,158,11,0.08)",
+                border: "1px solid rgba(245,158,11,0.22)",
+                color: "var(--text)",
+                fontSize: scaledFont(13),
+              }}
+            >
+              {chatError}
+            </div>
+          )}
+
+          <form onSubmit={handleChatSubmit} style={{ display: "grid", gap: "10px" }}>
+            <textarea
+              value={chatDraft}
+              onChange={(event) => setChatDraft(event.target.value)}
+              rows={3}
+              maxLength={1500}
+              placeholder="Ask the coach about this answer..."
+              style={{
+                resize: "vertical",
+                padding: "12px 14px",
+                background: "var(--bg)",
+                border: "1px solid var(--border)",
+                color: "var(--text)",
+                fontSize: scaledFont(14),
+                lineHeight: 1.5,
+              }}
+            />
+            <button
+              className="btn-ghost"
+              type="submit"
+              disabled={isSendingChat || !chatDraft.trim()}
+              style={{
+                opacity: isSendingChat || !chatDraft.trim() ? 0.6 : 1,
+                cursor: isSendingChat || !chatDraft.trim() ? "not-allowed" : "pointer",
+              }}
+            >
+              {isSendingChat ? "Coach Thinking..." : "Send To Coach"}
+            </button>
+          </form>
+        </div>
+      )}
 
       <div style={{ display: "flex", gap: "12px", marginTop: "20px" }}>
         <button className="btn-ghost" onClick={onRetry} style={{ flex: 1 }}>

@@ -56,6 +56,20 @@ export interface AnswerRecord {
   created_at: string;
 }
 
+export interface FeedbackChatMessage {
+  id: number;
+  role: "user" | "assistant";
+  content: string;
+  created_at: string;
+}
+
+export interface FeedbackChatThread {
+  thread_id: number;
+  answer_id: number;
+  ai_available: boolean;
+  messages: FeedbackChatMessage[];
+}
+
 interface ApiQuestionsResponse {
   items: Array<{
     id: number;
@@ -137,6 +151,21 @@ interface ApiHistoryResponse {
     };
     feedback?: ApiSubmitAnswerResponse["feedback"];
   }>;
+}
+
+interface ApiFeedbackChatThreadResponse {
+  thread_id: number;
+  answer_id: number;
+  ai_available: boolean;
+  messages: FeedbackChatMessage[];
+}
+
+interface ApiCreateFeedbackChatMessageResponse {
+  thread_id: number;
+  answer_id: number;
+  ai_available: boolean;
+  user_message: FeedbackChatMessage;
+  assistant_message: FeedbackChatMessage;
 }
 
 function toApiRole(role: Role): ApiRole {
@@ -438,4 +467,18 @@ export async function generateAIFeedback(answerId: number): Promise<{
     ai_feedback_error: data.ai_feedback_error ?? undefined,
     ai_feedback_source: data.ai_feedback_source ?? undefined,
   };
+}
+
+export async function getFeedbackChatThread(answerId: number): Promise<FeedbackChatThread> {
+  return request<ApiFeedbackChatThreadResponse>(`/feedback-chat/answers/${answerId}`);
+}
+
+export async function sendFeedbackChatMessage(
+  answerId: number,
+  content: string,
+): Promise<ApiCreateFeedbackChatMessageResponse> {
+  return request<ApiCreateFeedbackChatMessageResponse>(`/feedback-chat/answers/${answerId}/messages`, {
+    method: "POST",
+    body: JSON.stringify({ content }),
+  });
 }

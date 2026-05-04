@@ -6,10 +6,13 @@ import { readSavedQuestionId, saveInterviewSession } from "../../lib/interviewSe
 import {
   type CandidateLevel,
   clearToken,
+  type FeedbackChatMessage,
   generateAIFeedback,
+  getFeedbackChatThread,
   getHistory,
   getQuestions,
   isAuthenticated,
+  sendFeedbackChatMessage,
   submitAnswer,
   type Role,
   type Question,
@@ -174,6 +177,10 @@ export default function InterviewPage() {
   const [speechError, setSpeechError] = useState<string | null>(null);
   const [isGeneratingAiFeedback, setIsGeneratingAiFeedback] = useState(false);
   const [aiFeedbackPollAttempts, setAiFeedbackPollAttempts] = useState(0);
+  const [chatMessages, setChatMessages] = useState<FeedbackChatMessage[]>([]);
+  const [isLoadingChat, setIsLoadingChat] = useState(false);
+  const [isSendingChat, setIsSendingChat] = useState(false);
+  const [chatError, setChatError] = useState<string | null>(null);
   const [isQuestionSidebarPinned, setIsQuestionSidebarPinned] = useState(false);
   const [isQuestionSidebarPreviewed, setIsQuestionSidebarPreviewed] = useState(false);
   const [difficultyFilter, setDifficultyFilter] = useState<DifficultyFilter>("all");
@@ -276,6 +283,10 @@ export default function InterviewPage() {
         setScore(null);
         setIsGeneratingAiFeedback(false);
         setAiFeedbackPollAttempts(0);
+        setChatMessages([]);
+        setIsLoadingChat(false);
+        setIsSendingChat(false);
+        setChatError(null);
         setPhase("question");
       })
       .catch(() => setError("Failed to load questions."));
@@ -298,6 +309,25 @@ export default function InterviewPage() {
         setCompletedIds([]);
       });
   }, [authed, level, role]);
+
+  useEffect(() => {
+    if (phase !== "result" || !score?.answerId) {
+      setChatMessages([]);
+      setIsLoadingChat(false);
+      setChatError(null);
+      return;
+    }
+
+    setIsLoadingChat(true);
+    setChatError(null);
+    getFeedbackChatThread(score.answerId)
+      .then((thread) => setChatMessages(thread.messages))
+      .catch((err) => {
+        const message = err instanceof Error ? err.message : "Failed to load coach chat.";
+        setChatError(message);
+      })
+      .finally(() => setIsLoadingChat(false));
+  }, [phase, score?.answerId]);
 
   useEffect(() => {
     if (
@@ -422,6 +452,23 @@ export default function InterviewPage() {
     }
   }
 
+  async function handleSendChatMessage(content: string) {
+    if (!score?.answerId || isSendingChat) return;
+
+    setIsSendingChat(true);
+    setChatError(null);
+
+    try {
+      const result = await sendFeedbackChatMessage(score.answerId, content);
+      setChatMessages((current) => [...current, result.user_message, result.assistant_message]);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Coach chat failed. Please retry.";
+      setChatError(message);
+    } finally {
+      setIsSendingChat(false);
+    }
+  }
+
   function selectQuestion(index: number) {
     setQIndex(index);
     setAnswer("");
@@ -429,6 +476,10 @@ export default function InterviewPage() {
     setScore(null);
     setIsGeneratingAiFeedback(false);
     setAiFeedbackPollAttempts(0);
+    setChatMessages([]);
+    setIsLoadingChat(false);
+    setIsSendingChat(false);
+    setChatError(null);
     setPhase("question");
     setTimeout(() => textareaRef.current?.focus(), 100);
   }
@@ -453,6 +504,10 @@ export default function InterviewPage() {
     setScore(null);
     setIsGeneratingAiFeedback(false);
     setAiFeedbackPollAttempts(0);
+    setChatMessages([]);
+    setIsLoadingChat(false);
+    setIsSendingChat(false);
+    setChatError(null);
     setPhase("question");
   }
 
@@ -953,6 +1008,11 @@ export default function InterviewPage() {
                     }
                     isGeneratingAiFeedback={isGeneratingAiFeedback}
                     aiFeedbackPollAttempts={aiFeedbackPollAttempts}
+                    chatMessages={chatMessages}
+                    chatError={chatError}
+                    isLoadingChat={isLoadingChat}
+                    isSendingChat={isSendingChat}
+                    onSendChatMessage={handleSendChatMessage}
                   />
                 </div>
               )

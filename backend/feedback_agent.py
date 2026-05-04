@@ -15,6 +15,7 @@ AI_FEEDBACK_ENABLED = os.getenv("AI_FEEDBACK_ENABLED", "true").lower() == "true"
 AI_FEEDBACK_TIMEOUT_SECONDS = int(os.getenv("AI_FEEDBACK_TIMEOUT_SECONDS", "30"))
 AI_FEEDBACK_FAST_MODE = os.getenv("AI_FEEDBACK_FAST_MODE", "true").lower() == "true"
 AI_FEEDBACK_MAX_TOKENS = int(os.getenv("AI_FEEDBACK_MAX_TOKENS", "120"))
+AI_FEEDBACK_CHAT_MAX_TOKENS = int(os.getenv("AI_FEEDBACK_CHAT_MAX_TOKENS", "180"))
 AI_FEEDBACK_PROMPT_ANSWER_CHARS = int(os.getenv("AI_FEEDBACK_PROMPT_ANSWER_CHARS", "650"))
 AI_FEEDBACK_PROMPT_IDEAL_CHARS = int(os.getenv("AI_FEEDBACK_PROMPT_IDEAL_CHARS", "220"))
 AI_FEEDBACK_NUM_CTX = int(os.getenv("AI_FEEDBACK_NUM_CTX", "1024"))
@@ -310,6 +311,56 @@ def call_ollama(prompt: str, *, use_schema_format: bool) -> str:
     return text
 
 
+def call_ollama_text(prompt: str, *, max_tokens: int) -> str:
+    body = json.dumps(
+        {
+            "model": AI_FEEDBACK_MODEL,
+            "prompt": prompt,
+            "stream": False,
+            "options": {
+                "temperature": 0.25,
+                "num_predict": max_tokens,
+                "num_ctx": AI_FEEDBACK_NUM_CTX,
+            },
+        }
+    ).encode("utf-8")
+
+    req = request.Request(
+        OLLAMA_URL,
+        data=body,
+        headers={"Content-Type": "application/json"},
+        method="POST",
+    )
+
+    timeout = None if AI_FEEDBACK_TIMEOUT_SECONDS <= 0 else AI_FEEDBACK_TIMEOUT_SECONDS
+
+    try:
+        with request.urlopen(req, timeout=timeout) as response:
+            payload = json.loads(response.read().decode("utf-8"))
+    except error.HTTPError as exc:
+        details = exc.read().decode("utf-8", errors="replace")
+        try:
+            parsed = json.loads(details)
+            detail_message = parsed.get("error") or parsed.get("message") or details
+        except json.JSONDecodeError:
+            detail_message = details or str(exc)
+        raise FeedbackAgentError(f"Ollama request failed: {detail_message}") from exc
+    except error.URLError as exc:
+        raise FeedbackAgentError(f"Could not reach Ollama at {OLLAMA_URL}") from exc
+    except socket.timeout as exc:
+        raise FeedbackAgentError("Ollama timed out while generating feedback") from exc
+    except json.JSONDecodeError as exc:
+        raise FeedbackAgentError("Ollama returned non-JSON response") from exc
+
+    if payload.get("error"):
+        raise FeedbackAgentError(str(payload["error"]))
+
+    text = payload.get("response")
+    if not text or not isinstance(text, str):
+        raise FeedbackAgentError("Ollama response did not include generated feedback")
+    return text.strip()
+
+
 def parse_feedback_json(raw: str) -> dict:
     text = raw.strip()
     if text.startswith("```"):
@@ -406,3 +457,105 @@ def pick_first_string(payload: dict, *keys: str) -> str:
         if isinstance(value, str) and value.strip():
             return value.strip()
     return ""
+
+
+def generate_feedback_chat_reply(
+    *,
+    role: str,
+    question_prompt: str,
+    answer_text: str,
+    rubric: dict,
+    scores: dict[str, int],
+    overall: int,
+    feedback: dict,
+    history: list[dict[str, str]],
+) -> str:
+    if not AI_FEEDBACK_ENABLED:
+        raise FeedbackAgentError("AI feedback is disabled")
+
+    prompt = build_feedback_chat_prompt(
+        role=role,
+        question_prompt=question_prompt,
+        answer_text=answer_text,
+        rubric=rubric,
+        scores=scores,
+        overall=overall,
+        feedback=feedback,
+        history=history,
+    )
+    reply = call_ollama_text(prompt, max_tokens=AI_FEEDBACK_CHAT_MAX_TOKENS)
+    if not reply:
+        raise FeedbackAgentError("Ollama did not return a chat reply")
+    return reply
+
+
+def build_fallback_chat_reply(*, user_message: str, feedback: dict) -> str:
+    ai_feedback = feedback.get("ai_feedback") or {}
+    improvements = ai_feedback.get("improvements") or feedback.get("weaknesses") or []
+    missing = feedback.get("missing_keywords") or []
+    lower_message = user_message.lower()
+
+    if "rewrite" in lower_message or "improve" in lower_message:
+        focus = ", ".join(missing[:2]) if missing else "the missing key concepts"
+        return (
+            "A stronger version should lead with the direct answer, explain the reasoning or tradeoff, "
+            f"and explicitly mention {focus}."
+        )
+    if "why" in lower_message and improvements:
+        return f"That score reflects the main issue the scorer found: {improvements[0]}"
+    if "missing" in lower_message and missing:
+        return f"The highest-value concepts to add are: {', '.join(missing[:3])}."
+    if improvements:
+        return f"The fastest improvement is to focus on this next step: {improvements[0]}"
+    return "The answer needs a clearer direct conclusion, stronger supporting detail, and one concrete example."
+
+
+def build_feedback_chat_prompt(
+    *,
+    role: str,
+    question_prompt: str,
+    answer_text: str,
+    rubric: dict,
+    scores: dict[str, int],
+    overall: int,
+    feedback: dict,
+    history: list[dict[str, str]],
+) -> str:
+    compact_question = _compact_text(question_prompt, limit=220)
+    compact_answer = _compact_text(answer_text, limit=AI_FEEDBACK_PROMPT_ANSWER_CHARS)
+    compact_ideal = _compact_text(rubric.get("ideal_answer", ""), limit=AI_FEEDBACK_PROMPT_IDEAL_CHARS)
+    keywords = rubric.get("keywords", [])[:8]
+    missing_keywords = (feedback.get("missing_keywords", []) or [])[:5]
+    ai_feedback = feedback.get("ai_feedback") or {}
+    transcript = "\n".join(
+        f"{'User' if item.get('role') == 'user' else 'Coach'}: {_compact_text(item.get('content', ''), limit=260)}"
+        for item in history[-8:]
+    )
+
+    return f"""
+You are an interview coach continuing a short follow-up conversation about one submitted answer.
+
+Rules:
+- Stay grounded in the provided answer, score breakdown, and rubric.
+- Be concise, practical, and specific.
+- Keep the response under 120 words unless asked to rewrite the answer.
+- Do not invent claims about the user's answer.
+- If asked to rewrite, provide 2 to 4 sentences in an interview-ready tone.
+- Focus on one or two improvements, not a full lecture.
+
+Role: {role}
+Question: {compact_question}
+Candidate answer: {compact_answer}
+Ideal answer: {compact_ideal}
+Overall score: {overall}
+Dimension scores: {json.dumps(scores, separators=(",", ":"))}
+Expected keywords: {json.dumps(keywords, separators=(",", ":"))}
+Missing keywords: {json.dumps(missing_keywords, separators=(",", ":"))}
+Known weaknesses: {json.dumps(feedback.get("weaknesses", [])[:2], separators=(",", ":"))}
+AI summary: {_compact_text(ai_feedback.get("summary", ""), limit=200)}
+
+Conversation:
+{transcript}
+
+Reply as the coach to the latest user message only.
+""".strip()
