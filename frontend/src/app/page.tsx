@@ -707,19 +707,19 @@ export default function HomePage() {
               COMPARISON
             </div>
             <h2 className="landing-section-title comparison-title" style={{ marginBottom: "12px" }}>
-              <span className="comparison-title-primary">InterviewAI</span>{" "}
+              <span className="comparison-title-primary">InterviewAce</span>{" "}
               <span className="comparison-title-secondary">vs the rest.</span>
             </h2>
           </div>
         </div>
 
-        <div className="comparison-table-shell" role="table" aria-label="Comparison between InterviewAI and other services">
+        <div className="comparison-table-shell" role="table" aria-label="Comparison between InterviewAce and other services">
           <div className="comparison-table-header" role="row">
             <div className="comparison-table-cell comparison-table-cell-head comparison-table-cell-feature" role="columnheader">
               Feature
             </div>
             <div className="comparison-table-cell comparison-table-cell-head comparison-table-cell-ours-head" role="columnheader">
-              InterviewAI
+              InterviewAce
             </div>
             <div className="comparison-table-cell comparison-table-cell-head comparison-table-cell-others-head" role="columnheader">
               Others
@@ -730,7 +730,7 @@ export default function HomePage() {
               <div className="comparison-table-cell comparison-table-cell-feature" role="cell" data-label="Feature">
                 {row.feature}
               </div>
-              <div className="comparison-table-cell comparison-table-cell-ours" role="cell" data-label="InterviewAI">
+              <div className="comparison-table-cell comparison-table-cell-ours" role="cell" data-label="InterviewAce">
                 {row.ours ? <span className="comparison-table-check" aria-label="Included">✓</span> : "—"}
               </div>
               <div className="comparison-table-cell comparison-table-cell-others" role="cell" data-label="Others">

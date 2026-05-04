@@ -129,12 +129,26 @@ function LevelBadge({ level }: { level: CandidateLevel }) {
 }
 
 type Phase = "question" | "submitting" | "result";
+type DifficultyFilter = "all" | Question["difficulty"];
+type CompletionFilter = "all" | "done" | "not_done";
+
 const ROLE_LABELS: Record<Role, string> = {
   swe: "SWE",
   data: "DSA",
   pm: "PM",
   behavioral: "Behavioral",
 };
+const DIFFICULTY_FILTERS: { value: DifficultyFilter; label: string }[] = [
+  { value: "all", label: "All" },
+  { value: "easy", label: "Easy" },
+  { value: "medium", label: "Medium" },
+  { value: "hard", label: "Hard" },
+];
+const COMPLETION_FILTERS: { value: CompletionFilter; label: string }[] = [
+  { value: "all", label: "All" },
+  { value: "done", label: "Done" },
+  { value: "not_done", label: "Not done" },
+];
 
 export default function InterviewPage() {
   const [params] = useSearchParams();
@@ -162,6 +176,8 @@ export default function InterviewPage() {
   const [aiFeedbackPollAttempts, setAiFeedbackPollAttempts] = useState(0);
   const [isQuestionSidebarPinned, setIsQuestionSidebarPinned] = useState(false);
   const [isQuestionSidebarPreviewed, setIsQuestionSidebarPreviewed] = useState(false);
+  const [difficultyFilter, setDifficultyFilter] = useState<DifficultyFilter>("all");
+  const [completionFilter, setCompletionFilter] = useState<CompletionFilter>("all");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const recognitionRef = useRef<InstanceType<SpeechRecognitionCtor> | null>(null);
 
@@ -305,6 +321,29 @@ export default function InterviewPage() {
   const question = questions[qIndex];
   const progress = questions.length ? ((qIndex + 1) / questions.length) * 100 : 0;
   const isQuestionSidebarVisible = isQuestionSidebarPinned || isQuestionSidebarPreviewed;
+  const matchesCompletionFilter = (item: Question, filter: CompletionFilter) => {
+    const completed = completedIds.includes(item.id);
+    return filter === "all" || (filter === "done" ? completed : !completed);
+  };
+  const getDifficultyFilterCount = (filter: DifficultyFilter) =>
+    questions.filter(
+      (item) =>
+        (filter === "all" || item.difficulty === filter) &&
+        matchesCompletionFilter(item, completionFilter),
+    ).length;
+  const getCompletionFilterCount = (filter: CompletionFilter) =>
+    questions.filter(
+      (item) =>
+        (difficultyFilter === "all" || item.difficulty === difficultyFilter) &&
+        matchesCompletionFilter(item, filter),
+    ).length;
+  const filteredSidebarQuestions = questions
+    .map((item, index) => ({ item, index }))
+    .filter(
+      ({ item }) =>
+        (difficultyFilter === "all" || item.difficulty === difficultyFilter) &&
+        matchesCompletionFilter(item, completionFilter),
+    );
 
   useEffect(() => {
     if (!question) return;
@@ -515,9 +554,61 @@ export default function InterviewPage() {
             Question {questions.length ? qIndex + 1 : 0} of {questions.length}
           </div>
 
+          <div className="question-sidebar-filter-shell">
+            <div className="question-sidebar-filter-section" aria-label="Filter questions by difficulty">
+              <div className="question-sidebar-filter-label">Mode</div>
+              <div className="question-sidebar-filter-grid question-sidebar-filter-grid-mode">
+                {DIFFICULTY_FILTERS.map((filter) => {
+                  const active = difficultyFilter === filter.value;
+                  const count = getDifficultyFilterCount(filter.value);
+
+                  return (
+                    <button
+                      key={filter.value}
+                      type="button"
+                      className={`question-sidebar-filter-button question-sidebar-filter-button-${filter.value} ${
+                        active ? "question-sidebar-filter-button-active" : ""
+                      }`}
+                      onClick={() => setDifficultyFilter(filter.value)}
+                      aria-pressed={active}
+                    >
+                      <span>{filter.label}</span>
+                      <span className="mono question-sidebar-filter-count">{count}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="question-sidebar-filter-section" aria-label="Filter questions by completion">
+              <div className="question-sidebar-filter-label">Completed</div>
+              <div className="question-sidebar-filter-grid question-sidebar-filter-grid-completed">
+                {COMPLETION_FILTERS.map((filter) => {
+                  const active = completionFilter === filter.value;
+                  const count = getCompletionFilterCount(filter.value);
+
+                  return (
+                    <button
+                      key={filter.value}
+                      type="button"
+                      className={`question-sidebar-filter-button question-sidebar-filter-button-${filter.value} ${
+                        active ? "question-sidebar-filter-button-active" : ""
+                      }`}
+                      onClick={() => setCompletionFilter(filter.value)}
+                      aria-pressed={active}
+                    >
+                      <span>{filter.label}</span>
+                      <span className="mono question-sidebar-filter-count">{count}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
           <div className="question-sidebar-items">
-            {questions.length ? (
-              questions.map((item, index) => {
+            {filteredSidebarQuestions.length ? (
+              filteredSidebarQuestions.map(({ item, index }) => {
                 const active = question?.id === item.id;
                 const completed = completedIds.includes(item.id);
                 const questionNumber = index + 1;
@@ -847,7 +938,7 @@ export default function InterviewPage() {
                     display: "grid",
                     gridTemplateColumns: "minmax(0, 1fr) minmax(320px, 360px)",
                     gap: "24px",
-                    alignItems: "start",
+                    alignItems: "stretch",
                   }}
                 >
                   <ScoreCard score={score} submittedAnswer={answer} />
