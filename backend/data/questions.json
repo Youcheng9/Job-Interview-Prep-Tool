@@ -1,8 +1,9 @@
 [
   {
     "companies": [
-      "Google",
-      "Meta"
+      "Meta",
+      "Databricks",
+      "Airbnb"
     ],
     "role": "SWE",
     "level": "intern",
@@ -46,8 +47,9 @@
   },
   {
     "companies": [
+      "Google",
       "Meta",
-      "Stripe"
+      "OpenAI"
     ],
     "role": "SWE",
     "level": "intern",
@@ -90,7 +92,8 @@
   {
     "companies": [
       "Stripe",
-      "Databricks"
+      "Airbnb",
+      "Netflix"
     ],
     "role": "SWE",
     "level": "new_grad",
@@ -135,7 +138,8 @@
   {
     "companies": [
       "OpenAI",
-      "Anthropic"
+      "Stripe",
+      "Meta"
     ],
     "role": "SWE",
     "level": "new_grad",
@@ -179,7 +183,9 @@
   {
     "companies": [
       "Databricks",
-      "Google"
+      "Stripe",
+      "Airbnb",
+      "Notion"
     ],
     "role": "SWE",
     "level": "new_grad",
@@ -222,8 +228,9 @@
   },
   {
     "companies": [
-      "Airbnb",
-      "Stripe"
+      "Meta",
+      "OpenAI",
+      "Airbnb"
     ],
     "role": "SWE",
     "level": "new_grad",
@@ -266,8 +273,9 @@
   },
   {
     "companies": [
-      "Notion",
-      "OpenAI"
+      "OpenAI",
+      "Meta",
+      "Netflix"
     ],
     "role": "DataScience",
     "level": "intern",
@@ -309,7 +317,8 @@
   {
     "companies": [
       "Netflix",
-      "Meta"
+      "Meta",
+      "OpenAI"
     ],
     "role": "DataScience",
     "level": "intern",
@@ -351,8 +360,9 @@
   },
   {
     "companies": [
+      "Netflix",
       "Meta",
-      "Airbnb"
+      "Databricks"
     ],
     "role": "DataScience",
     "level": "new_grad",
@@ -394,8 +404,9 @@
   },
   {
     "companies": [
-      "Airbnb",
-      "Notion"
+      "OpenAI",
+      "Netflix",
+      "Meta"
     ],
     "role": "DataScience",
     "level": "new_grad",
@@ -945,6 +956,360 @@
         "structure": [
           "comparison format",
           "use cases"
+        ]
+      }
+    }
+  },
+  {
+    "role": "DataScience",
+    "level": "intern",
+    "companies": [
+      "Meta",
+      "Google"
+    ],
+    "prompt": "Explain how feature leakage can impact your model's performance during deployment? How would you detect it in a dataset?",
+    "rubric": {
+      "ideal_answer": "Feature leakage occurs when information from outside the training process is used to create features, leading to overly optimistic performance metrics. It impacts models by making them perform well on training data but poorly on unseen data. To detect feature leakage, one should split the data into train and test sets before engineering features, ensuring that no future information influences the model.",
+      "keywords": [
+        "feature",
+        "leakage",
+        "performance",
+        "training",
+        "testing"
+      ],
+      "dimension_keywords": {
+        "technical_depth": [
+          "model performance",
+          "data splitting"
+        ],
+        "clarity": [
+          "definition",
+          "impact explanation"
+        ],
+        "completeness": [
+          "detection methods",
+          "prevention strategies"
+        ],
+        "structure": [
+          "flow of explanation"
+        ]
+      }
+    }
+  },
+  {
+    "role": "DataScience",
+    "level": "intern",
+    "companies": [
+      "Meta",
+      "Google"
+    ],
+    "prompt": "What are the key differences between A/B testing and cross-validation, and when should each be used?",
+    "rubric": {
+      "ideal_answer": "A/B testing is used for comparing two versions of a product or feature in real-world conditions to determine which performs better. Cross-validation is used for model evaluation by partitioning the data into complementary subsets. A/B testing is suitable for decision-making based on user behavior, while cross-validation helps in assessing the generalization performance of models.",
+      "keywords": [
+        "A/B testing",
+        "cross-validation",
+        "model evaluation"
+      ],
+      "dimension_keywords": {
+        "technical_depth": [
+          "real-world application",
+          "data partitioning"
+        ],
+        "clarity": [
+          "definition",
+          "use case"
+        ],
+        "completeness": [
+          "comparison",
+          "advantages and disadvantages"
+        ],
+        "structure": [
+          "flow of explanation"
+        ]
+      }
+    }
+  },
+  {
+    "role": "DataScience",
+    "level": "intern",
+    "companies": [
+      "Google",
+      "Netflix"
+    ],
+    "prompt": "Explain how you would design an experiment to test the effectiveness of a new feature in a recommendation system, ensuring it is unbiased and representative? What metrics would you use to evaluate its success?",
+    "rubric": {
+      "ideal_answer": "An ideal answer should discuss randomization, control groups, A/B testing, and appropriate metrics like lift or change in click-through rate.",
+      "keywords": [
+        "experiment",
+        "recommendation system",
+        "randomization"
+      ],
+      "dimension_keywords": {
+        "technical_depth": [
+          "A/B testing",
+          "control group"
+        ],
+        "clarity": [
+          "clear explanation",
+          "step-by-step process"
+        ],
+        "completeness": [
+          "metrics selection",
+          "considerations for bias"
+        ],
+        "structure": [
+          "logical flow",
+          "reliability"
+        ]
+      }
+    }
+  },
+  {
+    "role": "DataScience",
+    "level": "intern",
+    "companies": [
+      "Meta",
+      "Google"
+    ],
+    "prompt": "Describe the bias-variance tradeoff in model selection and provide an example of how it can be observed in practice?",
+    "rubric": {
+      "ideal_answer": "Bias refers to the error introduced by approximating a real-world problem, which may be complex, by a simplified model. Variance is the error from sensitivity to small fluctuations in the training set. For instance, high bias might result in underfitting where the model is too simple and misses key patterns in the data. High variance could lead to overfitting where the model captures noise as if it were signal.",
+      "keywords": [
+        "bias",
+        "variance",
+        "underfitting",
+        "overfitting"
+      ],
+      "dimension_keywords": {
+        "technical_depth": [
+          "model complexity",
+          "error types"
+        ],
+        "clarity": [
+          "definition of bias and variance",
+          "examples"
+        ],
+        "completeness": [
+          "impact on model performance",
+          "tradeoff explanation"
+        ],
+        "structure": [
+          "organizing concepts",
+          "logical flow"
+        ]
+      }
+    }
+  },
+  {
+    "role": "DataScience",
+    "level": "intern",
+    "companies": [
+      "Meta",
+      "Google"
+    ],
+    "prompt": "How would you evaluate the performance of a machine learning model that predicts user churn? What metrics would you use and why?",
+    "rubric": {
+      "ideal_answer": "Use AUC-ROC, precision-recall curve, and lift curves to assess predictive power. Include log loss for probabilistic models.",
+      "keywords": [
+        "AUC-ROC",
+        "log loss",
+        "precision-recall"
+      ],
+      "dimension_keywords": {
+        "technical_depth": [
+          "performance metrics",
+          "probabilistic model evaluation"
+        ],
+        "clarity": [
+          "definition clarity",
+          "importance of each metric"
+        ],
+        "completeness": [
+          "range of metrics considered",
+          "contextual relevance"
+        ],
+        "structure": [
+          "organizational structure",
+          "rationale for choice"
+        ]
+      }
+    }
+  },
+  {
+    "role": "DataScience",
+    "level": "intern",
+    "companies": [
+      "Meta",
+      "Google"
+    ],
+    "prompt": "Describe how to handle class imbalance in a classification problem using resampling techniques. What are the potential drawbacks of each method?",
+    "rubric": {
+      "ideal_answer": "Resampling methods include oversampling the minority class, undersampling the majority class, and SMOTE (Synthetic Minority Over-sampling Technique). Each has its trade-offs related to data integrity and model generalization.",
+      "keywords": [
+        "resampling",
+        "oversampling",
+        "undersampling",
+        "SMOTE"
+      ],
+      "dimension_keywords": {
+        "technical_depth": [
+          "resampling methods",
+          "data integrity"
+        ],
+        "clarity": [
+          "description of each method",
+          "trade-offs explained"
+        ],
+        "completeness": [
+          "all mentioned methods",
+          "drawbacks discussed"
+        ],
+        "structure": [
+          "organized explanation"
+        ]
+      }
+    }
+  },
+  {
+    "role": "DataScience",
+    "level": "intern",
+    "companies": [
+      "Meta",
+      "Google"
+    ],
+    "prompt": "What is the difference between holdout validation and k-fold cross-validation? In what scenarios would you prefer one over the other?",
+    "rubric": {
+      "ideal_answer": "Holdout validation splits data into training and testing sets, while k-fold cross-validation uses multiple partitions of the dataset. Prefer k-fold for smaller datasets or when more accurate model evaluation is needed.",
+      "keywords": [
+        "validation",
+        "cross-validation",
+        "holdout"
+      ],
+      "dimension_keywords": {
+        "technical_depth": [
+          "partitioning techniques",
+          "model performance"
+        ],
+        "clarity": [
+          "explanation",
+          "examples"
+        ],
+        "completeness": [
+          "advantages",
+          "disadvantages"
+        ],
+        "structure": [
+          "comparison framework"
+        ]
+      }
+    }
+  },
+  {
+    "role": "DataScience",
+    "level": "intern",
+    "companies": [
+      "Meta",
+      "Google"
+    ],
+    "prompt": "What are the key assumptions of linear regression, and how can violations of these assumptions impact model performance? Suggest methods to address such issues.?",
+    "rubric": {
+      "ideal_answer": "Linear regression assumes linearity, independence, homoscedasticity, and normality. Violations can lead to biased estimates or inefficient predictions. Addressing them involves transformations, robust regression techniques, or using non-linear models.",
+      "keywords": [
+        "linear",
+        "regression",
+        "assumptions",
+        "impact"
+      ],
+      "dimension_keywords": {
+        "technical_depth": [
+          "linearity",
+          "homoscedasticity",
+          "normality"
+        ],
+        "clarity": [
+          "explain",
+          "methods"
+        ],
+        "completeness": [
+          "address",
+          "issues"
+        ],
+        "structure": [
+          "organize",
+          "responses"
+        ]
+      }
+    }
+  },
+  {
+    "role": "DataScience",
+    "level": "intern",
+    "companies": [
+      "Meta",
+      "Google"
+    ],
+    "prompt": "Explain the concept of regularization in linear regression and discuss how it helps prevent overfitting. What are some common types of regularization techniques, and when might you prefer one over another?",
+    "rubric": {
+      "ideal_answer": "Regularization adds a penalty term to the loss function to shrink coefficients and reduce model complexity, preventing overfitting by making the model more generalizable. Common types include L1 (Lasso) which can lead to sparse models, and L2 (Ridge), which shrinks coefficients without setting them to zero. The choice depends on whether you want feature selection or not.",
+      "keywords": [
+        "regularization",
+        "overfitting",
+        "linear regression",
+        "L1",
+        "L2"
+      ],
+      "dimension_keywords": {
+        "technical_depth": [
+          "penalty term",
+          "coefficient shrinkage"
+        ],
+        "clarity": [
+          "definition of regularization",
+          "examples of types"
+        ],
+        "completeness": [
+          "benefits and drawbacks",
+          "when to use each type"
+        ],
+        "structure": [
+          "organizing concepts logically"
+        ]
+      }
+    }
+  },
+  {
+    "role": "DataScience",
+    "level": "intern",
+    "companies": [
+      "Meta",
+      "Google"
+    ],
+    "prompt": "Describe the process of conducting a hypothesis test in a machine learning context. What are the key steps and why is it important to perform such tests?",
+    "rubric": {
+      "ideal_answer": "Formulate null and alternative hypotheses, choose an appropriate significance level, select an appropriate statistical test based on data characteristics, calculate the test statistic and p-value, compare p-value with significance level to decide whether to reject the null hypothesis. It is important for validating model assumptions and ensuring that observed effects are statistically significant.",
+      "keywords": [
+        "hypothesis testing",
+        "statistical test",
+        "p-value",
+        "significance level"
+      ],
+      "dimension_keywords": {
+        "technical_depth": [
+          "hypotheses formulation",
+          "statistical significance"
+        ],
+        "clarity": [
+          "step-by-step process",
+          "clear explanation"
+        ],
+        "completeness": [
+          "all steps of hypothesis test",
+          "importance in ML context"
+        ],
+        "structure": [
+          "flow of the test",
+          "logical sequence"
         ]
       }
     }
