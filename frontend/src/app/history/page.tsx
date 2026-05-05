@@ -173,7 +173,8 @@ function HistoryResultModal({ record, onClose }: { record: AnswerRecord; onClose
   const roleColor = ROLE_COLORS[record.question.role] ?? "var(--cyan)";
   const date = new Date(record.created_at);
   const aiFeedback = record.score.ai_feedback;
-  const evaluationSummary = aiFeedback?.summary || record.score.feedback || "No evaluation recorded.";
+  const instantFeedback = record.score.instant_feedback;
+  const evaluationSummary = aiFeedback?.summary || instantFeedback?.summary || record.score.feedback || "No evaluation recorded.";
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -248,10 +249,10 @@ function HistoryResultModal({ record, onClose }: { record: AnswerRecord; onClose
             <div className="progress-detail-section">
               <div className="progress-section-label">Feedback</div>
               <p className="progress-answer-text">
-                {aiFeedback?.next_focus || record.score.feedback || "No feedback recorded."}
+                {aiFeedback?.next_focus || instantFeedback?.next_focus || record.score.feedback || "No feedback recorded."}
               </p>
-              {aiFeedback?.improvements?.length ? (
-                <TextList items={aiFeedback.improvements} />
+              {(aiFeedback?.improvements?.length || instantFeedback?.improvements?.length) ? (
+                <TextList items={aiFeedback?.improvements?.length ? aiFeedback.improvements : instantFeedback?.improvements ?? []} />
               ) : null}
             </div>
           </div>

@@ -35,6 +35,13 @@ export interface ScoreResult {
   strengths: string[];
   weaknesses: string[];
   feedback: string;
+  instant_feedback?: {
+    summary: string;
+    improvements: string[];
+    next_focus: string;
+    label?: string;
+    source?: string;
+  };
   ai_feedback_source?: AIFeedbackSource;
   ai_feedback_pending?: boolean;
   ai_feedback?: {
@@ -101,6 +108,13 @@ interface ApiSubmitAnswerResponse {
     strengths?: string[];
     weaknesses?: string[];
     missing_keywords?: string[];
+    instant_feedback?: {
+      summary?: string;
+      improvements?: string[];
+      next_focus?: string;
+      label?: string;
+      source?: string;
+    };
     ai_feedback_source?: AIFeedbackSource;
     ai_feedback_pending?: boolean;
     ai_feedback?: {
@@ -226,6 +240,24 @@ function formatFeedback(payload?: ApiSubmitAnswerResponse["feedback"]): string {
   return parts.join(" ");
 }
 
+function normalizeInstantFeedback(
+  payload?: ApiSubmitAnswerResponse["feedback"] extends infer T
+    ? T extends { instant_feedback?: infer U }
+      ? U
+      : never
+    : never,
+): ScoreResult["instant_feedback"] | undefined {
+  if (!payload?.summary) return undefined;
+
+  return {
+    summary: payload.summary,
+    improvements: payload.improvements ?? [],
+    next_focus: payload.next_focus ?? "",
+    label: payload.label,
+    source: payload.source,
+  };
+}
+
 function normalizeScore(payload: ApiSubmitAnswerResponse): ScoreResult {
   return {
     answerId: payload.answer_id,
@@ -238,6 +270,7 @@ function normalizeScore(payload: ApiSubmitAnswerResponse): ScoreResult {
     strengths: payload.feedback?.strengths ?? [],
     weaknesses: payload.feedback?.weaknesses ?? [],
     feedback: formatFeedback(payload.feedback),
+    instant_feedback: normalizeInstantFeedback(payload.feedback?.instant_feedback),
     ai_feedback_source: payload.feedback?.ai_feedback_source,
     ai_feedback_pending: payload.feedback?.ai_feedback_pending,
     ai_feedback: payload.feedback?.ai_feedback?.summary
@@ -447,6 +480,7 @@ export async function getHistory(): Promise<AnswerRecord[]> {
         strengths: item.feedback?.strengths ?? [],
         weaknesses: item.feedback?.weaknesses ?? [],
         feedback: formatFeedback(item.feedback),
+        instant_feedback: normalizeInstantFeedback(item.feedback?.instant_feedback),
         ai_feedback_source: item.feedback?.ai_feedback_source,
         ai_feedback_pending: item.feedback?.ai_feedback_pending,
         ai_feedback: item.feedback?.ai_feedback?.summary

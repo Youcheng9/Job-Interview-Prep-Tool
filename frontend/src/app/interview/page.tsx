@@ -434,20 +434,21 @@ export default function InterviewPage() {
   }, [phase, score?.answerId]);
 
   useEffect(() => {
+    const pollDelays = [800, 1200, 1800, 2600, 3600, 5000];
     if (
       phase !== "result" ||
       !score?.answerId ||
       score.ai_feedback ||
       !score.ai_feedback_pending ||
       isGeneratingAiFeedback ||
-      aiFeedbackPollAttempts >= 4
+      aiFeedbackPollAttempts >= pollDelays.length
     ) {
       return;
     }
 
     const timeoutId = window.setTimeout(() => {
       void handleGenerateAiFeedback();
-    }, 2000);
+    }, pollDelays[aiFeedbackPollAttempts] ?? 5000);
 
     return () => window.clearTimeout(timeoutId);
   }, [phase, score, isGeneratingAiFeedback, aiFeedbackPollAttempts]);

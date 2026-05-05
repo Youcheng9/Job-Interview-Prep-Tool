@@ -131,6 +131,55 @@ def _score_confidence(*, embedding_error: str | None, answer_words: int, keyword
     return "high"
 
 
+def _build_instant_feedback(
+    *,
+    overall_score: int,
+    strengths: list[str],
+    weaknesses: list[str],
+    missing_keywords: list[str],
+    has_structure: bool,
+    has_examples: bool,
+) -> dict[str, object]:
+    if overall_score >= 80:
+        summary = "Strong answer overall. The core ideas are there, and the response is reasonably interview-ready."
+    elif overall_score >= 60:
+        summary = "Decent foundation, but the answer still needs clearer precision, stronger support, or better structure."
+    else:
+        summary = "The answer is not yet interview-ready. It needs stronger coverage of the key concepts and a clearer explanation."
+
+    improvements: list[str] = []
+    if missing_keywords:
+        improvements.append(f"Explicitly cover {', '.join(missing_keywords[:2])}.")
+    if not has_structure:
+        improvements.append("Use a tighter structure: direct answer, reasoning, example, takeaway.")
+    if not has_examples:
+        improvements.append("Add one concrete example or tradeoff to make the answer more convincing.")
+    if not improvements and weaknesses:
+        improvements.append(weaknesses[0])
+    if not improvements:
+        improvements.append("Make the explanation more specific and tie it back to the question.")
+
+    next_focus = "Specificity"
+    if missing_keywords:
+        next_focus = missing_keywords[0]
+    elif not has_structure:
+        next_focus = "Answer structure"
+    elif not has_examples:
+        next_focus = "Concrete examples"
+    elif weaknesses:
+        next_focus = weaknesses[0]
+
+    return {
+        "summary": summary,
+        "improvements": improvements[:2],
+        "next_focus": next_focus,
+        "label": "deterministic",
+        "source": "deterministic",
+        "strength_snapshot": strengths[:2],
+        "weakness_snapshot": weaknesses[:2],
+    }
+
+
 def concept_coverage(answer_text: str, concepts: List[str]) -> tuple[float, Dict[str, float]]:
     """
     Compute semantic concept coverage in [0.0, 1.0].
@@ -288,6 +337,14 @@ def compute_scores(
         "strengths": strengths,
         "weaknesses": weaknesses,
         "missing_keywords": missing,
+        "instant_feedback": _build_instant_feedback(
+            overall_score=overall_score,
+            strengths=strengths,
+            weaknesses=weaknesses,
+            missing_keywords=missing,
+            has_structure=has_structure,
+            has_examples=has_examples,
+        ),
         "notes": {
             "similarity_raw": similarity,
             "semantic_equivalence": semantic_equivalence,

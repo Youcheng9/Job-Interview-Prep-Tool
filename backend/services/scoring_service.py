@@ -8,6 +8,7 @@ from backend.feedback_agent import (
     build_fallback_feedback,
     feedback_enabled,
     generate_agentic_feedback,
+    public_feedback_error_message,
 )
 from backend.ml.scorer import compute_scores
 from backend.models.db import SessionLocal
@@ -140,7 +141,7 @@ def generate_and_store_ai_feedback(
             feedback=existing_feedback,
         )
     except FeedbackAgentError as exc:
-        error_message = str(exc)
+        error_message = public_feedback_error_message(str(exc))
         fallback_feedback = build_fallback_feedback(
             answer_text=answer.answer_text,
             feedback=existing_feedback,

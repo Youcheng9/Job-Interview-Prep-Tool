@@ -32,11 +32,13 @@ export function FeedbackPanel({
 }: Props) {
   const [chatDraft, setChatDraft] = useState("");
   const chatEndRef = useRef<HTMLDivElement | null>(null);
+  const instant = score.instant_feedback;
   const ai = score.ai_feedback;
   const aiError = score.ai_feedback_error;
   const aiSource = score.ai_feedback_source;
   const isFallbackFeedback = aiSource === "fallback";
   const isAiPending = Boolean(score.ai_feedback_pending) && !ai;
+  const visibleSummary = ai ?? instant;
   const canGenerateAiFeedback =
     Boolean(onGenerateAiFeedback) &&
     (!ai || isFallbackFeedback) &&
@@ -99,7 +101,7 @@ export function FeedbackPanel({
         Improvement Protocol
       </div>
 
-      {ai && (
+      {visibleSummary && (
         <div style={{ marginBottom: "20px" }}>
           <div
             style={{
@@ -111,7 +113,7 @@ export function FeedbackPanel({
               marginBottom: "12px",
             }}
           >
-            {isFallbackFeedback ? "Fallback Coach Summary" : "AI Coach Summary"}
+            {ai ? (isFallbackFeedback ? "Fallback Coach Summary" : "AI Coach Summary") : "Instant Summary"}
           </div>
 
           {isFallbackFeedback && (
@@ -127,7 +129,24 @@ export function FeedbackPanel({
                 color: "var(--text)",
               }}
             >
-              This is fallback guidance from deterministic scoring because the live model response was unavailable.
+              Live AI coaching was unavailable, so this fallback guidance was generated from deterministic scoring.
+            </div>
+          )}
+
+          {!ai && isAiPending && (
+            <div
+              style={{
+                marginBottom: "12px",
+                padding: "14px 16px",
+                background: "rgba(34,197,94,0.06)",
+                border: "1px solid rgba(34,197,94,0.18)",
+                borderLeft: "2px solid #22c55e",
+                fontSize: scaledFont(14),
+                lineHeight: 1.7,
+                color: "var(--text)",
+              }}
+            >
+              Instant guidance is ready. Richer AI coaching is still being generated in the background.
             </div>
           )}
 
@@ -143,10 +162,10 @@ export function FeedbackPanel({
               marginBottom: "12px",
             }}
           >
-            {ai.summary}
+            {visibleSummary.summary}
           </div>
 
-          {ai.improvements.length > 0 && (
+          {(visibleSummary.improvements?.length ?? 0) > 0 && (
             <div style={{ marginBottom: "12px" }}>
               <div
                 style={{
@@ -160,7 +179,7 @@ export function FeedbackPanel({
               >
                 Recommended Improvements
               </div>
-              {ai.improvements.map((item) => (
+              {visibleSummary.improvements.map((item) => (
                 <div
                   key={item}
                   style={{
@@ -182,7 +201,7 @@ export function FeedbackPanel({
             </div>
           )}
 
-          {ai.next_focus && (
+          {visibleSummary.next_focus && (
             <div
               style={{
                 marginBottom: "12px",
@@ -196,11 +215,11 @@ export function FeedbackPanel({
               <span className="mono" style={{ color: "var(--cyan)", marginRight: "8px" }}>
                 NEXT:
               </span>
-              {ai.next_focus}
+              {visibleSummary.next_focus}
             </div>
           )}
 
-          {ai.improved_answer && (
+          {ai?.improved_answer && (
             <details style={{ marginBottom: "8px" }}>
               <summary
                 style={{
@@ -250,9 +269,9 @@ export function FeedbackPanel({
             }}
           >
             {isAiPending
-              ? aiFeedbackPollAttempts >= 4
+              ? aiFeedbackPollAttempts >= 6
                 ? "AI coaching is taking longer than expected. Use the button below to force a direct generation attempt."
-                : "AI coaching is being generated in the background. We will retry a few times automatically."
+                : "AI coaching is being generated in the background. We will keep checking automatically."
               : "Deterministic scoring is ready. AI coaching is optional and may take longer depending on your local Ollama model."}
           </div>
           <button
@@ -276,7 +295,7 @@ export function FeedbackPanel({
         </div>
       )}
 
-      {aiError && (
+      {aiError && !isFallbackFeedback && (
         <div
           style={{
             marginBottom: "20px",
