@@ -181,7 +181,7 @@ export default function HomePage() {
               </div>
               <h1 className="authed-hero-title">Shape the next practice session before you start.</h1>
               <p className="authed-hero-copy">
-                Choose the interview track, set the level, and launch a round built from company-tagged fundamentals questions instead of generic prompts.
+                Choose the interview track, set the level, and launch a round built from company-tagged fundamentals questions.
               </p>
               <div className="authed-hero-meta">
                 <div className="authed-meta-chip">
@@ -299,7 +299,7 @@ export default function HomePage() {
                 <p className="muted">
                   Practicing a{" "}
                   <strong style={{ color: "var(--text)" }}>{role === "swe" ? "Software Engineering" : role === "data" ? "Data / ML" : role === "pm" ? "Product" : "Behavioral"}</strong>{" "}
-                  round at the <strong style={{ color: "var(--text)" }}>{level === "intern" ? "Intern" : "New Grad"}</strong> level with company-tagged fundamentals prompts.
+                  round at the <strong style={{ color: "var(--text)" }}>{level === "intern" ? "Intern" : "New Grad"}</strong> level.
                 </p>
               </div>
               <button type="button" className="btn-primary level-start-button" onClick={() => navigate(launchHref)}>
