@@ -1313,5 +1313,835 @@
         ]
       }
     }
+  },
+  {
+    "role": "SWE",
+    "level": "new_grad",
+    "companies": [
+      "Google",
+      "Stripe"
+    ],
+    "prompt": "Describe the role of a page table in virtual memory management?",
+    "rubric": {
+      "ideal_answer": "A page table is used to map virtual addresses to physical addresses. It enables efficient memory management by allowing processes to use virtual addresses, which are translated into physical addresses at runtime using page tables.",
+      "keywords": [
+        "page table",
+        "virtual memory",
+        "address translation"
+      ],
+      "dimension_keywords": {
+        "technical_depth": [
+          "translation lookaside buffer (TLB)",
+          "memory hierarchy"
+        ],
+        "clarity": [
+          "mapping process",
+          "lookup time"
+        ],
+        "completeness": [
+          "page fault handling",
+          "paging mechanism"
+        ],
+        "structure": [
+          "table structure",
+          "address space"
+        ]
+      }
+    }
+  },
+  {
+    "role": "SWE",
+    "level": "new_grad",
+    "companies": [
+      "Google",
+      "Stripe"
+    ],
+    "prompt": "What is the purpose of a page replacement algorithm in operating systems and what are some common strategies used?",
+    "rubric": {
+      "ideal_answer": "A page replacement algorithm manages memory by deciding which pages to evict from main memory when new pages need to be loaded. Common strategies include FIFO, LRU, and Optimal.",
+      "keywords": [
+        "page replacement",
+        "memory management",
+        "FIFO",
+        "LRU"
+      ],
+      "dimension_keywords": {
+        "technical_depth": [
+          "algorithm design",
+          "performance trade-offs"
+        ],
+        "clarity": [
+          "definition",
+          "strategy explanation"
+        ],
+        "completeness": [
+          "eviction criteria",
+          "usage scenarios"
+        ],
+        "structure": [
+          "logical flow",
+          "examples"
+        ]
+      }
+    }
+  },
+  {
+    "role": "SWE",
+    "level": "new_grad",
+    "companies": [
+      "Google",
+      "Meta"
+    ],
+    "prompt": "Explain how process scheduling algorithms can impact system performance under different workloads?",
+    "rubric": {
+      "ideal_answer": "Discuss key aspects like CPU-bound vs I/O-bound processes, priority-based scheduling, and fairness. Mention context switching costs and the importance of adaptability in varying workload conditions.",
+      "keywords": [
+        "process",
+        "scheduling",
+        "algorithms"
+      ],
+      "dimension_keywords": {
+        "technical_depth": [
+          "workload_types",
+          "context_switching"
+        ],
+        "clarity": [
+          "algorithm_explanation",
+          "performance_impact"
+        ],
+        "completeness": [
+          "fairness_concepts",
+          "adaptability"
+        ],
+        "structure": [
+          "key_aspects"
+        ]
+      }
+    }
+  },
+  {
+    "role": "SWE",
+    "level": "new_grad",
+    "companies": [
+      "Google",
+      "Meta"
+    ],
+    "prompt": "Describe the key differences between a process and a thread in operating systems?",
+    "rubric": {
+      "ideal_answer": "Processes have their own address space, resources, and file descriptors while threads share these among processes. Processes are heavier to create and manage compared to threads which are more lightweight but still require coordination through synchronization mechanisms.",
+      "keywords": [
+        "process",
+        "thread",
+        "address space"
+      ],
+      "dimension_keywords": {
+        "technical_depth": [
+          "process vs thread differences",
+          "resource sharing"
+        ],
+        "clarity": [
+          "definition",
+          "comparison"
+        ],
+        "completeness": [
+          "address space",
+          "synchronization"
+        ],
+        "structure": [
+          "format",
+          "conciseness"
+        ]
+      }
+    }
+  },
+  {
+    "role": "SWE",
+    "level": "new_grad",
+    "companies": [
+      "Google",
+      "Meta"
+    ],
+    "prompt": "What are the trade-offs between using a spin lock and a sleep lock in a high-contention scenario?",
+    "rubric": {
+      "ideal_answer": "Spin locks can reduce context switching overhead but may lead to CPU contention. Sleep locks allow other threads to run, reducing CPU usage but increasing context switch cost.",
+      "keywords": [
+        "spin_lock",
+        "sleep_lock",
+        "context_switch"
+      ],
+      "dimension_keywords": {
+        "technical_depth": [
+          "contention",
+          "overhead_reduction"
+        ],
+        "clarity": [
+          "explaination",
+          "example"
+        ],
+        "completeness": [
+          "costs",
+          "benefits"
+        ],
+        "structure": [
+          "comparison",
+          "scenario"
+        ]
+      }
+    }
+  },
+  {
+    "role": "SWE",
+    "level": "new_grad",
+    "companies": [
+      "Google",
+      "Stripe"
+    ],
+    "prompt": "Describe how a database transaction can be implemented to ensure ACID properties and what are the common isolation levels?",
+    "rubric": {
+      "ideal_answer": "Transactions use mechanisms like two-phase locking or multiversion concurrency control to ensure atomicity, consistency, isolation, and durability. Common isolation levels include read uncommitted, read committed, repeatable read, and serializable.",
+      "keywords": [
+        "transaction",
+        "ACID",
+        "isolation level"
+      ],
+      "dimension_keywords": {
+        "technical_depth": [
+          "two-phase locking",
+          "multiversion concurrency control"
+        ],
+        "clarity": [
+          "definition",
+          "example"
+        ],
+        "completeness": [
+          "all four ACID properties",
+          "common isolation levels"
+        ],
+        "structure": [
+          "flow of explanation"
+        ]
+      }
+    }
+  },
+  {
+    "role": "SWE",
+    "level": "new_grad",
+    "companies": [
+      "Stripe",
+      "Databricks"
+    ],
+    "prompt": "Explain how a distributed cache system like Redis handles data consistency across multiple nodes?",
+    "rubric": {
+      "ideal_answer": "Redis uses a publish-subscribe model and replication to ensure data consistency. It can use master-slave or master-master configurations, with the latter requiring additional mechanisms for conflict resolution.",
+      "keywords": [
+        "distributed",
+        "cache",
+        "system",
+        "consistency",
+        "replication"
+      ],
+      "dimension_keywords": {
+        "technical_depth": [
+          "publish-subscribe",
+          "master-slave",
+          "conflict-resolution"
+        ],
+        "clarity": [
+          "model-explanation",
+          "configuration-details"
+        ],
+        "completeness": [
+          "data-synchronization",
+          "failure-handling"
+        ],
+        "structure": [
+          "architecture-overview",
+          "components"
+        ]
+      }
+    }
+  },
+  {
+    "role": "SWE",
+    "level": "new_grad",
+    "companies": [
+      "Google",
+      "Meta"
+    ],
+    "prompt": "What are the key components of an operating system's memory management and how do they interact to handle virtual memory?",
+    "rubric": {
+      "ideal_answer": "The key components include a page table, demand paging, and a page replacement algorithm. Page tables map virtual addresses to physical ones, demand paging allows for lazy allocation of pages, and the page replacement algorithm decides which pages to evict when memory is full.",
+      "keywords": [
+        "page table",
+        "demand paging",
+        "page replacement"
+      ],
+      "dimension_keywords": {
+        "technical_depth": [
+          "virtual memory management",
+          "paging mechanism"
+        ],
+        "clarity": [
+          "mapping process",
+          "algorithm explanation"
+        ],
+        "completeness": [
+          "component interaction",
+          "use cases"
+        ],
+        "structure": [
+          "system overview",
+          "detail breakdown"
+        ]
+      }
+    }
+  },
+  {
+    "role": "SWE",
+    "level": "intern",
+    "companies": [
+      "Google",
+      "Stripe"
+    ],
+    "prompt": "Compare and contrast the use of locks and atomics in concurrent programming, highlighting their advantages and trade-offs.?",
+    "rubric": {
+      "ideal_answer": "Locks provide mutual exclusion for shared resources but can lead to deadlocks or performance bottlenecks. Atomics ensure atomicity without locks, reducing contention but increasing memory access complexity. Both have their use cases depending on the concurrency scenario.",
+      "keywords": [
+        "locks",
+        "atomics",
+        "concurrent programming"
+      ],
+      "dimension_keywords": {
+        "technical_depth": [
+          "mutual exclusion",
+          "deadlocks",
+          "contention"
+        ],
+        "clarity": [
+          "definition",
+          "examples"
+        ],
+        "completeness": [
+          "advantages",
+          "trade-offs"
+        ],
+        "structure": [
+          "comparison"
+        ]
+      }
+    }
+  },
+  {
+    "role": "SWE",
+    "level": "intern",
+    "companies": [
+      "Google",
+      "Meta"
+    ],
+    "prompt": "Discuss the role of a page replacement algorithm in managing virtual memory and explain the trade-offs between FIFO, LRU, and optimal algorithms.?",
+    "rubric": {
+      "ideal_answer": "Page replacement algorithms are crucial for managing virtual memory. FIFO can lead to thrashing; LRU is generally better but harder to implement; Optimal is ideal but impractical.",
+      "keywords": [
+        "page replacement",
+        "virtual memory",
+        "FIFO",
+        "LRU",
+        "optimal"
+      ],
+      "dimension_keywords": {
+        "technical_depth": [
+          "algorithm comparison",
+          "memory management concepts"
+        ],
+        "clarity": [
+          "definition of FIFO, LRU, optimal"
+        ],
+        "completeness": [
+          "thrashing explanation",
+          "implementation challenges"
+        ],
+        "structure": [
+          "trade-offs discussion"
+        ]
+      }
+    }
+  },
+  {
+    "role": "SWE",
+    "level": "intern",
+    "companies": [
+      "Google",
+      "Stripe"
+    ],
+    "prompt": "Explain how a database transaction can be implemented using two-phase locking (2PL) and discuss the potential issues that might arise during its execution?",
+    "rubric": {
+      "ideal_answer": "Implementing transactions with 2PL involves acquiring locks on resources before reading or writing. Potential issues include deadlock, livelock, and lost updates.",
+      "keywords": [
+        "two-phase locking",
+        "transaction",
+        "lock acquisition",
+        "deadlock"
+      ],
+      "dimension_keywords": {
+        "technical_depth": [
+          "lock protocols",
+          "transaction isolation levels"
+        ],
+        "clarity": [
+          "locking process",
+          "resource management"
+        ],
+        "completeness": [
+          "concurrency issues",
+          "handling conflicts"
+        ],
+        "structure": [
+          "phases of 2PL",
+          "example scenarios"
+        ]
+      }
+    }
+  },
+  {
+    "role": "SWE",
+    "level": "intern",
+    "companies": [
+      "Google",
+      "Stripe"
+    ],
+    "prompt": "Describe the process of handling a network request from client to server, focusing on the role of TCP and how it ensures data integrity and reliability?",
+    "rubric": {
+      "ideal_answer": "TCP establishes a connection using three-way handshaking. It segments data into packets, provides error checking through checksums, and retransmits lost or corrupted packets ensuring reliable delivery.",
+      "keywords": [
+        "TCP",
+        "three-way handshake",
+        "error checking",
+        "retransmission"
+      ],
+      "dimension_keywords": {
+        "technical_depth": [
+          "connection establishment",
+          "packet segmentation",
+          "checksum validation",
+          "retransmission mechanism"
+        ],
+        "clarity": [
+          "handshaking explanation",
+          "packet description",
+          "error handling process"
+        ],
+        "completeness": [
+          "TCP role in data integrity",
+          "TCP role in reliability"
+        ],
+        "structure": [
+          "step-by-step breakdown",
+          "logical flow"
+        ]
+      }
+    }
+  },
+  {
+    "role": "SWE",
+    "level": "intern",
+    "companies": [
+      "Google",
+      "Stripe"
+    ],
+    "prompt": "Explain the principles behind a distributed cache system, including key concepts such as consistency models, replication strategies, and failure handling mechanisms?",
+    "rubric": {
+      "ideal_answer": "A distributed cache system maintains data in multiple nodes to improve performance. Consistency models like eventual or strong consistency are used based on requirements. Replication strategies ensure high availability through techniques like master-slave or master-master setups. Failure handling includes techniques such as leader election and quorum-based operations.",
+      "keywords": [
+        "distributed",
+        "cache",
+        "consistency",
+        "replication",
+        "failure"
+      ],
+      "dimension_keywords": {
+        "technical_depth": [
+          "consistency_models",
+          "replication_strategies",
+          "failure_handling"
+        ],
+        "clarity": [
+          "definition",
+          "examples"
+        ],
+        "completeness": [
+          "models_used",
+          "strategies_implemented",
+          "handling_methods"
+        ],
+        "structure": [
+          "organization",
+          "coherence"
+        ]
+      }
+    }
+  },
+  {
+    "role": "DataScience",
+    "level": "new_grad",
+    "companies": [
+      "Meta",
+      "Google"
+    ],
+    "prompt": "Describe the process of conducting A/B testing in a data-driven organization and discuss how you would ensure that your test results are reliable?",
+    "rubric": {
+      "ideal_answer": "A/B testing involves randomizing users into control and treatment groups, measuring outcomes, and using statistical tests to determine significance. Key steps include defining clear hypotheses, choosing appropriate metrics, ensuring randomization, accounting for confounding variables, and validating the test environment.",
+      "keywords": [
+        "A/B testing",
+        "randomization",
+        "statistical significance"
+      ],
+      "dimension_keywords": {
+        "technical_depth": [
+          "hypothesis testing",
+          "random assignment",
+          "confounding factors"
+        ],
+        "clarity": [
+          "step-by-step process",
+          "clear definitions"
+        ],
+        "completeness": [
+          "test phases",
+          "result validation"
+        ],
+        "structure": [
+          "organizational context",
+          "reliability considerations"
+        ]
+      }
+    }
+  },
+  {
+    "role": "DataScience",
+    "level": "new_grad",
+    "companies": [
+      "Google",
+      "Notion"
+    ],
+    "prompt": "Explain the difference between precision and recall in the context of a classification model, and discuss how you would balance these metrics during model evaluation?",
+    "rubric": {
+      "ideal_answer": "Precision is the ratio of true positive predictions to all positive predictions. Recall is the ratio of true positive predictions to all actual positives. To balance these metrics, one might use F1 score or consider the cost of false positives and false negatives in the specific application.",
+      "keywords": [
+        "precision",
+        "recall",
+        "classification",
+        "model evaluation"
+      ],
+      "dimension_keywords": {
+        "technical_depth": [
+          "metrics tradeoff",
+          "F1 score"
+        ],
+        "clarity": [
+          "definition",
+          "example"
+        ],
+        "completeness": [
+          "cost considerations",
+          "application context"
+        ],
+        "structure": [
+          "evaluation metrics",
+          "tradeoff discussion"
+        ]
+      }
+    }
+  },
+  {
+    "role": "DataScience",
+    "level": "new_grad",
+    "companies": [
+      "Meta",
+      "Google"
+    ],
+    "prompt": "What are the key differences between cross-validation and bootstrap resampling techniques, and when would you prefer one over the other?",
+    "rubric": {
+      "ideal_answer": "Cross-validation involves partitioning the data into multiple subsets to train and validate a model. It is useful for estimating model performance on unseen data. Bootstrap resampling creates new training sets by sampling with replacement from the original dataset, which is better suited for small sample sizes or when you want to assess the variability of an estimator.",
+      "keywords": [
+        "cross-validation",
+        "bootstrap",
+        "model validation"
+      ],
+      "dimension_keywords": {
+        "technical_depth": [
+          "resampling techniques",
+          "model performance estimation"
+        ],
+        "clarity": [
+          "definition",
+          "scenario usage"
+        ],
+        "completeness": [
+          "advantages",
+          "disadvantages"
+        ],
+        "structure": [
+          "comparison framework"
+        ]
+      }
+    }
+  },
+  {
+    "role": "DataScience",
+    "level": "new_grad",
+    "companies": [
+      "Meta",
+      "Google"
+    ],
+    "prompt": "Explain the concept of feature leakage in machine learning models and provide an example of how it can occur during data preprocessing?",
+    "rubric": {
+      "ideal_answer": "Feature leakage occurs when information from outside the training set is used to create the features. For instance, using future stock prices to predict past stock prices would be a form of feature leakage.",
+      "keywords": [
+        "feature",
+        "leakage",
+        "training",
+        "data"
+      ],
+      "dimension_keywords": {
+        "technical_depth": [
+          "information",
+          "outside",
+          "training"
+        ],
+        "clarity": [
+          "example",
+          "stock price"
+        ],
+        "completeness": [
+          "future",
+          "past"
+        ],
+        "structure": [
+          "predicting",
+          "occurs"
+        ]
+      }
+    }
+  },
+  {
+    "role": "DataScience",
+    "level": "new_grad",
+    "companies": [
+      "Meta",
+      "Google"
+    ],
+    "prompt": "Describe the process of conducting a hypothesis test for a new feature in a machine learning model, including how you would ensure its statistical significance and practical relevance?",
+    "rubric": {
+      "ideal_answer": "Start by defining the null and alternative hypotheses. Explain selecting an appropriate test statistic and significance level, then describe collecting data and performing the test. Discuss interpreting p-values and confidence intervals to determine significance. Finally, explain how to assess practical relevance beyond statistical significance.",
+      "keywords": [
+        "hypothesis",
+        "test",
+        "significance",
+        "p-value"
+      ],
+      "dimension_keywords": {
+        "technical_depth": [
+          "statistical significance",
+          "confidence interval",
+          "practical relevance"
+        ],
+        "clarity": [
+          "clear explanation of steps",
+          "well-defined hypotheses"
+        ],
+        "completeness": [
+          "consideration of multiple aspects",
+          "incorporation of data collection and analysis"
+        ],
+        "structure": [
+          "logical flow",
+          "coherent argument"
+        ]
+      }
+    }
+  },
+  {
+    "role": "DataScience",
+    "level": "new_grad",
+    "companies": [
+      "Meta",
+      "Google"
+    ],
+    "prompt": "What are the key considerations when selecting a loss function for a regression model, and how do they impact model performance?",
+    "rubric": {
+      "ideal_answer": "The choice of loss function depends on the specific problem. Common choices include mean squared error (MSE) for smooth errors or mean absolute error (MAE) for robustness to outliers. MSE is sensitive to large errors, while MAE provides more stable gradients.",
+      "keywords": [
+        "loss function",
+        "regression model",
+        "mean squared error",
+        "mean absolute error"
+      ],
+      "dimension_keywords": {
+        "technical_depth": [
+          "error sensitivity",
+          "robustness"
+        ],
+        "clarity": [
+          "definition",
+          "example"
+        ],
+        "completeness": [
+          "application scenarios",
+          "tradeoffs"
+        ],
+        "structure": [
+          "comparison",
+          "impact"
+        ]
+      }
+    }
+  },
+  {
+    "role": "DataScience",
+    "level": "new_grad",
+    "companies": [
+      "Notion",
+      "Google"
+    ],
+    "prompt": "Explain the concept of regularization in machine learning models and discuss its role in mitigating overfitting.?",
+    "rubric": {
+      "ideal_answer": "Regularization involves adding a penalty term to the loss function to shrink the coefficients of less important features, reducing model complexity and preventing overfitting. Techniques include L1 (Lasso) and L2 (Ridge) regularization, with L1 encouraging sparsity and L2 promoting smaller but non-zero coefficients.",
+      "keywords": [
+        "regularization",
+        "penalty term",
+        "coefficient shrinkage",
+        "overfitting"
+      ],
+      "dimension_keywords": {
+        "technical_depth": [
+          "penalty terms",
+          "L1 vs L2",
+          "model complexity reduction"
+        ],
+        "clarity": [
+          "clear explanation of the concept",
+          "use of examples"
+        ],
+        "completeness": [
+          "mention of both types of regularization",
+          "discuss role in preventing overfitting"
+        ],
+        "structure": [
+          "logical flow",
+          "relevant details"
+        ]
+      }
+    }
+  },
+  {
+    "role": "DataScience",
+    "level": "new_grad",
+    "companies": [
+      "Google",
+      "Meta"
+    ],
+    "prompt": "When comparing two classification models on the same dataset, you find that one has a higher accuracy but a lower F1 score than the other. What could be causing this discrepancy and how would you interpret these results?",
+    "rubric": {
+      "ideal_answer": "The model with higher accuracy but lower F1 score might have better precision at the cost of recall or vice versa, indicating class imbalance or different error types. Interpretation should consider the specific context and business goals.",
+      "keywords": [
+        "accuracy",
+        "F1 score",
+        "precision",
+        "recall",
+        "class balance"
+      ],
+      "dimension_keywords": {
+        "technical_depth": [
+          "error types",
+          "class imbalance"
+        ],
+        "clarity": [
+          "interpretation",
+          "context consideration"
+        ],
+        "completeness": [
+          "model comparison",
+          "business goals"
+        ],
+        "structure": [
+          "accuracy vs F1",
+          "precision vs recall"
+        ]
+      }
+    }
+  },
+  {
+    "role": "DataScience",
+    "level": "new_grad",
+    "companies": [
+      "Notion",
+      "OpenAI"
+    ],
+    "prompt": "How do you ensure that the evaluation metrics of a machine learning model are not biased by feature leakage? Provide an example of how feature leakage can occur and discuss methods to detect it.?",
+    "rubric": {
+      "ideal_answer": "Feature leakage occurs when information from outside the training process is used in the model during training, leading to overly optimistic performance estimates. For instance, using future data in a time-series problem can cause this. To prevent it, one must carefully separate training and test datasets, use domain knowledge to identify potential leaks, and employ techniques like splitting data at random points or using cross-validation with appropriate folds.",
+      "keywords": [
+        "feature",
+        "leakage",
+        "bias"
+      ],
+      "dimension_keywords": {
+        "technical_depth": [
+          "model evaluation",
+          "cross-validation",
+          "time-series"
+        ],
+        "clarity": [
+          "definition",
+          "example",
+          "prevention"
+        ],
+        "completeness": [
+          "data separation",
+          "domain knowledge",
+          "techniques"
+        ],
+        "structure": [
+          "process",
+          "methods"
+        ]
+      }
+    }
+  },
+  {
+    "role": "DataScience",
+    "level": "new_grad",
+    "companies": [
+      "Meta",
+      "Google"
+    ],
+    "prompt": "Describe the concept of overfitting in machine learning models and provide an example of how it can be detected during model evaluation?",
+    "rubric": {
+      "ideal_answer": "Overfitting occurs when a model performs well on training data but poorly on unseen test data, indicating that the model has learned noise or details specific to the training set. It can be detected by comparing training and validation performance metrics such as accuracy, loss, or F1 score, where significant divergence suggests overfitting.",
+      "keywords": [
+        "overfitting",
+        "training",
+        "validation",
+        "noise"
+      ],
+      "dimension_keywords": {
+        "technical_depth": [
+          "model_performance",
+          "generalization"
+        ],
+        "clarity": [
+          "description",
+          "example"
+        ],
+        "completeness": [
+          "detection_methods",
+          "consequences"
+        ],
+        "structure": [
+          "definition",
+          "illustration"
+        ]
+      }
+    }
   }
 ]
