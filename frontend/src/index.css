@@ -1224,27 +1224,25 @@ input.input-shell {
   position: relative;
   width: 100%;
   max-width: 100%;
-  padding: 32px var(--page-gutter) 60px calc(var(--page-gutter) + var(--question-drawer-rail));
+  padding: 32px clamp(18px, 2.4vw, 36px) 60px calc(clamp(18px, 2.4vw, 36px) + var(--question-drawer-rail));
   overflow-x: clip;
+  transition: padding-left 0.22s ease;
+}
+
+.interview-page-sidebar-visible {
+  padding-left: calc(clamp(18px, 2.4vw, 36px) + var(--question-drawer-open-width));
 }
 
 .interview-layout {
   width: 100%;
-  max-width: 1520px;
+  max-width: 1440px;
   margin: 0 auto;
   padding: 24px 0 0;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: clamp(18px, 2vw, 30px);
   align-items: start;
-  transition: width 0.22s ease, margin-left 0.22s ease, margin-right 0.22s ease, max-width 0.22s ease;
-}
-
-.interview-page-sidebar-visible .interview-layout {
-  width: calc(100% - var(--question-drawer-width));
-  max-width: calc(1520px - var(--question-drawer-width));
-  margin-left: var(--question-drawer-width);
-  margin-right: 0;
+  transition: max-width 0.22s ease;
 }
 
 .interview-main {
@@ -1307,9 +1305,9 @@ input.input-shell {
   writing-mode: vertical-rl;
   transform: rotate(180deg);
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: 18px;
   font-weight: 800;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.18em;
   line-height: 1;
   text-transform: uppercase;
 }
@@ -3035,6 +3033,7 @@ html[data-theme="light"] .authed-meta-chip strong {
   .question-sidebar-rail span {
     writing-mode: initial;
     transform: none;
+    font-size: 18px;
   }
 
   .question-sidebar {
