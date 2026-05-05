@@ -1046,7 +1046,7 @@ export default function InterviewPage() {
                   className="interview-result-grid"
                   style={{
                     display: "grid",
-                    gridTemplateColumns: "minmax(0, 1fr) minmax(320px, 360px)",
+                    gridTemplateColumns: "minmax(0, 0.95fr) minmax(440px, 1.05fr)",
                     gap: "24px",
                     alignItems: "stretch",
                   }}

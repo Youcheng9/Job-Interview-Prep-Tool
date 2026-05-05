@@ -1,4 +1,4 @@
-import { useEffect, useState, type CSSProperties, type FormEvent } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type FormEvent } from "react";
 import type { FeedbackChatMessage, ScoreResult } from "../lib/api";
 
 interface Props {
@@ -15,79 +15,7 @@ interface Props {
   onSendChatMessage?: (content: string) => Promise<void> | void;
 }
 
-const TIPS: Record<string, string[]> = {
-  technical_depth: [
-    "Include specific technical terms and concepts from the domain",
-    "Explain the 'why' behind technical choices or complexities",
-    "Reference concrete algorithms, data structures, or methodologies by name",
-    "Discuss trade-offs between different technical approaches",
-  ],
-  clarity: [
-    "Structure your answer with a clear beginning, middle, end",
-    "Define technical terms before using them",
-    "Use concrete examples to illustrate abstract concepts",
-    "Break down complex ideas into digestible parts",
-  ],
-  completeness: [
-    "Cover all aspects of the question thoroughly",
-    "Address edge cases, limitations, and assumptions",
-    "Include relevant context and background information",
-    "Mention alternative approaches and when to use them",
-  ],
-  structure: [
-    "Start with a brief overview before diving into details",
-    "Use transitional phrases like 'first', 'then', 'however', 'therefore'",
-    "Organize your answer with clear logical flow",
-    "End with a summary of key takeaways",
-  ],
-};
-
 const scaledFont = (px: number) => `calc(${px}px * var(--result-card-font-scale))`;
-
-function ImprovementTip({ tip }: { tip: string }) {
-  return (
-    <div
-      style={{
-        display: "flex",
-        gap: "12px",
-        padding: "16px 18px",
-        background: "var(--surface2)",
-        border: "1px solid var(--border)",
-        marginBottom: "8px",
-        fontSize: scaledFont(15),
-        color: "var(--muted)",
-        lineHeight: 1.6,
-      }}
-    >
-      <span style={{ color: "var(--amber)", flexShrink: 0, marginTop: "1px" }}>{">"}</span>
-      <span>{tip}</span>
-    </div>
-  );
-}
-
-function getFocusAreaTips(score: ScoreResult): string[] {
-  const weaknessTips = score.weaknesses.filter(Boolean).slice(0, 4);
-  if (weaknessTips.length > 0) {
-    return weaknessTips;
-  }
-
-  const weakDims = (
-    ["technical_depth", "clarity", "completeness", "structure"] as const
-  ).filter((d) => (score[d] as number) < 80);
-
-  const fallbackTips = weakDims
-    .map((dim) => {
-      const tips = TIPS[dim] ?? [];
-      return tips[0];
-    })
-    .filter(Boolean);
-
-  if (score.missing_concepts.length > 0) {
-    fallbackTips.unshift(`Address these missing concepts directly: ${score.missing_concepts.slice(0, 2).join(", ")}.`);
-  }
-
-  return Array.from(new Set(fallbackTips)).slice(0, 4);
-}
 
 export function FeedbackPanel({
   score,
@@ -103,10 +31,7 @@ export function FeedbackPanel({
   onSendChatMessage,
 }: Props) {
   const [chatDraft, setChatDraft] = useState("");
-  const weakDims = (
-    ["technical_depth", "clarity", "completeness", "structure"] as const
-  ).filter((d) => (score[d] as number) < 80);
-  const focusAreaTips = getFocusAreaTips(score);
+  const chatEndRef = useRef<HTMLDivElement | null>(null);
   const ai = score.ai_feedback;
   const aiError = score.ai_feedback_error;
   const aiSource = score.ai_feedback_source;
@@ -121,6 +46,11 @@ export function FeedbackPanel({
   useEffect(() => {
     setChatDraft("");
   }, [score.answerId]);
+
+  useEffect(() => {
+    if (!canSendChat || isLoadingChat) return;
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+  }, [canSendChat, chatMessages, isLoadingChat, isSendingChat]);
 
   async function handleChatSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -382,72 +312,11 @@ export function FeedbackPanel({
         </button>
       )}
 
-      {focusAreaTips.length > 0 ? (
-        <>
-          <div
-            style={{
-              fontFamily: "var(--font-head)",
-              fontSize: scaledFont(12),
-              letterSpacing: "0.1em",
-              textTransform: "uppercase",
-              color: "var(--muted)",
-              marginBottom: "12px",
-            }}
-          >
-            Focus Areas
-          </div>
-          {focusAreaTips.map((tip) => (
-            <ImprovementTip key={tip} tip={tip} />
-          ))}
-        </>
-      ) : (
-        <div
-          style={{
-            textAlign: "center",
-            padding: "20px",
-            fontFamily: "var(--font-head)",
-            fontSize: scaledFont(18),
-            letterSpacing: "0.08em",
-            color: "#22c55e",
-          }}
-        >
-          Excellent performance across all dimensions
-        </div>
-      )}
-
-      <div
-        style={{
-          marginTop: "20px",
-          padding: "14px",
-          background: "var(--surface2)",
-          border: "1px solid var(--border)",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
-        <span
-          style={{
-            fontFamily: "var(--font-head)",
-            fontSize: scaledFont(12),
-            letterSpacing: "0.12em",
-            textTransform: "uppercase",
-            color: "var(--muted)",
-          }}
-        >
-          Dimensions at target
-        </span>
-        <span className="mono" style={{ fontSize: scaledFont(24), color: "var(--cyan)" }}>
-          {4 - weakDims.length}
-          <span style={{ color: "var(--muted)", fontSize: scaledFont(16) }}> / 4</span>
-        </span>
-      </div>
-
       {canSendChat && (
         <div
           style={{
             marginTop: "20px",
-            padding: "18px",
+            padding: "24px",
             background: "var(--surface2)",
             border: "1px solid var(--border)",
           }}
@@ -470,7 +339,7 @@ export function FeedbackPanel({
               fontSize: scaledFont(14),
               lineHeight: 1.6,
               color: "var(--muted)",
-              marginBottom: "12px",
+              marginBottom: "16px",
             }}
           >
             Ask focused follow-ups about this answer only. Keep prompts short for the fastest response.
@@ -479,10 +348,12 @@ export function FeedbackPanel({
           <div
             style={{
               display: "grid",
-              gap: "10px",
-              maxHeight: "260px",
+              gap: "12px",
+              minHeight: "320px",
+              maxHeight: "420px",
               overflowY: "auto",
-              marginBottom: "12px",
+              marginBottom: "16px",
+              paddingRight: "4px",
             }}
           >
             {isLoadingChat ? (
@@ -492,32 +363,35 @@ export function FeedbackPanel({
                 Try: “Why was my completeness low?” or “Rewrite this more strongly.”
               </div>
             ) : (
-              chatMessages.map((message) => (
-                <div
-                  key={message.id}
-                  style={{
-                    padding: "12px 14px",
-                    border: "1px solid var(--border)",
-                    background: message.role === "assistant" ? "rgba(185,255,57,0.08)" : "var(--bg)",
-                  }}
-                >
+              <>
+                {chatMessages.map((message) => (
                   <div
-                    className="mono"
+                    key={message.id}
                     style={{
-                      fontSize: scaledFont(11),
-                      letterSpacing: "0.1em",
-                      textTransform: "uppercase",
-                      color: message.role === "assistant" ? "var(--cyan)" : "var(--muted)",
-                      marginBottom: "6px",
+                      padding: "16px 18px",
+                      border: "1px solid var(--border)",
+                      background: message.role === "assistant" ? "rgba(185,255,57,0.08)" : "var(--bg)",
                     }}
                   >
-                    {message.role === "assistant" ? "Coach" : "You"}
+                    <div
+                      className="mono"
+                      style={{
+                        fontSize: scaledFont(11),
+                        letterSpacing: "0.1em",
+                        textTransform: "uppercase",
+                        color: message.role === "assistant" ? "var(--cyan)" : "var(--muted)",
+                        marginBottom: "6px",
+                      }}
+                    >
+                      {message.role === "assistant" ? "Coach" : "You"}
+                    </div>
+                    <div style={{ fontSize: scaledFont(15), color: "var(--text)", lineHeight: 1.75 }}>
+                      {message.content}
+                    </div>
                   </div>
-                  <div style={{ fontSize: scaledFont(14), color: "var(--text)", lineHeight: 1.65 }}>
-                    {message.content}
-                  </div>
-                </div>
-              ))
+                ))}
+                <div ref={chatEndRef} />
+              </>
             )}
           </div>
 
@@ -540,17 +414,18 @@ export function FeedbackPanel({
             <textarea
               value={chatDraft}
               onChange={(event) => setChatDraft(event.target.value)}
-              rows={3}
+              rows={5}
               maxLength={1500}
               placeholder="Ask the coach about this answer..."
               style={{
                 resize: "vertical",
-                padding: "12px 14px",
+                minHeight: "132px",
+                padding: "14px 16px",
                 background: "var(--bg)",
                 border: "1px solid var(--border)",
                 color: "var(--text)",
-                fontSize: scaledFont(14),
-                lineHeight: 1.5,
+                fontSize: scaledFont(15),
+                lineHeight: 1.65,
               }}
             />
             <button

@@ -1,4 +1,4 @@
-import { useEffect, useRef, type CSSProperties } from "react";
+import type { CSSProperties } from "react";
 import type { ScoreResult } from "../lib/api";
 
 interface Props {
@@ -6,88 +6,7 @@ interface Props {
   submittedAnswer?: string;
 }
 
-const DIMS: { key: keyof ScoreResult; label: string; color: string }[] = [
-  { key: "technical_depth", label: "Technical Depth", color: "#0d9488" },
-  { key: "clarity",         label: "Clarity",         color: "#6366f1" },
-  { key: "completeness",    label: "Completeness",     color: "#f59e0b" },
-  { key: "structure",       label: "Structure",        color: "#ec4899" },
-];
-
 const scaledFont = (px: number) => `calc(${px}px * var(--result-card-font-scale))`;
-
-function ScoreBar({
-  label,
-  value,
-  color,
-  delay,
-}: {
-  label: string;
-  value: number;
-  color: string;
-  delay: number;
-}) {
-  const barRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const el = barRef.current;
-    if (!el) return;
-    const t = setTimeout(() => {
-      el.style.width = `${value}%`;
-    }, delay);
-    return () => clearTimeout(t);
-  }, [value, delay]);
-
-  return (
-    <div style={{ marginBottom: "14px" }}>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          marginBottom: "6px",
-        }}
-      >
-        <span
-          style={{
-            fontFamily: "var(--font-head)",
-            fontSize: scaledFont(13),
-            letterSpacing: "0.1em",
-            textTransform: "uppercase",
-            color: "var(--muted)",
-          }}
-        >
-          {label}
-        </span>
-        <span
-          className="mono"
-          style={{ fontSize: scaledFont(16), color }}
-        >
-          {value}
-        </span>
-      </div>
-      <div
-        style={{
-          height: "6px",
-          background: "var(--surface2)",
-          borderRadius: "2px",
-          overflow: "hidden",
-          position: "relative",
-        }}
-      >
-        <div
-          ref={barRef}
-          style={{
-            height: "100%",
-            width: "0%",
-            background: `linear-gradient(90deg, ${color}80, ${color})`,
-            borderRadius: "2px",
-            transition: "width 0.8s cubic-bezier(0.16, 1, 0.3, 1)",
-            boxShadow: `0 0 8px ${color}60`,
-          }}
-        />
-      </div>
-    </div>
-  );
-}
 
 function RingScore({ value }: { value: number }) {
   const radius = 42;
@@ -209,19 +128,6 @@ export function ScoreCard({ score, submittedAnswer }: Props) {
               : "Insufficient"}
           </div>
         </div>
-      </div>
-
-      {/* Dimension bars */}
-      <div style={{ marginBottom: "24px" }}>
-        {DIMS.map((d, i) => (
-          <ScoreBar
-            key={d.key}
-            label={d.label}
-            value={score[d.key] as number}
-            color={d.color}
-            delay={i * 120}
-          />
-        ))}
       </div>
 
       {/* Feedback */}
