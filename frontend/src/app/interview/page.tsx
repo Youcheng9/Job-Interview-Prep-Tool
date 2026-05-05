@@ -214,6 +214,10 @@ const COMPLETION_FILTERS: { value: CompletionFilter; label: string }[] = [
   { value: "not_done", label: "Not done" },
 ];
 
+function getFilterOptionLabel(label: string, count: number) {
+  return `${label} (${count})`;
+}
+
 function shuffleQuestions(questions: Question[]) {
   const next = [...questions];
   for (let index = next.length - 1; index > 0; index -= 1) {
@@ -481,6 +485,12 @@ export default function InterviewPage() {
         (difficultyFilter === "all" || item.difficulty === difficultyFilter) &&
         matchesCompletionFilter(item, filter),
     ).length;
+  const topicFilterOptions = supportsTopicFilter
+    ? [{ value: "all", label: "All" }, ...topicOptions.map((topic) => ({
+        value: topic,
+        label: formatTopicLabel(topic),
+      }))]
+    : [];
   const filteredSidebarQuestions = questions
     .map((item, index) => ({ item, index }))
     .filter(
@@ -735,82 +745,58 @@ export default function InterviewPage() {
           <div className="question-sidebar-filter-shell">
             {supportsTopicFilter && topicOptions.length > 0 ? (
               <div className="question-sidebar-filter-section" aria-label="Filter questions by topic">
-                <div className="question-sidebar-filter-label">Topic</div>
-                <div className="question-sidebar-filter-grid question-sidebar-filter-grid-topic">
-                  {[{ value: "all", label: "All" }, ...topicOptions.map((topic) => ({
-                    value: topic,
-                    label: formatTopicLabel(topic),
-                  }))].map((filter) => {
-                    const active = topicFilter === filter.value;
-                    const count = getTopicFilterCount(filter.value);
-
-                    return (
-                      <button
-                        key={filter.value}
-                        type="button"
-                        className={`question-sidebar-filter-button question-sidebar-filter-button-topic ${
-                          active ? "question-sidebar-filter-button-active" : ""
-                        }`}
-                        onClick={() => handleTopicFilterChange(filter.value)}
-                        aria-pressed={active}
-                      >
-                        <span>{filter.label}</span>
-                        <span className="mono question-sidebar-filter-count">{count}</span>
-                      </button>
-                    );
-                  })}
-                </div>
+                <label className="question-sidebar-filter-label" htmlFor="question-topic-filter">
+                  Topic
+                </label>
+                <select
+                  id="question-topic-filter"
+                  className="input-shell question-sidebar-filter-select"
+                  value={topicFilter}
+                  onChange={(event) => handleTopicFilterChange(event.target.value as TopicFilter)}
+                >
+                  {topicFilterOptions.map((filter) => (
+                    <option key={filter.value} value={filter.value}>
+                      {getFilterOptionLabel(filter.label, getTopicFilterCount(filter.value))}
+                    </option>
+                  ))}
+                </select>
               </div>
             ) : null}
 
             <div className="question-sidebar-filter-section" aria-label="Filter questions by difficulty">
-              <div className="question-sidebar-filter-label">Mode</div>
-              <div className="question-sidebar-filter-grid question-sidebar-filter-grid-mode">
-                {DIFFICULTY_FILTERS.map((filter) => {
-                  const active = difficultyFilter === filter.value;
-                  const count = getDifficultyFilterCount(filter.value);
-
-                  return (
-                    <button
-                      key={filter.value}
-                      type="button"
-                      className={`question-sidebar-filter-button question-sidebar-filter-button-${filter.value} ${
-                        active ? "question-sidebar-filter-button-active" : ""
-                      }`}
-                      onClick={() => setDifficultyFilter(filter.value)}
-                      aria-pressed={active}
-                    >
-                      <span>{filter.label}</span>
-                      <span className="mono question-sidebar-filter-count">{count}</span>
-                    </button>
-                  );
-                })}
-              </div>
+              <label className="question-sidebar-filter-label" htmlFor="question-difficulty-filter">
+                Mode
+              </label>
+              <select
+                id="question-difficulty-filter"
+                className="input-shell question-sidebar-filter-select"
+                value={difficultyFilter}
+                onChange={(event) => setDifficultyFilter(event.target.value as DifficultyFilter)}
+              >
+                {DIFFICULTY_FILTERS.map((filter) => (
+                  <option key={filter.value} value={filter.value}>
+                    {getFilterOptionLabel(filter.label, getDifficultyFilterCount(filter.value))}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div className="question-sidebar-filter-section" aria-label="Filter questions by completion">
-              <div className="question-sidebar-filter-label">Completed</div>
-              <div className="question-sidebar-filter-grid question-sidebar-filter-grid-completed">
-                {COMPLETION_FILTERS.map((filter) => {
-                  const active = completionFilter === filter.value;
-                  const count = getCompletionFilterCount(filter.value);
-
-                  return (
-                    <button
-                      key={filter.value}
-                      type="button"
-                      className={`question-sidebar-filter-button question-sidebar-filter-button-${filter.value} ${
-                        active ? "question-sidebar-filter-button-active" : ""
-                      }`}
-                      onClick={() => setCompletionFilter(filter.value)}
-                      aria-pressed={active}
-                    >
-                      <span>{filter.label}</span>
-                      <span className="mono question-sidebar-filter-count">{count}</span>
-                    </button>
-                  );
-                })}
-              </div>
+              <label className="question-sidebar-filter-label" htmlFor="question-completion-filter">
+                Completed
+              </label>
+              <select
+                id="question-completion-filter"
+                className="input-shell question-sidebar-filter-select"
+                value={completionFilter}
+                onChange={(event) => setCompletionFilter(event.target.value as CompletionFilter)}
+              >
+                {COMPLETION_FILTERS.map((filter) => (
+                  <option key={filter.value} value={filter.value}>
+                    {getFilterOptionLabel(filter.label, getCompletionFilterCount(filter.value))}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
 
