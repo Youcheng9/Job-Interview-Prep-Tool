@@ -28,6 +28,10 @@ export function getSessionKey(role: Role, level: CandidateLevel) {
   return `${SESSION_KEY_PREFIX}:${role}:${level}`;
 }
 
+function getSessionOrderKey(role: Role, level: CandidateLevel) {
+  return `${getSessionKey(role, level)}:order`;
+}
+
 export function readSavedQuestionId(role: Role, level: CandidateLevel): number | null {
   const saved = localStorage.getItem(getSessionKey(role, level));
   if (!saved) return null;
@@ -39,6 +43,29 @@ export function readSavedQuestionId(role: Role, level: CandidateLevel): number |
 export function saveInterviewSession(role: Role, level: CandidateLevel, questionId: number) {
   localStorage.setItem(getSessionKey(role, level), String(questionId));
   localStorage.setItem(LAST_SESSION_KEY, `${role}:${level}:${questionId}`);
+}
+
+export function readSavedQuestionOrder(role: Role, level: CandidateLevel): number[] | null {
+  const saved = localStorage.getItem(getSessionOrderKey(role, level));
+  if (!saved) return null;
+
+  try {
+    const parsed = JSON.parse(saved) as unknown;
+    if (!Array.isArray(parsed)) return null;
+    const values = parsed.map((item) => Number(item)).filter((item) => Number.isFinite(item));
+    return values.length ? values : null;
+  } catch {
+    return null;
+  }
+}
+
+export function saveQuestionOrder(role: Role, level: CandidateLevel, questionIds: number[]) {
+  localStorage.setItem(getSessionOrderKey(role, level), JSON.stringify(questionIds));
+}
+
+export function clearInterviewSession(role: Role, level: CandidateLevel) {
+  localStorage.removeItem(getSessionKey(role, level));
+  localStorage.removeItem(getSessionOrderKey(role, level));
 }
 
 export function getSavedInterviewSession(): SavedInterviewSession | null {

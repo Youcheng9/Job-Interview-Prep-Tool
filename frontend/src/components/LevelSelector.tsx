@@ -15,7 +15,7 @@ const LEVELS: Array<{
     id: "intern",
     code: "L1",
     label: "Intern",
-    desc: "Foundational interviews focused on fundamentals, clear communication, and coachable reasoning",
+    desc: "Fundamentals-heavy interviews focused on technical clarity, core reasoning, and coachable thinking",
   },
   {
     id: "new_grad",

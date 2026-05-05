@@ -6,40 +6,11 @@ import { isAuthenticated, type CandidateLevel, type Role } from "../lib/api";
 import { getSavedInterviewSession, readSavedQuestionId } from "../lib/interviewSession";
 
 const COMPANIES = ["Google", "Meta", "Stripe", "OpenAI", "NVIDIA", "Databricks", "Airbnb", "Netflix"];
-const AUTH_COMPANIES = [
-  "OpenAI",
-  "Google",
-  "Meta",
-  "Stripe",
-  "NVIDIA",
-  "Databricks",
-  "Airbnb",
-  "Netflix",
-  "Figma",
-  "Notion",
-  "Anthropic",
-  "Scale AI",
-];
-const COMPANY_LOGOS: Record<string, string> = {
-  OpenAI: "/company-icons/OpenAILogo.png",
-  Google: "/company-icons/GoogleLogo.png",
-  Meta: "/company-icons/MetaLogo.png",
-  Stripe: "/company-icons/StripeLogo.png",
-  NVIDIA: "/company-icons/Nvidia-Logo.png",
-  Databricks: "/company-icons/Databricks_Logo.png",
-  Airbnb: "/company-icons/AirbnbLogo.png",
-  Netflix: "/company-icons/NetflixLogo.png",
-  Figma: "/company-icons/FigmaLogo.png",
-  Notion: "/company-icons/NotionLogo.png",
-  Anthropic: "/company-icons/Anthropic.png",
-  "Scale AI": "/company-icons/ScaleAILogo.png",
-};
 const MARQUEE_GROUP_COUNT = 6;
-const AUTH_COMPANY_PAGE_SIZE = 9;
 
 const STATS = [
   { value: "4", label: "interview tracks", detail: "Software engineering, data, product, and behavioral practice" },
-  { value: "Question-level", label: "feedback", detail: "Scorecards break down structure, signal, and technical depth" },
+  { value: "Company-tagged", label: "question bank", detail: "Fundamentals-focused technical prompts framed against recognizable hiring contexts" },
   { value: "Saved", label: "session history", detail: "Review previous answers, retry weak areas, and track improvement" },
 ];
 
@@ -78,7 +49,7 @@ const WORKFLOW = [
 
 const COMPARISON_ROWS = [
   {
-    feature: "Real intern + new-grad loops by company",
+    feature: "Company-tagged fundamentals grill",
     ours: true,
     others: "—",
   },
@@ -108,15 +79,13 @@ export default function HomePage() {
   const [role, setRole] = useState<Role | null>("swe");
   const [level, setLevel] = useState<CandidateLevel>("new_grad");
   const [levelConfirmed, setLevelConfirmed] = useState(false);
-  const [selectedCompany, setSelectedCompany] = useState("OpenAI");
-  const [companyPage, setCompanyPage] = useState(0);
   const [previewTypedCount, setPreviewTypedCount] = useState(0);
   const [previewPhase, setPreviewPhase] = useState<"typing" | "submitting" | "feedback">("typing");
   const navigate = useNavigate();
   const authed = isAuthenticated();
   const previousWork = authed ? getSavedInterviewSession() : null;
 
-  const launchHref = `/interview?role=${role ?? "swe"}&level=${level}&company=${encodeURIComponent(selectedCompany)}`;
+  const launchHref = `/interview?role=${role ?? "swe"}&level=${level}`;
   const authHref = `/auth?next=${encodeURIComponent(launchHref)}`;
 
   const hasSavedRound = () => {
@@ -141,11 +110,6 @@ export default function HomePage() {
     setLevelConfirmed(true);
   };
 
-  const companyPageCount = Math.ceil(AUTH_COMPANIES.length / AUTH_COMPANY_PAGE_SIZE);
-  const visibleCompanies = AUTH_COMPANIES.slice(
-    companyPage * AUTH_COMPANY_PAGE_SIZE,
-    (companyPage + 1) * AUTH_COMPANY_PAGE_SIZE,
-  );
   const previewVisibleAnswer = PRACTICE_PREVIEW_ANSWER_TEXT.slice(0, previewTypedCount);
   const previewFeedbackVisible = previewPhase === "feedback";
   const previewEvaluationLabel =
@@ -217,13 +181,9 @@ export default function HomePage() {
               </div>
               <h1 className="authed-hero-title">Shape the next practice session before you start.</h1>
               <p className="authed-hero-copy">
-                Pick a target company, lock the interview track, set the level, and launch a round that feels intentional instead of generic.
+                Choose the interview track, set the level, and launch a round built from company-tagged fundamentals questions instead of generic prompts.
               </p>
               <div className="authed-hero-meta">
-                <div className="authed-meta-chip">
-                  <span className="mono">Target</span>
-                  <strong>{selectedCompany}</strong>
-                </div>
                 <div className="authed-meta-chip">
                   <span className="mono">Track</span>
                   <strong>{role === "swe" ? "Software Engineering" : role === "data" ? "Data / ML" : role === "pm" ? "Product" : "Behavioral"}</strong>
@@ -254,75 +214,11 @@ export default function HomePage() {
             <div className="landing-section-header">
               <div>
                 <div className="eyebrow landing-eyebrow-large" style={{ marginBottom: "12px" }}>
-                  01 · Company
-                </div>
-                <h2 className="landing-section-title">Choose the company bar you want to rehearse against</h2>
-                <p className="muted landing-section-copy">
-                  Select the hiring context first. The interface keeps the same visual system across every choice so the flow feels consistent and focused.
-                </p>
-              </div>
-            </div>
-
-            <div className="auth-selection-card auth-company-shell">
-              <div className="auth-company-grid">
-                {visibleCompanies.map((company) => {
-                  const active = selectedCompany === company;
-                  const logoSrc = COMPANY_LOGOS[company];
-                  return (
-                    <button
-                      key={company}
-                      type="button"
-                      className={`auth-option-card auth-company-card${active ? " auth-option-card-active" : ""}`}
-                      onClick={() => setSelectedCompany(company)}
-                    >
-                      <span className="auth-company-logo-wrap" aria-hidden="true">
-                        {logoSrc ? (
-                          <img
-                            src={logoSrc}
-                            alt=""
-                            className="auth-company-logo"
-                          />
-                        ) : null}
-                      </span>
-                      <span className="mono auth-option-kicker">Company</span>
-                      <span className="auth-option-title">{company}</span>
-                    </button>
-                  );
-                })}
-              </div>
-              {companyPageCount > 1 ? (
-                <div className="auth-pager">
-                  <button
-                    type="button"
-                    className="auth-pager-button"
-                    onClick={() => setCompanyPage((current) => Math.max(0, current - 1))}
-                    disabled={companyPage === 0}
-                  >
-                    Previous page
-                  </button>
-                  <span className="mono auth-pager-meta">Page {companyPage + 1} / {companyPageCount}</span>
-                  <button
-                    type="button"
-                    className="auth-pager-button"
-                    onClick={() => setCompanyPage((current) => Math.min(companyPageCount - 1, current + 1))}
-                    disabled={companyPage === companyPageCount - 1}
-                  >
-                    Next page
-                  </button>
-                </div>
-              ) : null}
-            </div>
-          </section>
-
-          <section className="landing-section landing-anchor-section">
-            <div className="landing-section-header">
-              <div>
-                <div className="eyebrow landing-eyebrow-large" style={{ marginBottom: "12px" }}>
-                  02 · Track
+                  01 · Track
                 </div>
                 <h2 className="landing-section-title">Choose the interview track</h2>
                 <p className="muted landing-section-copy">
-                  Pick the loop you want to sharpen right now. Every option uses the same background tone and typography as the rest of the authenticated experience.
+                  Pick the loop you want to sharpen right now. The company context is attached to the prompts themselves, not locked as a global mode.
                 </p>
               </div>
             </div>
@@ -355,7 +251,7 @@ export default function HomePage() {
             <div className="landing-section-header">
               <div>
                 <div className="eyebrow landing-eyebrow-large" style={{ marginBottom: "12px" }}>
-                  03 · Level
+                  02 · Level
                 </div>
                 <h2 className="landing-section-title">Set the level and start the round</h2>
                 <p className="muted landing-section-copy">
@@ -370,7 +266,7 @@ export default function HomePage() {
                   id: "intern" as CandidateLevel,
                   code: "L1",
                   label: "Intern",
-                  desc: "Foundational interviews focused on fundamentals, clear communication, and coachable reasoning.",
+                  desc: "Fundamentals-heavy interviews focused on technical clarity, core reasoning, and coachable thinking.",
                 },
                 {
                   id: "new_grad" as CandidateLevel,
@@ -401,9 +297,9 @@ export default function HomePage() {
                   Ready to start
                 </div>
                 <p className="muted">
-                  Practicing for <strong style={{ color: "var(--text)" }}>{selectedCompany}</strong> in a{" "}
+                  Practicing a{" "}
                   <strong style={{ color: "var(--text)" }}>{role === "swe" ? "Software Engineering" : role === "data" ? "Data / ML" : role === "pm" ? "Product" : "Behavioral"}</strong>{" "}
-                  round at the <strong style={{ color: "var(--text)" }}>{level === "intern" ? "Intern" : "New Grad"}</strong> level.
+                  round at the <strong style={{ color: "var(--text)" }}>{level === "intern" ? "Intern" : "New Grad"}</strong> level with company-tagged fundamentals prompts.
                 </p>
               </div>
               <button type="button" className="btn-primary level-start-button" onClick={() => navigate(launchHref)}>
@@ -423,7 +319,7 @@ export default function HomePage() {
           <div className="landing-copy animate-fade-up">
             <h1 className="landing-title">Interview practice that feels like a real hiring loop</h1>
             <p className="landing-lead">
-              Train on role-specific prompts, get sharper follow-up questions, and review structured feedback after every answer. Built for candidates who need repetition, not novelty
+              Train on role-specific prompts, get sharper follow-up questions, and review structured feedback after every answer. The question bank is tagged by company but focused on the technical fundamentals teams use to grill for clarity, depth, and judgment.
             </p>
             <div className="landing-actions hero-actions">
               <button
@@ -585,7 +481,7 @@ export default function HomePage() {
       <section style={{ borderTop: "1px solid var(--border)", borderBottom: "1px solid var(--border)", background: "var(--surface)" }}>
         <div className="shell-width" style={{ padding: "20px 0" }}>
           <div className="eyebrow landing-eyebrow-large" style={{ marginBottom: "12px" }}>
-            Interview formats inspired by top hiring bars
+            Company contexts across the question bank
           </div>
           <div className="marquee-fade">
             <div

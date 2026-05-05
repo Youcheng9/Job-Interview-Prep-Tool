@@ -24,6 +24,12 @@ MAX_GENERATION_ATTEMPTS = int(os.getenv("QUESTION_GENERATION_MAX_ATTEMPTS", "8")
 
 VALID_ROLES = {"SWE", "DataScience", "PM", "Behavioral"}
 VALID_LEVELS = {"intern", "new_grad"}
+DEFAULT_COMPANY_TAGS = {
+    "SWE": ["Google", "Meta", "Stripe", "Databricks", "OpenAI", "Anthropic", "Airbnb", "Notion"],
+    "DataScience": ["Meta", "Netflix", "Airbnb", "Notion", "OpenAI", "Databricks", "Google"],
+    "PM": ["Google", "Stripe", "Notion", "Meta", "OpenAI"],
+    "Behavioral": ["Google", "Meta", "Stripe", "Airbnb", "OpenAI"],
+}
 
 
 class QuestionGenerationError(RuntimeError):
@@ -57,6 +63,7 @@ class RubricModel(BaseModel):
 class QuestionModel(BaseModel):
     role: str
     level: str
+    companies: list[str] = Field(min_length=1)
     prompt: str = Field(min_length=12)
     rubric: RubricModel
 
@@ -76,6 +83,21 @@ class QuestionModel(BaseModel):
             raise ValueError(f"level must be one of {sorted(VALID_LEVELS)}")
         return cleaned
 
+    @field_validator("companies")
+    @classmethod
+    def validate_companies(cls, value: list[str]) -> list[str]:
+        cleaned: list[str] = []
+        seen: set[str] = set()
+        for item in value:
+            normalized = item.strip()
+            if not normalized or normalized in seen:
+                continue
+            seen.add(normalized)
+            cleaned.append(normalized)
+        if not cleaned:
+            raise ValueError("companies must include at least one company tag")
+        return cleaned
+
     @field_validator("prompt")
     @classmethod
     def validate_prompt(cls, value: str) -> str:
@@ -86,7 +108,37 @@ class QuestionModel(BaseModel):
 
 
 def looks_like_question_object(value: object) -> bool:
-    return isinstance(value, dict) and {"role", "level", "prompt", "rubric"}.issubset(value.keys())
+    return isinstance(value, dict) and {"role", "level", "companies", "prompt", "rubric"}.issubset(
+        value.keys()
+    )
+
+
+def build_role_style_instructions(role: str) -> str:
+    if role == "SWE":
+        return """
+- Every prompt must be a hard technical fundamentals grill for a software engineer.
+- Focus on operating systems, networking, concurrency, memory, databases, APIs, debugging, performance, and distributed systems fundamentals.
+- Do not include behavioral, leadership, teamwork, preference, or story-based prompts.
+- Prefer concrete technical prompts such as process vs thread, indexing tradeoffs, locks vs atomics, TCP vs UDP, caching, transactions, and consistency.
+""".strip()
+
+    if role == "DataScience":
+        return """
+- Every prompt must be a hard technical fundamentals grill for a data science or machine learning candidate.
+- Focus on statistics, experimentation, model evaluation, bias-variance, feature leakage, regression/classification fundamentals, probability, and data system tradeoffs.
+- Do not include behavioral, stakeholder-management, product-sense, or story-based prompts.
+- Prefer concrete technical prompts such as precision vs recall, overfitting, calibration, regularization, hypothesis testing, and offline vs online evaluation.
+""".strip()
+
+    if role == "PM":
+        return """
+- Keep prompts product-focused and analytical.
+- Avoid behavioral story prompts unless they are explicitly about product reasoning.
+""".strip()
+
+    return """
+- Keep prompts focused on communication, reflection, or collaboration scenarios.
+""".strip()
 
 
 def build_prompt(
@@ -95,10 +147,12 @@ def build_prompt(
     level: str,
     count: int,
     topic: str | None,
+    companies: list[str],
     banned_prompts: list[str] | None = None,
 ) -> str:
     topic_line = f"Focus area: {topic}\n" if topic else ""
     freshness_hint = random.randint(1000, 9999)
+    company_pool = ", ".join(companies)
     banned_section = ""
     if banned_prompts:
         banned_lines = "\n".join(f'- "{prompt}"' for prompt in banned_prompts[:50])
@@ -116,6 +170,7 @@ Each object must match this schema exactly:
 {{
   "role": "{role}",
   "level": "{level}",
+  "companies": ["Company A", "Company B"],
   "prompt": "A concise interview question ending with a question mark",
   "rubric": {{
     "ideal_answer": "A strong 2 to 5 sentence answer summary",
@@ -133,12 +188,17 @@ Requirements:
 - Role must always be "{role}".
 - Level must always be "{level}".
 - Keep prompts realistic for {role} candidates at the {level} level.
+- Each question must include 1 to 3 company tags chosen from: {company_pool}.
+- Multiple companies may share the same question if the question is broadly representative.
 - Make all prompts distinct from one another.
 - Avoid repeating common textbook prompts unless they are rewritten in a meaningfully different way.
 - Do not include numbering or commentary.
 - Keywords should be specific and useful for scoring.
 - dimension_keywords should contain short phrases, not sentences.
 - Avoid markdown fences.
+- The prompt must not mention any company name directly.
+- Keep the language crisp and interviewer-like.
+- {build_role_style_instructions(role)}
 - Internal variation hint: {freshness_hint}
 {topic_line}
 {banned_section}
@@ -305,7 +365,14 @@ def dedupe_generated_questions(generated: list[QuestionModel]) -> list[QuestionM
     return unique_items
 
 
-def generate_questions_with_retries(*, role: str, level: str, count: int, topic: str | None) -> list[QuestionModel]:
+def generate_questions_with_retries(
+    *,
+    role: str,
+    level: str,
+    count: int,
+    topic: str | None,
+    companies: list[str],
+) -> list[QuestionModel]:
     collected: list[QuestionModel] = []
     last_error: QuestionGenerationError | None = None
     stalled_attempts = 0
@@ -328,6 +395,7 @@ def generate_questions_with_retries(*, role: str, level: str, count: int, topic:
             level=level,
             count=min(remaining, 3),
             topic=topic,
+            companies=companies,
             banned_prompts=banned_prompts,
         )
         raw = call_ollama(prompt)
@@ -383,6 +451,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--level", required=True, choices=sorted(VALID_LEVELS))
     parser.add_argument("--count", type=int, default=5)
     parser.add_argument("--topic", help="Optional topic to focus the generated questions on.")
+    parser.add_argument(
+        "--companies",
+        nargs="+",
+        help="Optional company tag pool to sample from. Defaults to a curated list per role.",
+    )
     return parser.parse_args()
 
 
@@ -392,11 +465,18 @@ def main() -> None:
     if args.count < 1 or args.count > 25:
         raise QuestionGenerationError("--count must be between 1 and 25")
 
+    companies = args.companies or DEFAULT_COMPANY_TAGS.get(args.role, [])
+    if not companies:
+        raise QuestionGenerationError(
+            f"No company tags configured for role {args.role}. Pass --companies explicitly."
+        )
+
     generated = generate_questions_with_retries(
         role=args.role,
         level=args.level,
         count=args.count,
         topic=args.topic,
+        companies=companies,
     )
 
     existing = load_existing_questions()

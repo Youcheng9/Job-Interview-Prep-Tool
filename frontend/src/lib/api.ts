@@ -14,6 +14,8 @@ export interface Question {
   id: number;
   role: Role;
   level: CandidateLevel;
+  company?: string | null;
+  companies?: string[];
   text: string;
   rubric: string[];
   difficulty: "easy" | "medium" | "hard";
@@ -75,6 +77,8 @@ interface ApiQuestionsResponse {
     id: number;
     role: ApiRole;
     level: CandidateLevel;
+    company?: string | null;
+    companies?: string[];
     prompt: string;
     difficulty: Question["difficulty"];
   }>;
@@ -138,9 +142,11 @@ interface ApiHistoryResponse {
     question_id: number;
     role: ApiRole;
     level: CandidateLevel;
-    difficulty: Question["difficulty"];
-    prompt: string;
-    answer_text: string;
+      difficulty: Question["difficulty"];
+      company?: string | null;
+      companies?: string[];
+      prompt: string;
+      answer_text: string;
     created_at: string;
     overall: number;
     scores: {
@@ -368,6 +374,8 @@ export async function getQuestions(role: Role, level: CandidateLevel): Promise<Q
     id: item.id,
     role: fromApiRole(item.role),
     level: item.level,
+    company: item.company,
+    companies: item.companies ?? (item.company ? [item.company] : []),
     text: item.prompt,
     rubric: [],
     difficulty: item.difficulty ?? getDifficulty(item.level, index),
@@ -416,6 +424,8 @@ export async function getHistory(): Promise<AnswerRecord[]> {
         id: item.question_id,
         role,
         level: item.level,
+        company: item.company,
+        companies: item.companies ?? (item.company ? [item.company] : []),
         text: item.prompt,
         rubric: [],
         difficulty: item.difficulty,

@@ -25,6 +25,8 @@ class Question(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     role: Mapped[str] = mapped_column(String(64), index=True, nullable=False)
     level: Mapped[str] = mapped_column(String(32), index=True, nullable=False, default="new_grad")
+    company: Mapped[str | None] = mapped_column(String(128), index=True, nullable=True)
+    companies: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
     prompt: Mapped[str] = mapped_column(Text, nullable=False)
     rubric: Mapped[dict] = mapped_column(JSON, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)

@@ -22,6 +22,8 @@ class QuestionService:
                     id=row.id,
                     role=row.role,
                     level=row.level,
+                    company=(row.companies[0] if row.companies else row.company),
+                    companies=row.companies or ([row.company] if row.company else []),
                     prompt=row.prompt,
                     difficulty=get_question_difficulty(row.level, index),
                 )
@@ -51,6 +53,8 @@ class QuestionService:
             id=row.id,
             role=row.role,
             level=row.level,
+            company=(row.companies[0] if row.companies else row.company),
+            companies=row.companies or ([row.company] if row.company else []),
             prompt=row.prompt,
             difficulty=get_question_difficulty(row.level, max(index, 0)),
         )

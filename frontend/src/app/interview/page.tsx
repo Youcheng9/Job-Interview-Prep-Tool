@@ -2,7 +2,13 @@ import { useState, useEffect, useRef } from "react";
 import { useSearchParams, useNavigate, useLocation } from "react-router-dom";
 import { ScoreCard } from "../../components/ScoreCard";
 import { FeedbackPanel } from "../../components/FeedbackPanel";
-import { readSavedQuestionId, saveInterviewSession } from "../../lib/interviewSession";
+import {
+  clearInterviewSession,
+  readSavedQuestionId,
+  readSavedQuestionOrder,
+  saveInterviewSession,
+  saveQuestionOrder,
+} from "../../lib/interviewSession";
 import {
   type CandidateLevel,
   clearToken,
@@ -131,6 +137,25 @@ function LevelBadge({ level }: { level: CandidateLevel }) {
   );
 }
 
+function CompanyBadge({ companies }: { companies: string[] }) {
+  return (
+    <span
+      className="mono"
+      style={{
+        fontSize: "12px",
+        letterSpacing: "0.12em",
+        textTransform: "uppercase",
+        color: "#7dd3fc",
+        border: "1px solid rgba(125,211,252,0.35)",
+        background: "rgba(125,211,252,0.1)",
+        padding: "4px 10px",
+      }}
+    >
+      {companies.join(" · ")}
+    </span>
+  );
+}
+
 type Phase = "question" | "submitting" | "result";
 type DifficultyFilter = "all" | Question["difficulty"];
 type CompletionFilter = "all" | "done" | "not_done";
@@ -152,6 +177,15 @@ const COMPLETION_FILTERS: { value: CompletionFilter; label: string }[] = [
   { value: "done", label: "Done" },
   { value: "not_done", label: "Not done" },
 ];
+
+function shuffleQuestions(questions: Question[]) {
+  const next = [...questions];
+  for (let index = next.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(Math.random() * (index + 1));
+    [next[index], next[swapIndex]] = [next[swapIndex], next[index]];
+  }
+  return next;
+}
 
 export default function InterviewPage() {
   const [params] = useSearchParams();
@@ -263,20 +297,39 @@ export default function InterviewPage() {
     setError(null);
     getQuestions(role, level)
       .then((loadedQuestions) => {
-        setQuestions(loadedQuestions);
         if (!loadedQuestions.length) {
           setError(`No ${level === "intern" ? "intern" : "new grad"} questions are available for this track yet.`);
           return;
         }
 
-        const requestedIndex = Number.isFinite(requestedQuestionId)
-          ? loadedQuestions.findIndex((item) => item.id === requestedQuestionId)
-          : -1;
+        const savedOrder = readSavedQuestionOrder(role, level);
         const savedQuestionId = readSavedQuestionId(role, level);
+        const questionById = new Map(loadedQuestions.map((item) => [item.id, item]));
+
+        let orderedQuestions: Question[];
+        if (savedOrder?.length) {
+          const ordered = savedOrder
+            .map((questionId) => questionById.get(questionId))
+            .filter((item): item is Question => Boolean(item));
+          const remaining = loadedQuestions.filter((item) => !savedOrder.includes(item.id));
+          orderedQuestions = [...ordered, ...remaining];
+        } else {
+          orderedQuestions = shuffleQuestions(loadedQuestions);
+          saveQuestionOrder(
+            role,
+            level,
+            orderedQuestions.map((item) => item.id),
+          );
+        }
+
+        const requestedIndex = Number.isFinite(requestedQuestionId)
+          ? orderedQuestions.findIndex((item) => item.id === requestedQuestionId)
+          : -1;
         const savedIndex =
-          savedQuestionId === null ? -1 : loadedQuestions.findIndex((item) => item.id === savedQuestionId);
+          savedQuestionId === null ? -1 : orderedQuestions.findIndex((item) => item.id === savedQuestionId);
         const nextIndex = requestedIndex >= 0 ? requestedIndex : savedIndex >= 0 ? savedIndex : 0;
 
+        setQuestions(orderedQuestions);
         setQIndex(nextIndex);
         setAnswer("");
         setCharCount(0);
@@ -495,6 +548,7 @@ export default function InterviewPage() {
     if (qIndex + 1 < questions.length) {
       selectQuestion(qIndex + 1);
     } else {
+      clearInterviewSession(role, level);
       navigate("/history");
     }
   }
@@ -803,6 +857,7 @@ export default function InterviewPage() {
                 </span>
                 <LevelBadge level={level} />
                 <DiffBadge level={question.difficulty} />
+                {question.companies?.length ? <CompanyBadge companies={question.companies} /> : null}
                 <div style={{ flex: 1, height: "1px", background: "var(--border)" }} />
               </div>
 
