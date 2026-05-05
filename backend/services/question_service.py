@@ -14,6 +14,8 @@ class QuestionService:
         query = self.db.query(Question)
         if role:
             query = query.filter(Question.role == role)
+            if role in {"SWE", "DataScience"}:
+                query = query.filter(Question.topic.isnot(None))
         rows = query.filter(Question.level == level).order_by(Question.id.asc()).all()
 
         return QuestionsResponse(
@@ -22,6 +24,7 @@ class QuestionService:
                     id=row.id,
                     role=row.role,
                     level=row.level,
+                    topic=row.topic,
                     company=(row.companies[0] if row.companies else row.company),
                     companies=row.companies or ([row.company] if row.company else []),
                     prompt=row.prompt,
@@ -40,6 +43,9 @@ class QuestionService:
     ) -> QuestionItem:
         query = self.db.query(Question).filter(Question.role == role, Question.level == level)
         base_query = self.db.query(Question).filter(Question.role == role, Question.level == level)
+        if role in {"SWE", "DataScience"}:
+            query = query.filter(Question.topic.isnot(None))
+            base_query = base_query.filter(Question.topic.isnot(None))
 
         if current_id is not None:
             query = query.filter(Question.id > current_id)
@@ -53,6 +59,7 @@ class QuestionService:
             id=row.id,
             role=row.role,
             level=row.level,
+            topic=row.topic,
             company=(row.companies[0] if row.companies else row.company),
             companies=row.companies or ([row.company] if row.company else []),
             prompt=row.prompt,

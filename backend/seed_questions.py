@@ -53,6 +53,7 @@ def main():
                 companies = item.get("companies")
                 if companies is None and item.get("company"):
                     companies = [item["company"]]
+                existing.topic = item.get("topic")
                 existing.company = companies[0] if companies else item.get("company")
                 existing.companies = companies
                 existing.rubric = item["rubric"]
@@ -66,6 +67,7 @@ def main():
             question = Question(
                 role=item["role"],
                 level=level,
+                topic=item.get("topic"),
                 company=companies[0] if companies else item.get("company"),
                 companies=companies,
                 prompt=item["prompt"],

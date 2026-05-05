@@ -8,6 +8,7 @@ class HistoryItem(BaseModel):
     question_id: int
     role: str
     level: str
+    topic: str | None = None
     company: str | None = None
     companies: list[str] = []
     difficulty: str
