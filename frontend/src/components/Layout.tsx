@@ -11,13 +11,14 @@ interface LayoutProps {
 export function Layout({ children }: LayoutProps) {
   const location = useLocation();
   const showBreadcrumbs = location.pathname !== "/";
+  const showFooter = location.pathname !== "/interview";
 
   return (
     <div className="site-shell">
       <Navbar />
       {showBreadcrumbs ? <Breadcrumbs /> : null}
       <main className="shell-main">{children}</main>
-      <Footer />
+      {showFooter ? <Footer /> : null}
     </div>
   );
 }
