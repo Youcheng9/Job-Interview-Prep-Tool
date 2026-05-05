@@ -176,12 +176,21 @@ def build_role_style_instructions(role: str) -> str:
 
     if role == "PM":
         return """
-- Keep prompts product-focused and analytical.
-- Avoid behavioral story prompts unless they are explicitly about product reasoning.
+- Every prompt must be a rigorous PM fundamentals question, not a generic behavioral prompt.
+- Focus on product sense, prioritization, metrics, experimentation, tradeoffs, roadmap judgment, execution risk, and decision quality.
+- The prompt should test structured thinking about products, users, markets, goals, and measurement.
+- Do not ask for personal stories, teamwork anecdotes, conflict resolution stories, or "tell me about a time" answers.
+- Prefer concrete PM prompts such as defining success metrics, diagnosing metric movement, prioritizing features, evaluating tradeoffs, choosing experiments, and scoping an MVP.
+- Strong prompts should force the candidate to reason, not recite frameworks mechanically.
 """.strip()
 
     return """
-- Keep prompts focused on communication, reflection, or collaboration scenarios.
+- Every prompt must be a rigorous behavioral interview question for a technical candidate.
+- Focus on ownership, conflict, execution under ambiguity, failure recovery, prioritization under pressure, stakeholder management, feedback, and decision-making.
+- The prompt should invite a concrete real example from the candidate and reveal judgment, accountability, and communication quality.
+- Do not ask abstract opinion questions or lightweight culture-fit questions.
+- Prefer direct prompts such as handling disagreement, recovering from mistakes, influencing without authority, managing scope pressure, and making tradeoffs with incomplete information.
+- Avoid vague prompts that can be answered with generic advice; make the candidate ground the answer in a specific situation.
 """.strip()
 
 
