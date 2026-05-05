@@ -5,6 +5,7 @@ import json
 import os
 from pathlib import Path
 import random
+import re
 from urllib import error, request
 
 from dotenv import load_dotenv
@@ -21,6 +22,7 @@ OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3.1:8b")
 OLLAMA_TIMEOUT_SECONDS = int(os.getenv("AI_FEEDBACK_TIMEOUT_SECONDS", "90"))
 OLLAMA_MAX_TOKENS = int(os.getenv("QUESTION_GENERATION_MAX_TOKENS", "1800"))
 MAX_GENERATION_ATTEMPTS = int(os.getenv("QUESTION_GENERATION_MAX_ATTEMPTS", "8"))
+NEAR_DUPLICATE_WORD_OVERLAP = float(os.getenv("QUESTION_GENERATION_DUPLICATE_OVERLAP", "0.8"))
 
 VALID_ROLES = {"SWE", "DataScience", "PM", "Behavioral"}
 VALID_LEVELS = {"intern", "new_grad"}
@@ -111,6 +113,48 @@ def looks_like_question_object(value: object) -> bool:
     return isinstance(value, dict) and {"role", "level", "companies", "prompt", "rubric"}.issubset(
         value.keys()
     )
+
+
+def normalize_prompt_for_similarity(prompt: str) -> list[str]:
+    text = prompt.lower()
+    text = re.sub(r"[^a-z0-9\s]", " ", text)
+    words = [word for word in text.split() if len(word) > 2]
+    stop_words = {
+        "what",
+        "when",
+        "where",
+        "which",
+        "why",
+        "how",
+        "does",
+        "would",
+        "could",
+        "should",
+        "explain",
+        "describe",
+        "difference",
+        "between",
+        "from",
+        "with",
+        "that",
+        "this",
+        "into",
+        "about",
+        "your",
+        "make",
+    }
+    return [word for word in words if word not in stop_words]
+
+
+def prompts_are_near_duplicates(left: str, right: str) -> bool:
+    left_words = set(normalize_prompt_for_similarity(left))
+    right_words = set(normalize_prompt_for_similarity(right))
+
+    if not left_words or not right_words:
+        return left.strip().lower() == right.strip().lower()
+
+    overlap = len(left_words & right_words) / min(len(left_words), len(right_words))
+    return overlap >= NEAR_DUPLICATE_WORD_OVERLAP
 
 
 def build_role_style_instructions(role: str) -> str:
@@ -344,6 +388,13 @@ def dedupe_and_merge(existing: list[dict], generated: list[QuestionModel]) -> tu
         key = (item.role, item.level, item.prompt)
         if key in seen:
             continue
+        if any(
+            str(existing_item.get("role", "")).strip() == item.role
+            and str(existing_item.get("level", "")).strip() == item.level
+            and prompts_are_near_duplicates(str(existing_item.get("prompt", "")).strip(), item.prompt)
+            for existing_item in merged
+        ):
+            continue
         merged.append(item.model_dump())
         seen.add(key)
         added += 1
@@ -358,6 +409,13 @@ def dedupe_generated_questions(generated: list[QuestionModel]) -> list[QuestionM
     for item in generated:
         key = (item.role, item.level, item.prompt)
         if key in seen:
+            continue
+        if any(
+            existing.role == item.role
+            and existing.level == item.level
+            and prompts_are_near_duplicates(existing.prompt, item.prompt)
+            for existing in unique_items
+        ):
             continue
         seen.add(key)
         unique_items.append(item)
