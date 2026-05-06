@@ -253,6 +253,278 @@ def _behavioral_signal_score(answer_text: str) -> float:
     return score
 
 
+def _contains_any(text: str, phrases: list[str]) -> bool:
+    return any(phrase in text for phrase in phrases)
+
+
+def _behavioral_story_components(answer_text: str) -> dict[str, bool]:
+    lowered = f" {answer_text.lower()} "
+    return {
+        "situation": _contains_any(
+            lowered,
+            [" when ", " during ", " on one project ", " in that situation ", " at the time ", " we had "],
+        ),
+        "task": _contains_any(
+            lowered,
+            [" my goal ", " my task ", " i needed to ", " i was responsible for ", " the goal was ", " i had to "],
+        ),
+        "action": _contains_any(
+            lowered,
+            [
+                " i decided ",
+                " i led ",
+                " i aligned ",
+                " i communicated ",
+                " i resolved ",
+                " i prioritized ",
+                " i owned ",
+                " i handled ",
+                " i drove ",
+                " i set up ",
+                " i brought ",
+                " i proposed ",
+                " i clarified ",
+            ],
+        ),
+        "result": _contains_any(
+            lowered,
+            [" as a result ", " the result ", " outcome ", " impact ", " improved ", " shipped ", " delivered ", " resolved ", " reduced ", " increased "],
+        ),
+        "reflection": _contains_any(
+            lowered,
+            [" i learned ", " next time ", " in retrospect ", " takeaway ", " i would do differently "],
+        ),
+        "ownership": _contains_any(
+            lowered,
+            [" i owned ", " i took ownership ", " i was responsible ", " i drove ", " i led "],
+        ),
+        "stakeholders": _contains_any(
+            lowered,
+            [" teammate", " teammates", " manager", " stakeholder", " customer", " cross-functional", " product", " design", " engineering"],
+        ),
+    }
+
+
+def _behavioral_framework_label(components: dict[str, bool]) -> str:
+    has_sar = components["situation"] and components["action"] and components["result"]
+    has_star = has_sar and components["task"]
+    if has_star:
+        return "STAR"
+    if has_sar:
+        return "SAR"
+    return "partial"
+
+
+def _build_behavioral_instant_feedback(
+    *,
+    overall_score: int,
+    framework: str,
+    components: dict[str, bool],
+    strengths: list[str],
+    weaknesses: list[str],
+) -> dict[str, object]:
+    if overall_score >= 80:
+        summary = "Strong behavioral answer. The story is concrete, ownership is visible, and the narrative lands clearly."
+    elif framework == "SAR":
+        summary = "Usable story, but it reads more like SAR than full STAR. Make the task explicit and sharpen the impact."
+    elif overall_score >= 60:
+        summary = "The answer has a workable story, but the narrative still needs clearer structure, stronger ownership, or a sharper result."
+    else:
+        summary = "The response is too vague for a strong behavioral interview answer. Build it around a specific story with explicit action and result."
+
+    improvements: list[str] = []
+    if not components["situation"]:
+        improvements.append("Open with the exact situation so the interviewer can anchor the story quickly.")
+    if not components["task"]:
+        improvements.append("State your task or responsibility explicitly so the answer follows STAR instead of a loose SAR story.")
+    if not components["action"]:
+        improvements.append("Spend more time on what you specifically did, not just what the team decided.")
+    if not components["result"]:
+        improvements.append("Close with a concrete result, impact, or decision outcome.")
+    if not components["reflection"]:
+        improvements.append("Add a short takeaway or what you learned to show judgment.")
+    if not improvements and weaknesses:
+        improvements.append(weaknesses[0])
+
+    next_focus = "Result"
+    if not components["situation"]:
+        next_focus = "Situation"
+    elif not components["task"]:
+        next_focus = "Task"
+    elif not components["action"]:
+        next_focus = "Action"
+    elif not components["result"]:
+        next_focus = "Result"
+    elif not components["reflection"]:
+        next_focus = "Reflection"
+
+    return {
+        "summary": summary,
+        "improvements": improvements[:2],
+        "next_focus": next_focus,
+        "label": framework,
+        "source": "behavioral-deterministic",
+        "strength_snapshot": strengths[:2],
+        "weakness_snapshot": weaknesses[:2],
+    }
+
+
+def _compute_behavioral_scores(
+    answer_text: str,
+    rubric: Dict,
+    similarity: float,
+    semantic_equivalence: float,
+    concept_cov: float,
+    concept_cov_raw: float,
+    dimension_evidence: Dict[str, Dict[str, object]],
+    answer_words: int,
+    embedding_error: str | None,
+    ideal: str,
+) -> Tuple[Dict[str, int], int, Dict]:
+    components = _behavioral_story_components(answer_text)
+    framework = _behavioral_framework_label(components)
+    behavioral_signal = _behavioral_signal_score(answer_text)
+
+    action_score = 1.0 if components["action"] else 0.0
+    result_score = 1.0 if components["result"] else 0.0
+    structure_score = (
+        0.25 * (1.0 if components["situation"] else 0.0)
+        + 0.20 * (1.0 if components["task"] else 0.0)
+        + 0.30 * action_score
+        + 0.25 * result_score
+    )
+    ownership_score = min(
+        1.0,
+        0.45 * (1.0 if components["ownership"] else 0.0)
+        + 0.30 * action_score
+        + 0.25 * (1.0 if components["reflection"] else 0.0),
+    )
+    completeness_score = min(
+        1.0,
+        0.30 * (1.0 if components["situation"] else 0.0)
+        + 0.20 * (1.0 if components["task"] else 0.0)
+        + 0.25 * action_score
+        + 0.25 * result_score,
+    )
+    clarity_score = min(
+        1.0,
+        0.45 * max(similarity, semantic_equivalence)
+        + 0.30 * structure_score
+        + 0.15 * (1.0 if components["stakeholders"] else 0.0)
+        + 0.10 * (1.0 if 45 <= answer_words <= 220 else 0.0),
+    )
+
+    scores = {
+        "technical_depth": int(
+            round(100 * min(1.0, 0.45 * max(similarity, semantic_equivalence) + 0.35 * ownership_score + 0.20 * behavioral_signal))
+        ),
+        "clarity": int(round(100 * clarity_score)),
+        "completeness": int(
+            round(
+                100
+                * min(
+                    1.0,
+                    0.45 * completeness_score
+                    + 0.30 * behavioral_signal
+                    + 0.25 * float(dimension_evidence.get("completeness", {}).get("coverage", 0.0)),
+                )
+            )
+        ),
+        "structure": int(
+            round(
+                100
+                * min(
+                    1.0,
+                    0.60 * structure_score
+                    + 0.25 * behavioral_signal
+                    + 0.15 * float(dimension_evidence.get("structure", {}).get("coverage", 0.0)),
+                )
+            )
+        ),
+    }
+
+    overall_score = int(round(sum(scores.values()) / len(scores)))
+    if components["reflection"]:
+        overall_score = min(100, overall_score + 3)
+    if framework == "STAR":
+        overall_score = min(100, overall_score + 4)
+    elif framework == "partial":
+        overall_score = max(0, overall_score - 6)
+
+    strengths: list[str] = []
+    weaknesses: list[str] = []
+
+    if framework == "STAR":
+        strengths.append("Clear STAR narrative with situation, task, action, and result.")
+    elif framework == "SAR":
+        strengths.append("The story has a usable SAR backbone with concrete action and outcome.")
+        weaknesses.append("Make the task or responsibility explicit so the answer reads as full STAR.")
+    else:
+        weaknesses.append("The answer needs a clearer story arc: situation, task, action, and result.")
+
+    if components["ownership"]:
+        strengths.append("Ownership is visible - your individual contribution is identifiable.")
+    else:
+        weaknesses.append("Clarify what you specifically owned or decided instead of describing the team at a high level.")
+
+    if components["result"]:
+        strengths.append("The story lands with a concrete result or impact.")
+    else:
+        weaknesses.append("End with a measurable result, decision, or concrete outcome.")
+
+    if components["reflection"]:
+        strengths.append("Good reflection on what you learned or would carry forward.")
+    else:
+        weaknesses.append("Add a short reflection or lesson learned to show judgment.")
+
+    if answer_words < 40:
+        weaknesses.append("The story is too short to show depth - give enough context, action, and outcome.")
+    elif answer_words > 260:
+        weaknesses.append("The story is too long - compress it to the key beats of STAR.")
+
+    degraded = embedding_error is not None
+    confidence = _score_confidence(
+        embedding_error=embedding_error,
+        answer_words=answer_words,
+        keyword_count=len(rubric.get("keywords", []) or []),
+    )
+
+    feedback = {
+        "strengths": strengths,
+        "weaknesses": weaknesses,
+        "missing_keywords": [],
+        "instant_feedback": _build_behavioral_instant_feedback(
+            overall_score=overall_score,
+            framework=framework,
+            components=components,
+            strengths=strengths,
+            weaknesses=weaknesses,
+        ),
+        "notes": {
+            "similarity_raw": similarity,
+            "semantic_equivalence": semantic_equivalence,
+            "answer_relevance": semantic_equivalence,
+            "keyword_coverage": concept_cov,
+            "keyword_coverage_raw": concept_cov_raw,
+            "concept_coverage": concept_cov,
+            "length_penalty": 1.0,
+            "embedding_error": embedding_error,
+            "degraded": degraded,
+            "confidence": confidence,
+            "dimension_evidence": dimension_evidence,
+            "narrative_framework": framework,
+            "quality_indicators": {
+                "has_structure": framework != "partial",
+                "has_examples": components["situation"],
+                "behavioral_signal": round(behavioral_signal, 4),
+                "star_components": components,
+            },
+            "ideal_snippet": ideal[:300] if ideal else None,
+        },
+    }
+    return scores, overall_score, feedback
+
+
 def concept_coverage(answer_text: str, concepts: List[str]) -> tuple[float, Dict[str, float]]:
     """
     Compute semantic concept coverage in [0.0, 1.0].
@@ -312,7 +584,22 @@ def compute_scores(
     concept_cov_raw, concept_scores = concept_coverage(answer_text, keywords)
     concept_cov = concept_cov_raw
     dimension_evidence, dimension_unmatched, dimension_matched = _collect_dimension_evidence(answer_text, dim_keys)
-    behavioral_signal = _behavioral_signal_score(answer_text) if normalized_role == "Behavioral" else 0.0
+
+    if normalized_role == "Behavioral":
+        return _compute_behavioral_scores(
+            answer_text,
+            rubric,
+            similarity,
+            semantic_equivalence,
+            concept_cov,
+            concept_cov_raw,
+            dimension_evidence,
+            answer_words,
+            embedding_error,
+            ideal,
+        )
+
+    behavioral_signal = 0.0
 
     has_structure = any(
         word in answer_text.lower()

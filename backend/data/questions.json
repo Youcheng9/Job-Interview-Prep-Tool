@@ -15,31 +15,25 @@
         "process",
         "thread",
         "address space",
-        "shared memory",
-        "isolation",
-        "context switch"
+        "shared memory"
       ],
       "dimension_keywords": {
         "technical_depth": [
           "address space",
-          "shared memory",
-          "resource isolation"
+          "shared memory"
         ],
         "clarity": [
           "difference",
-          "whereas",
-          "share"
+          "whereas"
         ],
         "completeness": [
           "process",
           "thread",
-          "memory",
-          "cost"
+          "memory"
         ],
         "structure": [
           "first",
-          "whereas",
-          "in contrast"
+          "whereas"
         ]
       }
     }
@@ -60,31 +54,25 @@
         "stack",
         "heap",
         "local variables",
-        "dynamic allocation",
-        "lifetime",
-        "memory management"
+        "dynamic allocation"
       ],
       "dimension_keywords": {
         "technical_depth": [
           "dynamic allocation",
-          "lifetime",
-          "automatic storage"
+          "lifetime"
         ],
         "clarity": [
           "difference",
-          "automatic",
-          "dynamic"
+          "automatic"
         ],
         "completeness": [
           "stack",
           "heap",
-          "allocation",
-          "lifetime"
+          "allocation"
         ],
         "structure": [
           "first",
-          "while",
-          "therefore"
+          "while"
         ]
       }
     }
@@ -105,31 +93,25 @@
         "hash table",
         "bucket",
         "collision",
-        "chaining",
-        "open addressing",
-        "lookup"
+        "chaining"
       ],
       "dimension_keywords": {
         "technical_depth": [
           "hash function",
-          "collision handling",
-          "average case"
+          "collision handling"
         ],
         "clarity": [
           "maps to",
-          "collision",
-          "strategy"
+          "collision"
         ],
         "completeness": [
           "problem solved",
           "collision",
-          "mitigation",
-          "performance"
+          "mitigation"
         ],
         "structure": [
           "first",
-          "if",
-          "then"
+          "if"
         ]
       }
     }
@@ -150,31 +132,25 @@
         "TCP",
         "UDP",
         "connection",
-        "ordering",
-        "retransmission",
-        "reliability"
+        "ordering"
       ],
       "dimension_keywords": {
         "technical_depth": [
           "flow control",
-          "congestion control",
-          "ordering"
+          "congestion control"
         ],
         "clarity": [
           "connectionless",
-          "guarantee",
-          "tradeoff"
+          "guarantee"
         ],
         "completeness": [
           "setup",
           "delivery",
-          "ordering",
-          "latency"
+          "ordering"
         ],
         "structure": [
           "first",
-          "by contrast",
-          "therefore"
+          "by contrast"
         ]
       }
     }
@@ -195,31 +171,25 @@
         "race condition",
         "threads",
         "shared state",
-        "interleaving",
-        "lock",
-        "atomic"
+        "interleaving"
       ],
       "dimension_keywords": {
         "technical_depth": [
           "shared mutable state",
-          "synchronization",
-          "atomic operations"
+          "synchronization"
         ],
         "clarity": [
           "timing",
-          "interleaving",
-          "example"
+          "interleaving"
         ],
         "completeness": [
           "definition",
           "cause",
-          "example",
-          "mitigation"
+          "example"
         ],
         "structure": [
           "first",
-          "for example",
-          "to prevent this"
+          "for example"
         ]
       }
     }
@@ -240,31 +210,25 @@
         "index",
         "table scan",
         "read performance",
-        "insert",
-        "update",
-        "delete"
+        "insert"
       ],
       "dimension_keywords": {
         "technical_depth": [
           "auxiliary structure",
-          "table scan",
-          "maintenance overhead"
+          "table scan"
         ],
         "clarity": [
           "locate rows",
-          "faster reads",
-          "write cost"
+          "faster reads"
         ],
         "completeness": [
           "index",
           "reads",
-          "writes",
-          "maintenance"
+          "writes"
         ],
         "structure": [
           "first",
-          "however",
-          "therefore"
+          "however"
         ]
       }
     }
@@ -286,31 +250,25 @@
         "TCP",
         "TLS",
         "HTTP request",
-        "response",
-        "server",
-        "client"
+        "response"
       ],
       "dimension_keywords": {
         "technical_depth": [
           "DNS",
-          "TLS",
-          "connection establishment"
+          "TLS"
         ],
         "clarity": [
           "step by step",
-          "request",
-          "response"
+          "request"
         ],
         "completeness": [
           "DNS",
           "connection",
-          "request",
-          "response"
+          "request"
         ],
         "structure": [
           "first",
-          "next",
-          "finally"
+          "next"
         ]
       }
     }
@@ -331,31 +289,25 @@
         "synchronous",
         "asynchronous",
         "blocking",
-        "I/O",
-        "latency",
-        "responsiveness"
+        "I/O"
       ],
       "dimension_keywords": {
         "technical_depth": [
           "I/O latency",
-          "blocking",
-          "throughput"
+          "blocking"
         ],
         "clarity": [
           "wait",
-          "continue",
-          "difference"
+          "continue"
         ],
         "completeness": [
           "blocking",
           "non-blocking",
-          "I/O",
-          "responsiveness"
+          "I/O"
         ],
         "structure": [
           "first",
-          "whereas",
-          "for example"
+          "whereas"
         ]
       }
     }
@@ -376,31 +328,25 @@
         "virtual memory",
         "page table",
         "virtual address",
-        "physical memory",
-        "isolation",
-        "mapping"
+        "physical memory"
       ],
       "dimension_keywords": {
         "technical_depth": [
           "address translation",
-          "page table",
-          "protection"
+          "page table"
         ],
         "clarity": [
           "illusion",
-          "mapping",
-          "private address space"
+          "mapping"
         ],
         "completeness": [
           "problem solved",
           "mapping",
-          "page table",
-          "isolation"
+          "page table"
         ],
         "structure": [
           "first",
-          "then",
-          "therefore"
+          "then"
         ]
       }
     }
@@ -421,31 +367,25 @@
         "BFS",
         "DFS",
         "shortest path",
-        "graph",
-        "queue",
-        "stack"
+        "graph"
       ],
       "dimension_keywords": {
         "technical_depth": [
           "unweighted shortest path",
-          "memory tradeoff",
-          "traversal strategy"
+          "memory tradeoff"
         ],
         "clarity": [
           "choose",
-          "because",
-          "tradeoff"
+          "because"
         ],
         "completeness": [
           "BFS",
           "DFS",
-          "use case",
-          "memory"
+          "use case"
         ],
         "structure": [
           "first",
-          "whereas",
-          "for example"
+          "whereas"
         ]
       }
     }
@@ -466,31 +406,25 @@
         "transaction",
         "isolation",
         "dirty read",
-        "uncommitted",
-        "consistency",
-        "concurrency"
+        "uncommitted"
       ],
       "dimension_keywords": {
         "technical_depth": [
           "isolation level",
-          "uncommitted data",
-          "consistency"
+          "uncommitted data"
         ],
         "clarity": [
           "prevent",
-          "dirty read",
-          "tradeoff"
+          "dirty read"
         ],
         "completeness": [
           "goal of transactions",
           "dirty read",
-          "concurrency",
-          "tradeoff"
+          "concurrency"
         ],
         "structure": [
           "first",
-          "for example",
-          "however"
+          "for example"
         ]
       }
     }
@@ -511,31 +445,25 @@
         "cache invalidation",
         "stale data",
         "source of truth",
-        "propagation",
-        "consistency",
-        "eviction"
+        "propagation"
       ],
       "dimension_keywords": {
         "technical_depth": [
           "staleness",
-          "propagation delay",
-          "consistency tradeoff"
+          "propagation delay"
         ],
         "clarity": [
           "source of truth",
-          "stale",
-          "coordination"
+          "stale"
         ],
         "completeness": [
           "why hard",
           "distributed setting",
-          "tradeoff",
-          "mitigation"
+          "tradeoff"
         ],
         "structure": [
           "first",
-          "then",
-          "therefore"
+          "then"
         ]
       }
     }
@@ -556,30 +484,25 @@
         "idempotent",
         "retry",
         "duplicate side effects",
-        "network failure",
-        "request semantics"
+        "network failure"
       ],
       "dimension_keywords": {
         "technical_depth": [
           "retry safety",
-          "side effects",
-          "failure handling"
+          "side effects"
         ],
         "clarity": [
           "repeat",
-          "same outcome",
-          "why it matters"
+          "same outcome"
         ],
         "completeness": [
           "definition",
           "retries",
-          "failure case",
-          "example"
+          "failure case"
         ],
         "structure": [
           "first",
-          "for example",
-          "therefore"
+          "for example"
         ]
       }
     }
@@ -600,30 +523,24 @@
         "overfitting",
         "noise",
         "generalization",
-        "training data",
-        "unseen data",
-        "validation"
+        "training data"
       ],
       "dimension_keywords": {
         "technical_depth": [
           "generalization",
-          "noise",
-          "out-of-sample"
+          "noise"
         ],
         "clarity": [
           "training",
-          "new data",
-          "difference"
+          "new data"
         ],
         "completeness": [
           "what it is",
-          "why it happens",
-          "impact"
+          "why it happens"
         ],
         "structure": [
           "definition",
-          "cause",
-          "impact"
+          "cause"
         ]
       }
     }
@@ -644,31 +561,25 @@
         "precision",
         "recall",
         "false positive",
-        "false negative",
-        "predicted positive",
-        "actual positive"
+        "false negative"
       ],
       "dimension_keywords": {
         "technical_depth": [
           "false positive",
-          "false negative",
-          "tradeoff"
+          "false negative"
         ],
         "clarity": [
           "predicted positive",
-          "actual positive",
-          "difference"
+          "actual positive"
         ],
         "completeness": [
           "precision",
           "recall",
-          "tradeoff",
-          "use case"
+          "tradeoff"
         ],
         "structure": [
           "first",
-          "whereas",
-          "for example"
+          "whereas"
         ]
       }
     }
@@ -689,31 +600,25 @@
         "correlation",
         "causation",
         "confounding",
-        "observational",
-        "relationship",
-        "cause"
+        "observational"
       ],
       "dimension_keywords": {
         "technical_depth": [
           "confounding",
-          "observational data",
-          "causal inference"
+          "observational data"
         ],
         "clarity": [
           "move together",
-          "directly causes",
-          "difference"
+          "directly causes"
         ],
         "completeness": [
           "correlation",
           "causation",
-          "confounder",
-          "why it matters"
+          "confounder"
         ],
         "structure": [
           "first",
-          "however",
-          "for example"
+          "however"
         ]
       }
     }
@@ -734,31 +639,25 @@
         "feature leakage",
         "prediction time",
         "training feature",
-        "validation",
-        "production",
-        "leak"
+        "validation"
       ],
       "dimension_keywords": {
         "technical_depth": [
           "target leakage",
-          "offline evaluation",
-          "prediction-time availability"
+          "offline evaluation"
         ],
         "clarity": [
           "looks better",
-          "unavailable information",
-          "production"
+          "unavailable information"
         ],
         "completeness": [
           "definition",
           "why misleading",
-          "example",
-          "impact"
+          "example"
         ],
         "structure": [
           "first",
-          "for example",
-          "therefore"
+          "for example"
         ]
       }
     }
@@ -779,31 +678,25 @@
         "linearity",
         "independence",
         "homoscedasticity",
-        "multicollinearity",
-        "residuals",
-        "assumptions"
+        "multicollinearity"
       ],
       "dimension_keywords": {
         "technical_depth": [
           "residual behavior",
-          "homoscedasticity",
-          "multicollinearity"
+          "homoscedasticity"
         ],
         "clarity": [
           "assumption",
-          "model",
-          "violation"
+          "model"
         ],
         "completeness": [
           "linearity",
           "independence",
-          "variance",
-          "multicollinearity"
+          "variance"
         ],
         "structure": [
           "first",
-          "also",
-          "if violated"
+          "also"
         ]
       }
     }
@@ -824,31 +717,25 @@
         "bias",
         "variance",
         "underfitting",
-        "overfitting",
-        "generalization",
-        "model complexity"
+        "overfitting"
       ],
       "dimension_keywords": {
         "technical_depth": [
           "underfitting",
-          "overfitting",
-          "model complexity"
+          "overfitting"
         ],
         "clarity": [
           "too simple",
-          "too sensitive",
-          "tradeoff"
+          "too sensitive"
         ],
         "completeness": [
           "bias",
           "variance",
-          "underfitting",
-          "overfitting"
+          "underfitting"
         ],
         "structure": [
           "first",
-          "whereas",
-          "therefore"
+          "whereas"
         ]
       }
     }
@@ -869,31 +756,25 @@
         "randomization",
         "A/B test",
         "treatment",
-        "control",
-        "bias",
-        "confounding"
+        "control"
       ],
       "dimension_keywords": {
         "technical_depth": [
           "group comparability",
-          "confounding",
-          "causal interpretation"
+          "confounding"
         ],
         "clarity": [
           "treatment",
-          "control",
-          "caused by the change"
+          "control"
         ],
         "completeness": [
           "why randomize",
           "bias",
-          "confounding",
-          "result interpretation"
+          "confounding"
         ],
         "structure": [
           "first",
-          "because",
-          "therefore"
+          "because"
         ]
       }
     }
@@ -914,31 +795,25 @@
         "accuracy",
         "imbalanced classes",
         "majority class",
-        "precision",
-        "recall",
-        "F1"
+        "precision"
       ],
       "dimension_keywords": {
         "technical_depth": [
           "class imbalance",
-          "minority class",
-          "alternative metrics"
+          "minority class"
         ],
         "clarity": [
           "misleading",
-          "majority class",
-          "why"
+          "majority class"
         ],
         "completeness": [
           "problem",
           "example",
-          "better metrics",
-          "interpretation"
+          "better metrics"
         ],
         "structure": [
           "first",
-          "for example",
-          "instead"
+          "for example"
         ]
       }
     }
@@ -959,31 +834,25 @@
         "normalization",
         "standardization",
         "training split",
-        "data leakage",
-        "evaluation bias",
-        "transform"
+        "data leakage"
       ],
       "dimension_keywords": {
         "technical_depth": [
           "data leakage",
-          "fit versus transform",
-          "evaluation bias"
+          "fit versus transform"
         ],
         "clarity": [
           "training only",
-          "then apply",
-          "why"
+          "then apply"
         ],
         "completeness": [
           "fit on train",
           "apply to validation",
-          "leakage",
-          "impact"
+          "leakage"
         ],
         "structure": [
           "first",
-          "then",
-          "therefore"
+          "then"
         ]
       }
     }
@@ -1002,9 +871,7 @@
         "user impact",
         "urgency",
         "effort",
-        "dependencies",
-        "tradeoff",
-        "framework"
+        "dependencies"
       ],
       "dimension_keywords": {
         "technical_depth": [
@@ -1013,19 +880,16 @@
         ],
         "clarity": [
           "framework",
-          "criteria",
-          "decision"
+          "criteria"
         ],
         "completeness": [
           "impact",
           "urgency",
-          "effort",
-          "why"
+          "effort"
         ],
         "structure": [
           "first",
-          "compare",
-          "decide"
+          "compare"
         ]
       }
     },
@@ -1045,9 +909,7 @@
         "decision",
         "value",
         "signal",
-        "behavior change",
-        "action",
-        "vanity metric"
+        "behavior change"
       ],
       "dimension_keywords": {
         "technical_depth": [
@@ -1060,13 +922,11 @@
         ],
         "completeness": [
           "connection to value",
-          "response to change",
-          "actionability"
+          "response to change"
         ],
         "structure": [
           "definition",
-          "criteria",
-          "example"
+          "criteria"
         ]
       }
     },
@@ -1086,8 +946,7 @@
         "user problem",
         "behavior change",
         "success metric",
-        "guardrail",
-        "launch decision"
+        "guardrail"
       ],
       "dimension_keywords": {
         "technical_depth": [
@@ -1096,19 +955,16 @@
         ],
         "clarity": [
           "before launch",
-          "success",
-          "decision"
+          "success"
         ],
         "completeness": [
           "problem",
           "metric",
-          "guardrail",
-          "post-launch decision"
+          "guardrail"
         ],
         "structure": [
           "start with",
-          "measure",
-          "evaluate"
+          "measure"
         ]
       }
     },
@@ -1128,9 +984,7 @@
         "user problem",
         "goals",
         "constraints",
-        "data",
-        "stakeholders",
-        "tradeoffs"
+        "data"
       ],
       "dimension_keywords": {
         "technical_depth": [
@@ -1144,13 +998,11 @@
         "completeness": [
           "users",
           "data",
-          "stakeholders",
-          "constraints"
+          "stakeholders"
         ],
         "structure": [
           "first",
-          "gather",
-          "synthesize"
+          "gather"
         ]
       }
     },
@@ -1170,9 +1022,7 @@
         "original view",
         "new information",
         "adapted",
-        "learning",
-        "humility",
-        "reasoning"
+        "learning"
       ],
       "dimension_keywords": {
         "technical_depth": [
@@ -1181,19 +1031,16 @@
         ],
         "clarity": [
           "before",
-          "after",
-          "why"
+          "after"
         ],
         "completeness": [
           "initial belief",
           "new information",
-          "action",
-          "lesson"
+          "action"
         ],
         "structure": [
           "situation",
-          "change",
-          "result"
+          "change"
         ]
       }
     },
@@ -1213,9 +1060,7 @@
         "feedback",
         "listened",
         "action",
-        "improvement",
-        "coachability",
-        "reflection"
+        "improvement"
       ],
       "dimension_keywords": {
         "technical_depth": [
@@ -1229,13 +1074,11 @@
         "completeness": [
           "feedback",
           "response",
-          "follow-through",
-          "result"
+          "follow-through"
         ],
         "structure": [
           "received",
-          "acted",
-          "learned"
+          "acted"
         ]
       }
     },
@@ -1255,9 +1098,7 @@
         "trust",
         "context",
         "actions",
-        "reliability",
-        "empathy",
-        "outcome"
+        "reliability"
       ],
       "dimension_keywords": {
         "technical_depth": [
@@ -1271,13 +1112,11 @@
         "completeness": [
           "situation",
           "actions",
-          "result",
-          "lesson"
+          "result"
         ],
         "structure": [
           "context",
-          "action",
-          "outcome"
+          "action"
         ]
       }
     },
@@ -1297,31 +1136,25 @@
         "ambiguity",
         "plan",
         "framework",
-        "alignment",
-        "ownership",
-        "outcome"
+        "alignment"
       ],
       "dimension_keywords": {
         "technical_depth": [
           "structured thinking",
-          "alignment",
-          "execution"
+          "alignment"
         ],
         "clarity": [
           "what was unclear",
-          "what you did",
-          "result"
+          "what you did"
         ],
         "completeness": [
           "ambiguity",
           "plan",
-          "alignment",
-          "outcome"
+          "alignment"
         ],
         "structure": [
           "situation",
-          "approach",
-          "result"
+          "approach"
         ]
       }
     },

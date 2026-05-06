@@ -69,8 +69,6 @@ function RingScore({ value }: { value: number }) {
 }
 
 export function ScoreCard({ score, submittedAnswer }: Props) {
-  const instantFeedback = score.instant_feedback;
-
   return (
     <div
       className="panel animate-fade-up"
@@ -131,24 +129,6 @@ export function ScoreCard({ score, submittedAnswer }: Props) {
           </div>
         </div>
       </div>
-
-      {/* Feedback */}
-      {instantFeedback?.summary && (
-        <div
-          style={{
-            background: "var(--surface2)",
-            border: "1px solid var(--border)",
-            borderLeft: "2px solid var(--cyan)",
-            padding: "18px 20px",
-            fontSize: scaledFont(16),
-            color: "var(--text)",
-            lineHeight: 1.7,
-            marginBottom: "16px",
-          }}
-        >
-          {instantFeedback.summary}
-        </div>
-      )}
 
       {score.scoring_degraded && (
         <div

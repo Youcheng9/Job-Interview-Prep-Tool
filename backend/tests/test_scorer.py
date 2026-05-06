@@ -165,6 +165,40 @@ class ScorerTests(unittest.TestCase):
         self.assertEqual(feedback["missing_keywords"], [])
         self.assertGreater(feedback["notes"]["quality_indicators"]["behavioral_signal"], 0.5)
         self.assertGreaterEqual(scores["structure"], 60)
+        self.assertEqual(feedback["notes"]["narrative_framework"], "SAR")
+        self.assertEqual(feedback["instant_feedback"]["label"], "SAR")
+        self.assertIn("STAR", feedback["weaknesses"][0])
+
+    @patch("backend.ml.scorer.embed_texts")
+    @patch("backend.ml.scorer._cached_embeddings", side_effect=RuntimeError("embedding backend unavailable"))
+    def test_behavioral_star_answer_gets_star_feedback(self, _cached_embeddings, embed_texts):
+        rubric = {
+            "ideal_answer": "A strong behavioral answer uses STAR with clear ownership, action, and impact.",
+            "keywords": ["ownership", "action", "impact"],
+            "dimension_keywords": {
+                "completeness": ["situation", "task", "action", "result"],
+                "structure": ["situation", "task", "action", "result"],
+            },
+        }
+        embed_texts.return_value = np.array(
+            [
+                [1.0, 0.0],
+                [0.85, 0.15],
+            ]
+        )
+
+        answer = (
+            "When our release slipped because two teams disagreed on scope, my task was to get the launch back on track. "
+            "I led a working session, cut the risky edge cases, and aligned engineering and product on a smaller milestone. "
+            "As a result, we shipped three days later with no critical defects, and I learned to surface scope risk earlier."
+        )
+
+        _, overall, feedback = compute_scores(answer, rubric, role="Behavioral")
+
+        self.assertGreaterEqual(overall, 70)
+        self.assertEqual(feedback["notes"]["narrative_framework"], "STAR")
+        self.assertEqual(feedback["instant_feedback"]["label"], "STAR")
+        self.assertTrue(any("STAR narrative" in item for item in feedback["strengths"]))
 
 
 if __name__ == "__main__":
