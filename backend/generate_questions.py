@@ -17,11 +17,29 @@ QUESTIONS_PATH = ROOT_DIR / "data" / "questions.json"
 
 load_dotenv(dotenv_path=ENV_PATH)
 
+
+def _env_str(name: str, default: str, *legacy_names: str) -> str:
+    for key in (name, *legacy_names):
+        value = os.getenv(key)
+        if value is not None:
+            return value
+    return default
+
+
+def _env_int(name: str, default: int, *legacy_names: str) -> int:
+    return int(_env_str(name, str(default), *legacy_names))
+
+
 OLLAMA_URL = os.getenv("OLLAMA_URL", "http://127.0.0.1:11434/api/generate")
-OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3.1:8b")
-OLLAMA_TIMEOUT_SECONDS = int(os.getenv("AI_FEEDBACK_TIMEOUT_SECONDS", "90"))
-OLLAMA_MAX_TOKENS = int(os.getenv("QUESTION_GENERATION_MAX_TOKENS", "1800"))
-MAX_GENERATION_ATTEMPTS = int(os.getenv("QUESTION_GENERATION_MAX_ATTEMPTS", "8"))
+OLLAMA_MODEL = _env_str("QUESTION_GENERATION_MODEL", "llama3.1:8b", "AI_COACH_CHAT_MODEL", "OLLAMA_MODEL")
+OLLAMA_TIMEOUT_SECONDS = _env_int(
+    "QUESTION_GENERATION_TIMEOUT_SECONDS",
+    90,
+    "AI_COACH_TIMEOUT_SECONDS",
+    "AI_FEEDBACK_TIMEOUT_SECONDS",
+)
+OLLAMA_MAX_TOKENS = _env_int("QUESTION_GENERATION_MAX_TOKENS", 1800)
+MAX_GENERATION_ATTEMPTS = _env_int("QUESTION_GENERATION_MAX_ATTEMPTS", 8)
 NEAR_DUPLICATE_WORD_OVERLAP = float(os.getenv("QUESTION_GENERATION_DUPLICATE_OVERLAP", "0.8"))
 
 VALID_ROLES = {"SWE", "DataScience", "PM", "Behavioral"}

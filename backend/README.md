@@ -79,6 +79,13 @@ AI_COACH_PROMPT_IDEAL_CHARS=220
 AI_CHAT_NUM_CTX=768
 AI_CHAT_PROMPT_ANSWER_CHARS=420
 AI_CHAT_PROMPT_HISTORY_CHARS=180
+
+# Optional question generation overrides
+QUESTION_GENERATION_MODEL=llama3.1:8b
+QUESTION_GENERATION_TIMEOUT_SECONDS=90
+QUESTION_GENERATION_MAX_TOKENS=1800
+QUESTION_GENERATION_MAX_ATTEMPTS=8
+QUESTION_GENERATION_DUPLICATE_OVERLAP=0.8
 ```
 
 ### Notes
@@ -121,7 +128,13 @@ uvicorn backend.main:app --reload --port 8000
 ollama serve
 ```
 
-If needed:
+If needed for coach chat:
+
+```bash
+ollama pull llama3.2:3b
+```
+
+If you plan to regenerate the question bank with the default question-generation model:
 
 ```bash
 ollama pull llama3.1:8b
