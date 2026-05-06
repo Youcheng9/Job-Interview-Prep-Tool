@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -44,6 +45,42 @@ NEAR_DUPLICATE_WORD_OVERLAP = float(os.getenv("QUESTION_GENERATION_DUPLICATE_OVE
 
 VALID_ROLES = {"SWE", "DataScience", "PM", "Behavioral"}
 VALID_LEVELS = {"intern", "new_grad"}
+ROLE_TOPIC_POOLS = {
+    "SWE": [
+        "operating_systems",
+        "memory",
+        "dsa",
+        "networking",
+        "concurrency",
+        "databases",
+        "distributed_systems",
+        "apis",
+    ],
+    "DataScience": [
+        "ml_fundamentals",
+        "model_evaluation",
+        "statistics",
+        "experimentation",
+        "feature_engineering",
+        "data_processing",
+    ],
+    "PM": [
+        "product_sense",
+        "prioritization",
+        "metrics",
+        "experimentation",
+        "roadmap",
+        "execution",
+    ],
+    "Behavioral": [
+        "ownership",
+        "conflict_resolution",
+        "communication",
+        "ambiguity",
+        "feedback",
+        "decision_making",
+    ],
+}
 DEFAULT_COMPANY_TAGS = {
     "SWE": ["Google", "Meta", "Stripe", "Databricks", "OpenAI", "Anthropic", "Airbnb", "Notion"],
     "DataScience": ["Meta", "Netflix", "Airbnb", "Notion", "OpenAI", "Databricks", "Google"],
@@ -83,6 +120,7 @@ class RubricModel(BaseModel):
 class QuestionModel(BaseModel):
     role: str
     level: str
+    topic: str | None = None
     companies: list[str] = Field(min_length=1)
     prompt: str = Field(min_length=12)
     rubric: RubricModel
@@ -102,6 +140,14 @@ class QuestionModel(BaseModel):
         if cleaned not in VALID_LEVELS:
             raise ValueError(f"level must be one of {sorted(VALID_LEVELS)}")
         return cleaned
+
+    @field_validator("topic")
+    @classmethod
+    def validate_topic(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
+        cleaned = slugify_topic(value)
+        return cleaned or None
 
     @field_validator("companies")
     @classmethod
@@ -131,6 +177,58 @@ def looks_like_question_object(value: object) -> bool:
     return isinstance(value, dict) and {"role", "level", "companies", "prompt", "rubric"}.issubset(
         value.keys()
     )
+
+
+def slugify_topic(value: str) -> str:
+    cleaned = re.sub(r"[^a-z0-9]+", "_", value.strip().lower())
+    return cleaned.strip("_")
+
+
+def normalize_company(value: str) -> str:
+    return " ".join(value.strip().split())
+
+
+def auto_assign_topic(*, role: str, prompt: str) -> str | None:
+    pool = ROLE_TOPIC_POOLS.get(role)
+    if not pool:
+        return None
+    digest = hashlib.sha256(f"{role}:{prompt}".encode("utf-8")).digest()
+    index = int.from_bytes(digest[:4], "big") % len(pool)
+    return pool[index]
+
+
+def normalize_question_record(item: dict) -> dict:
+    normalized = dict(item)
+    role = str(normalized.get("role", "")).strip()
+    prompt = " ".join(str(normalized.get("prompt", "")).split()).strip()
+    if prompt:
+        normalized["prompt"] = prompt if prompt.endswith("?") else f"{prompt}?"
+
+    companies = normalized.get("companies")
+    if isinstance(companies, list):
+        normalized["companies"] = [company for company in (normalize_company(str(item)) for item in companies) if company]
+    elif normalized.get("company"):
+        normalized["companies"] = [normalize_company(str(normalized["company"]))]
+
+    topic = normalized.get("topic")
+    if isinstance(topic, str):
+        normalized["topic"] = slugify_topic(topic) or None
+    else:
+        normalized["topic"] = None
+
+    if not normalized["topic"] and role and prompt:
+        normalized["topic"] = auto_assign_topic(role=role, prompt=prompt)
+
+    return normalized
+
+
+def finalize_generated_questions(items: list[QuestionModel]) -> list[QuestionModel]:
+    finalized: list[QuestionModel] = []
+    for item in items:
+        payload = item.model_dump()
+        payload["topic"] = payload.get("topic") or auto_assign_topic(role=item.role, prompt=item.prompt)
+        finalized.append(QuestionModel.model_validate(payload))
+    return finalized
 
 
 def normalize_prompt_for_similarity(prompt: str) -> list[str]:
@@ -373,9 +471,10 @@ def parse_generated_questions(raw: str) -> list[QuestionModel]:
         raise QuestionGenerationError("LLM returned an empty question list")
 
     try:
-        return [QuestionModel.model_validate(item) for item in question_items]
+        validated = [QuestionModel.model_validate(item) for item in question_items]
     except ValidationError as exc:
         raise QuestionGenerationError(f"Generated questions failed validation: {exc}") from exc
+    return finalize_generated_questions(validated)
 
 
 def shorten_for_debug(text: str, max_chars: int = 500) -> str:
@@ -395,7 +494,7 @@ def load_existing_questions() -> list[dict]:
     if not isinstance(data, list):
         raise QuestionGenerationError("questions.json must contain a top-level JSON array")
 
-    return data
+    return [normalize_question_record(item) for item in data]
 
 
 def dedupe_and_merge(existing: list[dict], generated: list[QuestionModel]) -> tuple[list[dict], int]:
@@ -522,9 +621,10 @@ def generate_questions_with_retries(
 
 
 def save_questions(items: list[dict]) -> None:
+    normalized_items = [normalize_question_record(item) for item in items]
     QUESTIONS_PATH.parent.mkdir(parents=True, exist_ok=True)
     with QUESTIONS_PATH.open("w", encoding="utf-8") as handle:
-        json.dump(items, handle, indent=2)
+        json.dump(normalized_items, handle, indent=2)
         handle.write("\n")
 
 

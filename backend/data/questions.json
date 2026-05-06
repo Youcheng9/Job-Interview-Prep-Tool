@@ -3,16 +3,44 @@
     "role": "SWE",
     "level": "intern",
     "topic": "operating_systems",
-    "companies": ["Meta", "Databricks", "Airbnb"],
-    "prompt": "Explain the difference between a process and a thread.",
+    "companies": [
+      "Meta",
+      "Databricks",
+      "Airbnb"
+    ],
+    "prompt": "Explain the difference between a process and a thread.?",
     "rubric": {
       "ideal_answer": "A strong answer explains that a process has its own address space and OS-managed resources, while threads are execution units inside a process that share memory and most resources. It should mention isolation, context-switch cost, and why threads are lighter weight.",
-      "keywords": ["process", "thread", "address space", "shared memory", "isolation", "context switch"],
+      "keywords": [
+        "process",
+        "thread",
+        "address space",
+        "shared memory",
+        "isolation",
+        "context switch"
+      ],
       "dimension_keywords": {
-        "technical_depth": ["address space", "shared memory", "resource isolation"],
-        "clarity": ["difference", "whereas", "share"],
-        "completeness": ["process", "thread", "memory", "cost"],
-        "structure": ["first", "whereas", "in contrast"]
+        "technical_depth": [
+          "address space",
+          "shared memory",
+          "resource isolation"
+        ],
+        "clarity": [
+          "difference",
+          "whereas",
+          "share"
+        ],
+        "completeness": [
+          "process",
+          "thread",
+          "memory",
+          "cost"
+        ],
+        "structure": [
+          "first",
+          "whereas",
+          "in contrast"
+        ]
       }
     }
   },
@@ -20,16 +48,44 @@
     "role": "SWE",
     "level": "intern",
     "topic": "memory",
-    "companies": ["Google", "Meta", "OpenAI"],
+    "companies": [
+      "Google",
+      "Meta",
+      "OpenAI"
+    ],
     "prompt": "What is the difference between stack memory and heap memory?",
     "rubric": {
       "ideal_answer": "A strong answer explains that stack memory is generally used for function frames and local variables with automatic lifetime management, while heap memory is used for dynamic allocation and has more flexible lifetime. It should mention allocation speed, lifetime, and management tradeoffs.",
-      "keywords": ["stack", "heap", "local variables", "dynamic allocation", "lifetime", "memory management"],
+      "keywords": [
+        "stack",
+        "heap",
+        "local variables",
+        "dynamic allocation",
+        "lifetime",
+        "memory management"
+      ],
       "dimension_keywords": {
-        "technical_depth": ["dynamic allocation", "lifetime", "automatic storage"],
-        "clarity": ["difference", "automatic", "dynamic"],
-        "completeness": ["stack", "heap", "allocation", "lifetime"],
-        "structure": ["first", "while", "therefore"]
+        "technical_depth": [
+          "dynamic allocation",
+          "lifetime",
+          "automatic storage"
+        ],
+        "clarity": [
+          "difference",
+          "automatic",
+          "dynamic"
+        ],
+        "completeness": [
+          "stack",
+          "heap",
+          "allocation",
+          "lifetime"
+        ],
+        "structure": [
+          "first",
+          "while",
+          "therefore"
+        ]
       }
     }
   },
@@ -37,16 +93,44 @@
     "role": "SWE",
     "level": "intern",
     "topic": "dsa",
-    "companies": ["Google", "Meta", "Stripe"],
+    "companies": [
+      "Google",
+      "Meta",
+      "Stripe"
+    ],
     "prompt": "What problem does a hash table solve, and what happens when two keys map to the same bucket?",
     "rubric": {
       "ideal_answer": "A strong answer explains that hash tables provide fast average-case lookup, insert, and delete by hashing keys to buckets. It should describe collisions and mention common strategies such as chaining or open addressing, along with the effect on performance.",
-      "keywords": ["hash table", "bucket", "collision", "chaining", "open addressing", "lookup"],
+      "keywords": [
+        "hash table",
+        "bucket",
+        "collision",
+        "chaining",
+        "open addressing",
+        "lookup"
+      ],
       "dimension_keywords": {
-        "technical_depth": ["hash function", "collision handling", "average case"],
-        "clarity": ["maps to", "collision", "strategy"],
-        "completeness": ["problem solved", "collision", "mitigation", "performance"],
-        "structure": ["first", "if", "then"]
+        "technical_depth": [
+          "hash function",
+          "collision handling",
+          "average case"
+        ],
+        "clarity": [
+          "maps to",
+          "collision",
+          "strategy"
+        ],
+        "completeness": [
+          "problem solved",
+          "collision",
+          "mitigation",
+          "performance"
+        ],
+        "structure": [
+          "first",
+          "if",
+          "then"
+        ]
       }
     }
   },
@@ -54,16 +138,44 @@
     "role": "SWE",
     "level": "intern",
     "topic": "networking",
-    "companies": ["Stripe", "Airbnb", "Netflix"],
-    "prompt": "Describe what TCP does for a client-server connection that UDP does not.",
+    "companies": [
+      "Stripe",
+      "Airbnb",
+      "Netflix"
+    ],
+    "prompt": "Describe what TCP does for a client-server connection that UDP does not.?",
     "rubric": {
       "ideal_answer": "A strong answer explains that TCP provides connection setup, ordering, retransmission, and flow or congestion control, while UDP is connectionless and does not guarantee delivery or order. It should tie those differences to reliability and latency tradeoffs.",
-      "keywords": ["TCP", "UDP", "connection", "ordering", "retransmission", "reliability"],
+      "keywords": [
+        "TCP",
+        "UDP",
+        "connection",
+        "ordering",
+        "retransmission",
+        "reliability"
+      ],
       "dimension_keywords": {
-        "technical_depth": ["flow control", "congestion control", "ordering"],
-        "clarity": ["connectionless", "guarantee", "tradeoff"],
-        "completeness": ["setup", "delivery", "ordering", "latency"],
-        "structure": ["first", "by contrast", "therefore"]
+        "technical_depth": [
+          "flow control",
+          "congestion control",
+          "ordering"
+        ],
+        "clarity": [
+          "connectionless",
+          "guarantee",
+          "tradeoff"
+        ],
+        "completeness": [
+          "setup",
+          "delivery",
+          "ordering",
+          "latency"
+        ],
+        "structure": [
+          "first",
+          "by contrast",
+          "therefore"
+        ]
       }
     }
   },
@@ -71,16 +183,44 @@
     "role": "SWE",
     "level": "intern",
     "topic": "concurrency",
-    "companies": ["Meta", "OpenAI", "Airbnb"],
+    "companies": [
+      "Meta",
+      "OpenAI",
+      "Airbnb"
+    ],
     "prompt": "What is a race condition and how can it happen in a multithreaded program?",
     "rubric": {
       "ideal_answer": "A strong answer explains that a race condition occurs when multiple threads access shared mutable state and the result depends on timing or interleaving. It should mention unsynchronized reads or writes and typical mitigations such as locks, atomics, or reducing shared state.",
-      "keywords": ["race condition", "threads", "shared state", "interleaving", "lock", "atomic"],
+      "keywords": [
+        "race condition",
+        "threads",
+        "shared state",
+        "interleaving",
+        "lock",
+        "atomic"
+      ],
       "dimension_keywords": {
-        "technical_depth": ["shared mutable state", "synchronization", "atomic operations"],
-        "clarity": ["timing", "interleaving", "example"],
-        "completeness": ["definition", "cause", "example", "mitigation"],
-        "structure": ["first", "for example", "to prevent this"]
+        "technical_depth": [
+          "shared mutable state",
+          "synchronization",
+          "atomic operations"
+        ],
+        "clarity": [
+          "timing",
+          "interleaving",
+          "example"
+        ],
+        "completeness": [
+          "definition",
+          "cause",
+          "example",
+          "mitigation"
+        ],
+        "structure": [
+          "first",
+          "for example",
+          "to prevent this"
+        ]
       }
     }
   },
@@ -88,16 +228,44 @@
     "role": "SWE",
     "level": "intern",
     "topic": "databases",
-    "companies": ["Stripe", "Databricks", "Notion"],
+    "companies": [
+      "Stripe",
+      "Databricks",
+      "Notion"
+    ],
     "prompt": "What is a database index, and why can it speed up reads while slowing down writes?",
     "rubric": {
       "ideal_answer": "A strong answer explains that an index is an auxiliary structure used to find rows more quickly without scanning the full table. It should mention that writes become more expensive because inserts, updates, and deletes must also maintain the index.",
-      "keywords": ["index", "table scan", "read performance", "insert", "update", "delete"],
+      "keywords": [
+        "index",
+        "table scan",
+        "read performance",
+        "insert",
+        "update",
+        "delete"
+      ],
       "dimension_keywords": {
-        "technical_depth": ["auxiliary structure", "table scan", "maintenance overhead"],
-        "clarity": ["locate rows", "faster reads", "write cost"],
-        "completeness": ["index", "reads", "writes", "maintenance"],
-        "structure": ["first", "however", "therefore"]
+        "technical_depth": [
+          "auxiliary structure",
+          "table scan",
+          "maintenance overhead"
+        ],
+        "clarity": [
+          "locate rows",
+          "faster reads",
+          "write cost"
+        ],
+        "completeness": [
+          "index",
+          "reads",
+          "writes",
+          "maintenance"
+        ],
+        "structure": [
+          "first",
+          "however",
+          "therefore"
+        ]
       }
     }
   },
@@ -105,16 +273,45 @@
     "role": "SWE",
     "level": "new_grad",
     "topic": "networking",
-    "companies": ["Stripe", "Airbnb", "Netflix"],
+    "companies": [
+      "Stripe",
+      "Airbnb",
+      "Netflix"
+    ],
     "prompt": "What happens when you make an HTTP request from a browser to a server?",
     "rubric": {
       "ideal_answer": "A strong answer walks through DNS resolution, connection establishment, sending the HTTP request, server processing, and receiving the response. It should mention TLS if HTTPS is used and explain the request-response flow clearly.",
-      "keywords": ["DNS", "TCP", "TLS", "HTTP request", "response", "server", "client"],
+      "keywords": [
+        "DNS",
+        "TCP",
+        "TLS",
+        "HTTP request",
+        "response",
+        "server",
+        "client"
+      ],
       "dimension_keywords": {
-        "technical_depth": ["DNS", "TLS", "connection establishment"],
-        "clarity": ["step by step", "request", "response"],
-        "completeness": ["DNS", "connection", "request", "response"],
-        "structure": ["first", "next", "finally"]
+        "technical_depth": [
+          "DNS",
+          "TLS",
+          "connection establishment"
+        ],
+        "clarity": [
+          "step by step",
+          "request",
+          "response"
+        ],
+        "completeness": [
+          "DNS",
+          "connection",
+          "request",
+          "response"
+        ],
+        "structure": [
+          "first",
+          "next",
+          "finally"
+        ]
       }
     }
   },
@@ -122,16 +319,44 @@
     "role": "SWE",
     "level": "new_grad",
     "topic": "concurrency",
-    "companies": ["OpenAI", "Stripe", "Meta"],
+    "companies": [
+      "OpenAI",
+      "Stripe",
+      "Meta"
+    ],
     "prompt": "What is the difference between synchronous and asynchronous execution?",
     "rubric": {
       "ideal_answer": "A strong answer explains that synchronous execution waits for an operation to complete before continuing, while asynchronous execution lets other work proceed while waiting for completion. It should connect the difference to I/O latency, throughput, and responsiveness.",
-      "keywords": ["synchronous", "asynchronous", "blocking", "I/O", "latency", "responsiveness"],
+      "keywords": [
+        "synchronous",
+        "asynchronous",
+        "blocking",
+        "I/O",
+        "latency",
+        "responsiveness"
+      ],
       "dimension_keywords": {
-        "technical_depth": ["I/O latency", "blocking", "throughput"],
-        "clarity": ["wait", "continue", "difference"],
-        "completeness": ["blocking", "non-blocking", "I/O", "responsiveness"],
-        "structure": ["first", "whereas", "for example"]
+        "technical_depth": [
+          "I/O latency",
+          "blocking",
+          "throughput"
+        ],
+        "clarity": [
+          "wait",
+          "continue",
+          "difference"
+        ],
+        "completeness": [
+          "blocking",
+          "non-blocking",
+          "I/O",
+          "responsiveness"
+        ],
+        "structure": [
+          "first",
+          "whereas",
+          "for example"
+        ]
       }
     }
   },
@@ -139,16 +364,44 @@
     "role": "SWE",
     "level": "new_grad",
     "topic": "operating_systems",
-    "companies": ["Google", "Meta", "Databricks"],
+    "companies": [
+      "Google",
+      "Meta",
+      "Databricks"
+    ],
     "prompt": "What problem does virtual memory solve, and what role does the page table play?",
     "rubric": {
       "ideal_answer": "A strong answer explains that virtual memory gives each process the illusion of a large private address space while mapping addresses to physical memory on demand. It should explain that the page table stores the mapping from virtual pages to physical frames and supports protection and isolation.",
-      "keywords": ["virtual memory", "page table", "virtual address", "physical memory", "isolation", "mapping"],
+      "keywords": [
+        "virtual memory",
+        "page table",
+        "virtual address",
+        "physical memory",
+        "isolation",
+        "mapping"
+      ],
       "dimension_keywords": {
-        "technical_depth": ["address translation", "page table", "protection"],
-        "clarity": ["illusion", "mapping", "private address space"],
-        "completeness": ["problem solved", "mapping", "page table", "isolation"],
-        "structure": ["first", "then", "therefore"]
+        "technical_depth": [
+          "address translation",
+          "page table",
+          "protection"
+        ],
+        "clarity": [
+          "illusion",
+          "mapping",
+          "private address space"
+        ],
+        "completeness": [
+          "problem solved",
+          "mapping",
+          "page table",
+          "isolation"
+        ],
+        "structure": [
+          "first",
+          "then",
+          "therefore"
+        ]
       }
     }
   },
@@ -156,16 +409,44 @@
     "role": "SWE",
     "level": "new_grad",
     "topic": "dsa",
-    "companies": ["Google", "Meta", "Databricks"],
+    "companies": [
+      "Google",
+      "Meta",
+      "Databricks"
+    ],
     "prompt": "When would you choose breadth-first search over depth-first search, and why?",
     "rubric": {
       "ideal_answer": "A strong answer explains that breadth-first search explores level by level and is useful when you need the shortest path in an unweighted graph, while depth-first search is often simpler for exhaustive traversal, backtracking, or topological-style reasoning. It should mention tradeoffs in memory and traversal behavior.",
-      "keywords": ["BFS", "DFS", "shortest path", "graph", "queue", "stack"],
+      "keywords": [
+        "BFS",
+        "DFS",
+        "shortest path",
+        "graph",
+        "queue",
+        "stack"
+      ],
       "dimension_keywords": {
-        "technical_depth": ["unweighted shortest path", "memory tradeoff", "traversal strategy"],
-        "clarity": ["choose", "because", "tradeoff"],
-        "completeness": ["BFS", "DFS", "use case", "memory"],
-        "structure": ["first", "whereas", "for example"]
+        "technical_depth": [
+          "unweighted shortest path",
+          "memory tradeoff",
+          "traversal strategy"
+        ],
+        "clarity": [
+          "choose",
+          "because",
+          "tradeoff"
+        ],
+        "completeness": [
+          "BFS",
+          "DFS",
+          "use case",
+          "memory"
+        ],
+        "structure": [
+          "first",
+          "whereas",
+          "for example"
+        ]
       }
     }
   },
@@ -173,16 +454,44 @@
     "role": "SWE",
     "level": "new_grad",
     "topic": "databases",
-    "companies": ["Stripe", "Airbnb", "Notion"],
+    "companies": [
+      "Stripe",
+      "Airbnb",
+      "Notion"
+    ],
     "prompt": "What isolation problem are transactions trying to prevent, and what is a dirty read?",
     "rubric": {
       "ideal_answer": "A strong answer explains that transactions try to preserve consistency when operations happen concurrently or fail partway through. It should define a dirty read as reading uncommitted data from another transaction and mention that isolation levels trade off correctness and performance.",
-      "keywords": ["transaction", "isolation", "dirty read", "uncommitted", "consistency", "concurrency"],
+      "keywords": [
+        "transaction",
+        "isolation",
+        "dirty read",
+        "uncommitted",
+        "consistency",
+        "concurrency"
+      ],
       "dimension_keywords": {
-        "technical_depth": ["isolation level", "uncommitted data", "consistency"],
-        "clarity": ["prevent", "dirty read", "tradeoff"],
-        "completeness": ["goal of transactions", "dirty read", "concurrency", "tradeoff"],
-        "structure": ["first", "for example", "however"]
+        "technical_depth": [
+          "isolation level",
+          "uncommitted data",
+          "consistency"
+        ],
+        "clarity": [
+          "prevent",
+          "dirty read",
+          "tradeoff"
+        ],
+        "completeness": [
+          "goal of transactions",
+          "dirty read",
+          "concurrency",
+          "tradeoff"
+        ],
+        "structure": [
+          "first",
+          "for example",
+          "however"
+        ]
       }
     }
   },
@@ -190,16 +499,44 @@
     "role": "SWE",
     "level": "new_grad",
     "topic": "distributed_systems",
-    "companies": ["Databricks", "OpenAI", "Airbnb"],
+    "companies": [
+      "Databricks",
+      "OpenAI",
+      "Airbnb"
+    ],
     "prompt": "Why is cache invalidation hard in a distributed system?",
     "rubric": {
       "ideal_answer": "A strong answer explains that cached data can become stale when the source of truth changes, and the challenge is coordinating updates or expiration across many machines without serving inconsistent data. It should mention propagation delay, eviction strategy, and correctness versus performance tradeoffs.",
-      "keywords": ["cache invalidation", "stale data", "source of truth", "propagation", "consistency", "eviction"],
+      "keywords": [
+        "cache invalidation",
+        "stale data",
+        "source of truth",
+        "propagation",
+        "consistency",
+        "eviction"
+      ],
       "dimension_keywords": {
-        "technical_depth": ["staleness", "propagation delay", "consistency tradeoff"],
-        "clarity": ["source of truth", "stale", "coordination"],
-        "completeness": ["why hard", "distributed setting", "tradeoff", "mitigation"],
-        "structure": ["first", "then", "therefore"]
+        "technical_depth": [
+          "staleness",
+          "propagation delay",
+          "consistency tradeoff"
+        ],
+        "clarity": [
+          "source of truth",
+          "stale",
+          "coordination"
+        ],
+        "completeness": [
+          "why hard",
+          "distributed setting",
+          "tradeoff",
+          "mitigation"
+        ],
+        "structure": [
+          "first",
+          "then",
+          "therefore"
+        ]
       }
     }
   },
@@ -207,16 +544,43 @@
     "role": "SWE",
     "level": "new_grad",
     "topic": "apis",
-    "companies": ["Stripe", "Airbnb", "OpenAI"],
+    "companies": [
+      "Stripe",
+      "Airbnb",
+      "OpenAI"
+    ],
     "prompt": "What does it mean for an API request to be idempotent, and why does that matter in production systems?",
     "rubric": {
       "ideal_answer": "A strong answer explains that an idempotent request can be repeated without changing the final outcome beyond the first successful application. It should connect idempotency to retries, network failures, and avoiding duplicate side effects such as duplicate payments or writes.",
-      "keywords": ["idempotent", "retry", "duplicate side effects", "network failure", "request semantics"],
+      "keywords": [
+        "idempotent",
+        "retry",
+        "duplicate side effects",
+        "network failure",
+        "request semantics"
+      ],
       "dimension_keywords": {
-        "technical_depth": ["retry safety", "side effects", "failure handling"],
-        "clarity": ["repeat", "same outcome", "why it matters"],
-        "completeness": ["definition", "retries", "failure case", "example"],
-        "structure": ["first", "for example", "therefore"]
+        "technical_depth": [
+          "retry safety",
+          "side effects",
+          "failure handling"
+        ],
+        "clarity": [
+          "repeat",
+          "same outcome",
+          "why it matters"
+        ],
+        "completeness": [
+          "definition",
+          "retries",
+          "failure case",
+          "example"
+        ],
+        "structure": [
+          "first",
+          "for example",
+          "therefore"
+        ]
       }
     }
   },
@@ -224,16 +588,43 @@
     "role": "DataScience",
     "level": "intern",
     "topic": "ml_fundamentals",
-    "companies": ["OpenAI", "Meta", "Netflix"],
+    "companies": [
+      "OpenAI",
+      "Meta",
+      "Netflix"
+    ],
     "prompt": "What is overfitting and why does it hurt model performance on new data?",
     "rubric": {
       "ideal_answer": "A strong answer explains that overfitting happens when a model learns noise or overly specific patterns in the training data, reducing its ability to generalize to unseen data. It should connect the concept to train-versus-validation behavior.",
-      "keywords": ["overfitting", "noise", "generalization", "training data", "unseen data", "validation"],
+      "keywords": [
+        "overfitting",
+        "noise",
+        "generalization",
+        "training data",
+        "unseen data",
+        "validation"
+      ],
       "dimension_keywords": {
-        "technical_depth": ["generalization", "noise", "out-of-sample"],
-        "clarity": ["training", "new data", "difference"],
-        "completeness": ["what it is", "why it happens", "impact"],
-        "structure": ["definition", "cause", "impact"]
+        "technical_depth": [
+          "generalization",
+          "noise",
+          "out-of-sample"
+        ],
+        "clarity": [
+          "training",
+          "new data",
+          "difference"
+        ],
+        "completeness": [
+          "what it is",
+          "why it happens",
+          "impact"
+        ],
+        "structure": [
+          "definition",
+          "cause",
+          "impact"
+        ]
       }
     }
   },
@@ -241,16 +632,44 @@
     "role": "DataScience",
     "level": "intern",
     "topic": "model_evaluation",
-    "companies": ["Netflix", "Meta", "OpenAI"],
+    "companies": [
+      "Netflix",
+      "Meta",
+      "OpenAI"
+    ],
     "prompt": "What is the difference between precision and recall?",
     "rubric": {
       "ideal_answer": "A strong answer explains that precision measures how many predicted positives are actually positive, while recall measures how many actual positives were found. It should mention that the tradeoff depends on the cost of false positives versus false negatives.",
-      "keywords": ["precision", "recall", "false positive", "false negative", "predicted positive", "actual positive"],
+      "keywords": [
+        "precision",
+        "recall",
+        "false positive",
+        "false negative",
+        "predicted positive",
+        "actual positive"
+      ],
       "dimension_keywords": {
-        "technical_depth": ["false positive", "false negative", "tradeoff"],
-        "clarity": ["predicted positive", "actual positive", "difference"],
-        "completeness": ["precision", "recall", "tradeoff", "use case"],
-        "structure": ["first", "whereas", "for example"]
+        "technical_depth": [
+          "false positive",
+          "false negative",
+          "tradeoff"
+        ],
+        "clarity": [
+          "predicted positive",
+          "actual positive",
+          "difference"
+        ],
+        "completeness": [
+          "precision",
+          "recall",
+          "tradeoff",
+          "use case"
+        ],
+        "structure": [
+          "first",
+          "whereas",
+          "for example"
+        ]
       }
     }
   },
@@ -258,16 +677,44 @@
     "role": "DataScience",
     "level": "intern",
     "topic": "statistics",
-    "companies": ["Meta", "Airbnb", "Databricks"],
+    "companies": [
+      "Meta",
+      "Airbnb",
+      "Databricks"
+    ],
     "prompt": "What is the difference between correlation and causation?",
     "rubric": {
       "ideal_answer": "A strong answer explains that correlation means two variables move together, while causation means a change in one variable directly produces a change in the other. It should mention confounding variables and why observational patterns alone are not enough to prove causality.",
-      "keywords": ["correlation", "causation", "confounding", "observational", "relationship", "cause"],
+      "keywords": [
+        "correlation",
+        "causation",
+        "confounding",
+        "observational",
+        "relationship",
+        "cause"
+      ],
       "dimension_keywords": {
-        "technical_depth": ["confounding", "observational data", "causal inference"],
-        "clarity": ["move together", "directly causes", "difference"],
-        "completeness": ["correlation", "causation", "confounder", "why it matters"],
-        "structure": ["first", "however", "for example"]
+        "technical_depth": [
+          "confounding",
+          "observational data",
+          "causal inference"
+        ],
+        "clarity": [
+          "move together",
+          "directly causes",
+          "difference"
+        ],
+        "completeness": [
+          "correlation",
+          "causation",
+          "confounder",
+          "why it matters"
+        ],
+        "structure": [
+          "first",
+          "however",
+          "for example"
+        ]
       }
     }
   },
@@ -275,16 +722,44 @@
     "role": "DataScience",
     "level": "intern",
     "topic": "feature_engineering",
-    "companies": ["OpenAI", "Databricks", "Notion"],
+    "companies": [
+      "OpenAI",
+      "Databricks",
+      "Notion"
+    ],
     "prompt": "What is feature leakage, and why can it make a model look better than it really is?",
     "rubric": {
       "ideal_answer": "A strong answer explains that feature leakage happens when information unavailable at prediction time leaks into training features, causing unrealistically strong validation performance. It should mention that the model appears better offline than it will be in production.",
-      "keywords": ["feature leakage", "prediction time", "training feature", "validation", "production", "leak"],
+      "keywords": [
+        "feature leakage",
+        "prediction time",
+        "training feature",
+        "validation",
+        "production",
+        "leak"
+      ],
       "dimension_keywords": {
-        "technical_depth": ["target leakage", "offline evaluation", "prediction-time availability"],
-        "clarity": ["looks better", "unavailable information", "production"],
-        "completeness": ["definition", "why misleading", "example", "impact"],
-        "structure": ["first", "for example", "therefore"]
+        "technical_depth": [
+          "target leakage",
+          "offline evaluation",
+          "prediction-time availability"
+        ],
+        "clarity": [
+          "looks better",
+          "unavailable information",
+          "production"
+        ],
+        "completeness": [
+          "definition",
+          "why misleading",
+          "example",
+          "impact"
+        ],
+        "structure": [
+          "first",
+          "for example",
+          "therefore"
+        ]
       }
     }
   },
@@ -292,16 +767,44 @@
     "role": "DataScience",
     "level": "new_grad",
     "topic": "statistics",
-    "companies": ["Netflix", "Meta", "Databricks"],
+    "companies": [
+      "Netflix",
+      "Meta",
+      "Databricks"
+    ],
     "prompt": "What assumptions does linear regression make?",
     "rubric": {
       "ideal_answer": "A strong answer mentions key assumptions such as linearity, independent observations, homoscedasticity, and low multicollinearity, and should note that residual behavior matters. It should also explain that violating assumptions can make estimates unreliable or hard to interpret.",
-      "keywords": ["linearity", "independence", "homoscedasticity", "multicollinearity", "residuals", "assumptions"],
+      "keywords": [
+        "linearity",
+        "independence",
+        "homoscedasticity",
+        "multicollinearity",
+        "residuals",
+        "assumptions"
+      ],
       "dimension_keywords": {
-        "technical_depth": ["residual behavior", "homoscedasticity", "multicollinearity"],
-        "clarity": ["assumption", "model", "violation"],
-        "completeness": ["linearity", "independence", "variance", "multicollinearity"],
-        "structure": ["first", "also", "if violated"]
+        "technical_depth": [
+          "residual behavior",
+          "homoscedasticity",
+          "multicollinearity"
+        ],
+        "clarity": [
+          "assumption",
+          "model",
+          "violation"
+        ],
+        "completeness": [
+          "linearity",
+          "independence",
+          "variance",
+          "multicollinearity"
+        ],
+        "structure": [
+          "first",
+          "also",
+          "if violated"
+        ]
       }
     }
   },
@@ -309,16 +812,44 @@
     "role": "DataScience",
     "level": "new_grad",
     "topic": "ml_fundamentals",
-    "companies": ["OpenAI", "Netflix", "Meta"],
+    "companies": [
+      "OpenAI",
+      "Netflix",
+      "Meta"
+    ],
     "prompt": "What is the bias-variance tradeoff?",
     "rubric": {
       "ideal_answer": "A strong answer explains that high bias means a model is too simple and underfits, while high variance means it is too sensitive to training data and overfits. It should explain that model selection balances these two sources of error to improve generalization.",
-      "keywords": ["bias", "variance", "underfitting", "overfitting", "generalization", "model complexity"],
+      "keywords": [
+        "bias",
+        "variance",
+        "underfitting",
+        "overfitting",
+        "generalization",
+        "model complexity"
+      ],
       "dimension_keywords": {
-        "technical_depth": ["underfitting", "overfitting", "model complexity"],
-        "clarity": ["too simple", "too sensitive", "tradeoff"],
-        "completeness": ["bias", "variance", "underfitting", "overfitting"],
-        "structure": ["first", "whereas", "therefore"]
+        "technical_depth": [
+          "underfitting",
+          "overfitting",
+          "model complexity"
+        ],
+        "clarity": [
+          "too simple",
+          "too sensitive",
+          "tradeoff"
+        ],
+        "completeness": [
+          "bias",
+          "variance",
+          "underfitting",
+          "overfitting"
+        ],
+        "structure": [
+          "first",
+          "whereas",
+          "therefore"
+        ]
       }
     }
   },
@@ -326,16 +857,44 @@
     "role": "DataScience",
     "level": "new_grad",
     "topic": "experimentation",
-    "companies": ["Meta", "Netflix", "Airbnb"],
+    "companies": [
+      "Meta",
+      "Netflix",
+      "Airbnb"
+    ],
     "prompt": "Why is randomization important in an A/B test?",
     "rubric": {
       "ideal_answer": "A strong answer explains that randomization helps make treatment and control groups comparable so that differences in outcomes are more likely to be caused by the change rather than pre-existing differences. It should mention bias reduction and confounding.",
-      "keywords": ["randomization", "A/B test", "treatment", "control", "bias", "confounding"],
+      "keywords": [
+        "randomization",
+        "A/B test",
+        "treatment",
+        "control",
+        "bias",
+        "confounding"
+      ],
       "dimension_keywords": {
-        "technical_depth": ["group comparability", "confounding", "causal interpretation"],
-        "clarity": ["treatment", "control", "caused by the change"],
-        "completeness": ["why randomize", "bias", "confounding", "result interpretation"],
-        "structure": ["first", "because", "therefore"]
+        "technical_depth": [
+          "group comparability",
+          "confounding",
+          "causal interpretation"
+        ],
+        "clarity": [
+          "treatment",
+          "control",
+          "caused by the change"
+        ],
+        "completeness": [
+          "why randomize",
+          "bias",
+          "confounding",
+          "result interpretation"
+        ],
+        "structure": [
+          "first",
+          "because",
+          "therefore"
+        ]
       }
     }
   },
@@ -343,16 +902,44 @@
     "role": "DataScience",
     "level": "new_grad",
     "topic": "model_evaluation",
-    "companies": ["OpenAI", "Meta", "Google"],
+    "companies": [
+      "OpenAI",
+      "Meta",
+      "Google"
+    ],
     "prompt": "Why can accuracy be a misleading metric for an imbalanced classification problem?",
     "rubric": {
       "ideal_answer": "A strong answer explains that if one class is much more common, a model can achieve high accuracy by predicting the majority class most of the time while still failing on the minority class. It should mention alternative metrics such as precision, recall, F1, or PR-AUC depending on the task.",
-      "keywords": ["accuracy", "imbalanced classes", "majority class", "precision", "recall", "F1"],
+      "keywords": [
+        "accuracy",
+        "imbalanced classes",
+        "majority class",
+        "precision",
+        "recall",
+        "F1"
+      ],
       "dimension_keywords": {
-        "technical_depth": ["class imbalance", "minority class", "alternative metrics"],
-        "clarity": ["misleading", "majority class", "why"],
-        "completeness": ["problem", "example", "better metrics", "interpretation"],
-        "structure": ["first", "for example", "instead"]
+        "technical_depth": [
+          "class imbalance",
+          "minority class",
+          "alternative metrics"
+        ],
+        "clarity": [
+          "misleading",
+          "majority class",
+          "why"
+        ],
+        "completeness": [
+          "problem",
+          "example",
+          "better metrics",
+          "interpretation"
+        ],
+        "structure": [
+          "first",
+          "for example",
+          "instead"
+        ]
       }
     }
   },
@@ -360,144 +947,919 @@
     "role": "DataScience",
     "level": "new_grad",
     "topic": "data_processing",
-    "companies": ["Databricks", "OpenAI", "Netflix"],
+    "companies": [
+      "Databricks",
+      "OpenAI",
+      "Netflix"
+    ],
     "prompt": "Why should you fit normalization or standardization parameters on the training split only?",
     "rubric": {
       "ideal_answer": "A strong answer explains that fitting preprocessing parameters on the full dataset leaks information from validation or test data into training, which biases evaluation. It should mention that transforms should be learned on training data and then applied unchanged to validation and test splits.",
-      "keywords": ["normalization", "standardization", "training split", "data leakage", "evaluation bias", "transform"],
+      "keywords": [
+        "normalization",
+        "standardization",
+        "training split",
+        "data leakage",
+        "evaluation bias",
+        "transform"
+      ],
       "dimension_keywords": {
-        "technical_depth": ["data leakage", "fit versus transform", "evaluation bias"],
-        "clarity": ["training only", "then apply", "why"],
-        "completeness": ["fit on train", "apply to validation", "leakage", "impact"],
-        "structure": ["first", "then", "therefore"]
+        "technical_depth": [
+          "data leakage",
+          "fit versus transform",
+          "evaluation bias"
+        ],
+        "clarity": [
+          "training only",
+          "then apply",
+          "why"
+        ],
+        "completeness": [
+          "fit on train",
+          "apply to validation",
+          "leakage",
+          "impact"
+        ],
+        "structure": [
+          "first",
+          "then",
+          "therefore"
+        ]
       }
     }
   },
   {
     "role": "PM",
     "level": "intern",
-    "companies": ["Google", "Stripe"],
+    "companies": [
+      "Google",
+      "Stripe"
+    ],
     "prompt": "How do you prioritize when several things all look important?",
     "rubric": {
       "ideal_answer": "A strong answer explains a prioritization framework that considers user impact, urgency, strategic importance, effort, and dependencies. The answer should show that prioritization is about tradeoffs, not trying to do everything.",
-      "keywords": ["user impact", "urgency", "effort", "dependencies", "tradeoff", "framework"],
+      "keywords": [
+        "user impact",
+        "urgency",
+        "effort",
+        "dependencies",
+        "tradeoff",
+        "framework"
+      ],
       "dimension_keywords": {
-        "technical_depth": ["tradeoff", "dependencies"],
-        "clarity": ["framework", "criteria", "decision"],
-        "completeness": ["impact", "urgency", "effort", "why"],
-        "structure": ["first", "compare", "decide"]
+        "technical_depth": [
+          "tradeoff",
+          "dependencies"
+        ],
+        "clarity": [
+          "framework",
+          "criteria",
+          "decision"
+        ],
+        "completeness": [
+          "impact",
+          "urgency",
+          "effort",
+          "why"
+        ],
+        "structure": [
+          "first",
+          "compare",
+          "decide"
+        ]
       }
-    }
+    },
+    "topic": "prioritization"
   },
   {
     "role": "PM",
     "level": "intern",
-    "companies": ["Stripe", "Notion"],
+    "companies": [
+      "Stripe",
+      "Notion"
+    ],
     "prompt": "What makes a product metric actionable instead of just interesting?",
     "rubric": {
       "ideal_answer": "A strong answer explains that an actionable metric should connect to a decision, reflect user or business value, move in response to real changes, and help teams know what to do next. The answer should distinguish insight from vanity.",
-      "keywords": ["decision", "value", "signal", "behavior change", "action", "vanity metric"],
+      "keywords": [
+        "decision",
+        "value",
+        "signal",
+        "behavior change",
+        "action",
+        "vanity metric"
+      ],
       "dimension_keywords": {
-        "technical_depth": ["signal", "vanity metric"],
-        "clarity": ["decision", "what to do next"],
-        "completeness": ["connection to value", "response to change", "actionability"],
-        "structure": ["definition", "criteria", "example"]
+        "technical_depth": [
+          "signal",
+          "vanity metric"
+        ],
+        "clarity": [
+          "decision",
+          "what to do next"
+        ],
+        "completeness": [
+          "connection to value",
+          "response to change",
+          "actionability"
+        ],
+        "structure": [
+          "definition",
+          "criteria",
+          "example"
+        ]
       }
-    }
+    },
+    "topic": "metrics"
   },
   {
     "role": "PM",
     "level": "new_grad",
-    "companies": ["Notion", "Google"],
+    "companies": [
+      "Notion",
+      "Google"
+    ],
     "prompt": "How do you define success for a new feature before it launches?",
     "rubric": {
       "ideal_answer": "A strong answer covers the user problem, expected behavior change, key success metrics, guardrails, and the decision the team will make after launch. It should show that success is defined before building, not retrofitted later.",
-      "keywords": ["user problem", "behavior change", "success metric", "guardrail", "launch decision"],
+      "keywords": [
+        "user problem",
+        "behavior change",
+        "success metric",
+        "guardrail",
+        "launch decision"
+      ],
       "dimension_keywords": {
-        "technical_depth": ["guardrail", "behavior change"],
-        "clarity": ["before launch", "success", "decision"],
-        "completeness": ["problem", "metric", "guardrail", "post-launch decision"],
-        "structure": ["start with", "measure", "evaluate"]
+        "technical_depth": [
+          "guardrail",
+          "behavior change"
+        ],
+        "clarity": [
+          "before launch",
+          "success",
+          "decision"
+        ],
+        "completeness": [
+          "problem",
+          "metric",
+          "guardrail",
+          "post-launch decision"
+        ],
+        "structure": [
+          "start with",
+          "measure",
+          "evaluate"
+        ]
+      }
+    },
+    "topic": "execution"
+  },
+  {
+    "role": "PM",
+    "level": "new_grad",
+    "companies": [
+      "Meta",
+      "OpenAI"
+    ],
+    "prompt": "Before recommending a product decision, how do you gather enough context to be credible?",
+    "rubric": {
+      "ideal_answer": "A strong answer explains that credibility comes from understanding the user problem, product goals, constraints, existing data, stakeholder perspectives, and tradeoffs. The answer should show curiosity and disciplined preparation.",
+      "keywords": [
+        "user problem",
+        "goals",
+        "constraints",
+        "data",
+        "stakeholders",
+        "tradeoffs"
+      ],
+      "dimension_keywords": {
+        "technical_depth": [
+          "constraints",
+          "tradeoffs"
+        ],
+        "clarity": [
+          "context",
+          "credible recommendation"
+        ],
+        "completeness": [
+          "users",
+          "data",
+          "stakeholders",
+          "constraints"
+        ],
+        "structure": [
+          "first",
+          "gather",
+          "synthesize"
+        ]
+      }
+    },
+    "topic": "roadmap"
+  },
+  {
+    "role": "Behavioral",
+    "level": "intern",
+    "companies": [
+      "OpenAI",
+      "Anthropic"
+    ],
+    "prompt": "Tell me about a time you changed your mind after getting new information.?",
+    "rubric": {
+      "ideal_answer": "A strong answer describes the original belief, the new information that changed the picture, how the candidate adapted, and what they learned. It should show humility, reasoning, and a willingness to update course.",
+      "keywords": [
+        "original view",
+        "new information",
+        "adapted",
+        "learning",
+        "humility",
+        "reasoning"
+      ],
+      "dimension_keywords": {
+        "technical_depth": [
+          "reasoning",
+          "decision update"
+        ],
+        "clarity": [
+          "before",
+          "after",
+          "why"
+        ],
+        "completeness": [
+          "initial belief",
+          "new information",
+          "action",
+          "lesson"
+        ],
+        "structure": [
+          "situation",
+          "change",
+          "result"
+        ]
+      }
+    },
+    "topic": "ambiguity"
+  },
+  {
+    "role": "Behavioral",
+    "level": "intern",
+    "companies": [
+      "NVIDIA",
+      "Databricks"
+    ],
+    "prompt": "Describe a time you received difficult feedback and what you did next.?",
+    "rubric": {
+      "ideal_answer": "A strong answer explains the feedback clearly, shows the candidate listened without defensiveness, acted on it in a concrete way, and reflects on the improvement that followed. It should show coachability and maturity.",
+      "keywords": [
+        "feedback",
+        "listened",
+        "action",
+        "improvement",
+        "coachability",
+        "reflection"
+      ],
+      "dimension_keywords": {
+        "technical_depth": [
+          "action taken",
+          "behavior change"
+        ],
+        "clarity": [
+          "what feedback",
+          "what changed"
+        ],
+        "completeness": [
+          "feedback",
+          "response",
+          "follow-through",
+          "result"
+        ],
+        "structure": [
+          "received",
+          "acted",
+          "learned"
+        ]
+      }
+    },
+    "topic": "feedback"
+  },
+  {
+    "role": "Behavioral",
+    "level": "new_grad",
+    "companies": [
+      "Airbnb",
+      "Meta"
+    ],
+    "prompt": "Tell me about a time you had to build trust with a teammate quickly.?",
+    "rubric": {
+      "ideal_answer": "A strong answer describes the context, why trust mattered, what concrete actions the candidate took, and how the relationship improved. It should show reliability, empathy, and follow-through.",
+      "keywords": [
+        "trust",
+        "context",
+        "actions",
+        "reliability",
+        "empathy",
+        "outcome"
+      ],
+      "dimension_keywords": {
+        "technical_depth": [
+          "actions taken",
+          "reliability"
+        ],
+        "clarity": [
+          "why trust mattered",
+          "what changed"
+        ],
+        "completeness": [
+          "situation",
+          "actions",
+          "result",
+          "lesson"
+        ],
+        "structure": [
+          "context",
+          "action",
+          "outcome"
+        ]
+      }
+    },
+    "topic": "decision_making"
+  },
+  {
+    "role": "Behavioral",
+    "level": "new_grad",
+    "companies": [
+      "Databricks",
+      "Google"
+    ],
+    "prompt": "Describe a time you had to bring structure to an ambiguous situation.?",
+    "rubric": {
+      "ideal_answer": "A strong answer explains what was unclear, how the candidate created a plan or framework, how they aligned others, and what outcome followed. The answer should demonstrate ownership and structured thinking under uncertainty.",
+      "keywords": [
+        "ambiguity",
+        "plan",
+        "framework",
+        "alignment",
+        "ownership",
+        "outcome"
+      ],
+      "dimension_keywords": {
+        "technical_depth": [
+          "structured thinking",
+          "alignment",
+          "execution"
+        ],
+        "clarity": [
+          "what was unclear",
+          "what you did",
+          "result"
+        ],
+        "completeness": [
+          "ambiguity",
+          "plan",
+          "alignment",
+          "outcome"
+        ],
+        "structure": [
+          "situation",
+          "approach",
+          "result"
+        ]
+      }
+    },
+    "topic": "ownership"
+  },
+  {
+    "role": "DataScience",
+    "level": "intern",
+    "companies": [
+      "Meta",
+      "Airbnb"
+    ],
+    "prompt": "How do you handle the 'curse of dimensionality' when dealing with high-dimensional data?",
+    "rubric": {
+      "ideal_answer": "A concise explanation of techniques to mitigate the curse of dimensionality, such as feature selection or dimensionality reduction.",
+      "keywords": [
+        "dimensionality",
+        "reduction",
+        "feature"
+      ],
+      "dimension_keywords": {
+        "technical_depth": [
+          "manifold learning",
+          "autoencoders"
+        ],
+        "clarity": [
+          "clear explanation",
+          "concise answer"
+        ],
+        "completeness": [
+          "techniques mentioned",
+          "trade-offs discussed"
+        ],
+        "structure": [
+          "logical flow",
+          "relevant examples"
+        ]
+      }
+    },
+    "topic": "ml_fundamentals"
+  },
+  {
+    "role": "DataScience",
+    "level": "intern",
+    "companies": [
+      "Meta",
+      "Netflix"
+    ],
+    "prompt": "When evaluating model performance on a regression task, what's the tradeoff between minimizing mean squared error and maximizing R-squared?",
+    "rubric": {
+      "ideal_answer": "A concise explanation of the tradeoff between MSE and R-squared, including considerations for overfitting and underfitting.",
+      "keywords": [
+        "regression",
+        "mean squared error",
+        "R-squared"
+      ],
+      "dimension_keywords": {
+        "technical_depth": [
+          "bias-variance tradeoff",
+          "regularization techniques"
+        ],
+        "clarity": [
+          "clear explanation of the tradeoff",
+          "concise answer summary"
+        ],
+        "completeness": [
+          "considerations for overfitting and underfitting",
+          "example use cases"
+        ],
+        "structure": [
+          "logical organization of ideas",
+          "clear conclusion"
+        ]
+      }
+    },
+    "topic": "statistics"
+  },
+  {
+    "role": "DataScience",
+    "level": "intern",
+    "companies": [
+      "Meta",
+      "Netflix"
+    ],
+    "prompt": "How do you handle missing values in a dataset without losing valuable information?",
+    "rubric": {
+      "ideal_answer": "Carefully assess the nature of the missing data and consider imputation techniques, such as mean or median imputation, or more advanced methods like multiple imputation by chained equations. Consider also whether there are patterns in the missing data that could indicate an underlying issue with data collection.",
+      "keywords": [
+        "imputation",
+        "missing values",
+        "data preprocessing"
+      ],
+      "dimension_keywords": {
+        "technical_depth": [
+          "regression",
+          "machine learning algorithms"
+        ],
+        "clarity": [
+          "clear explanation of imputation techniques"
+        ],
+        "completeness": [
+          "consideration of potential biases in data collection"
+        ],
+        "structure": [
+          "step-by-step approach to handling missing values"
+        ]
+      }
+    },
+    "topic": "model_evaluation"
+  },
+  {
+    "role": "DataScience",
+    "level": "intern",
+    "companies": [
+      "Meta",
+      "Netflix"
+    ],
+    "prompt": "Given two sets of data with identical distributions, what's the key difference between model calibration and bias?",
+    "rubric": {
+      "ideal_answer": "Model calibration refers to how well a model's predictions align with the true probabilities, while bias refers to the systematic error in expected value. Calibration is about ensuring the model's confidence levels reflect reality.",
+      "keywords": [
+        "calibration",
+        "bias",
+        "model evaluation"
+      ],
+      "dimension_keywords": {
+        "technical_depth": [
+          "probability distributions",
+          "expected values"
+        ],
+        "clarity": [
+          "key difference",
+          "systematic error"
+        ],
+        "completeness": [
+          "model calibration",
+          "bias-variance tradeoff"
+        ],
+        "structure": [
+          "confidence levels",
+          "true probabilities"
+        ]
+      }
+    },
+    "topic": "experimentation"
+  },
+  {
+    "role": "DataScience",
+    "level": "intern",
+    "companies": [
+      "Meta",
+      "Netflix"
+    ],
+    "prompt": "How do you handle feature correlations when selecting a subset of predictors for a regression task?",
+    "rubric": {
+      "ideal_answer": "A strong answer would discuss the importance of correlation coefficient, feature selection techniques such as mutual information or recursive feature elimination, and potential issues with multicollinearity.",
+      "keywords": [
+        "correlation",
+        "feature selection",
+        "multicollinearity"
+      ],
+      "dimension_keywords": {
+        "technical_depth": [
+          "correlation matrix",
+          "mutual information"
+        ],
+        "clarity": [
+          "importance of correlation coefficient",
+          "feature subset selection"
+        ],
+        "completeness": [
+          "feature elimination techniques",
+          "regularization methods"
+        ],
+        "structure": [
+          "multicollinearity issues",
+          "dimensionality reduction"
+        ]
+      }
+    },
+    "topic": "experimentation"
+  },
+  {
+    "role": "DataScience",
+    "level": "new_grad",
+    "topic": "experimentation",
+    "companies": [
+      "Meta",
+      "Netflix"
+    ],
+    "prompt": "How can you detect overfitting in a model trained on a small dataset with many features?",
+    "rubric": {
+      "ideal_answer": "Overfitting is detected by monitoring the model's performance on unseen data, such as a validation set. The model is likely overfitting if its performance on the training set is significantly better than its performance on the validation set.",
+      "keywords": [
+        "overfitting",
+        "validation set",
+        "model performance"
+      ],
+      "dimension_keywords": {
+        "technical_depth": [
+          "regularization techniques",
+          "early stopping"
+        ],
+        "clarity": [
+          "clear explanation of overfitting",
+          "specific example"
+        ],
+        "completeness": [
+          "detection methods",
+          "prevention strategies"
+        ],
+        "structure": [
+          "problem statement",
+          "solution explanation"
+        ]
+      }
+    }
+  },
+  {
+    "role": "DataScience",
+    "level": "new_grad",
+    "topic": "ml_fundamentals",
+    "companies": [
+      "Meta",
+      "Databricks"
+    ],
+    "prompt": "What's the relationship between precision and recall, especially in imbalanced datasets?",
+    "rubric": {
+      "ideal_answer": "Precision is the ratio of true positives to all predicted positive instances. Recall measures the proportion of actual positives correctly identified. They're not interchangeable metrics, especially when dealing with class imbalance.",
+      "keywords": [
+        "precision",
+        "recall",
+        "class imbalance"
+      ],
+      "dimension_keywords": {
+        "technical_depth": [
+          "calibration curve",
+          "roc curve"
+        ],
+        "clarity": [
+          "distinct definitions",
+          "example use cases"
+        ],
+        "completeness": [
+          "evaluation metrics",
+          "dataset characteristics"
+        ],
+        "structure": [
+          "tradeoff discussion",
+          "implications for model selection"
+        ]
+      }
+    }
+  },
+  {
+    "role": "DataScience",
+    "level": "new_grad",
+    "topic": "statistics",
+    "companies": [
+      "Meta",
+      "Netflix"
+    ],
+    "prompt": "How do you handle feature leakage when using historical data for forecasting?",
+    "rubric": {
+      "ideal_answer": "Feature selection and engineering techniques are used to prevent feature leakage. This involves identifying the relevant features that impact the target variable and ensuring they are not correlated with future events.",
+      "keywords": [
+        "feature_leakage",
+        "forecasting",
+        "historical_data"
+      ],
+      "dimension_keywords": {
+        "technical_depth": [
+          "regression",
+          "feature_selection"
+        ],
+        "clarity": [
+          "prevent_feature_leakage",
+          "future_events"
+        ],
+        "completeness": [
+          "relevant_features",
+          "target_variable"
+        ],
+        "structure": [
+          "identify_correlated_features",
+          "ensure_relevance"
+        ]
+      }
+    }
+  },
+  {
+    "role": "DataScience",
+    "level": "new_grad",
+    "topic": "ml_fundamentals",
+    "companies": [
+      "Meta",
+      "Netflix"
+    ],
+    "prompt": "Can a model's accuracy on the training set be a good indicator of its performance on unseen data?",
+    "rubric": {
+      "ideal_answer": "A strong answer would discuss the limitations of using training set accuracy as an evaluation metric, potentially referencing issues like overfitting and feature leakage. It may also mention the importance of using techniques like cross-validation or holdout sets for a more accurate assessment.",
+      "keywords": [
+        "overfitting",
+        "feature_leakage",
+        "cross_validation"
+      ],
+      "dimension_keywords": {
+        "technical_depth": [
+          "model_evaluation",
+          "evaluation_metrics"
+        ],
+        "clarity": [
+          "clearly_explains",
+          "concisely_summarizes"
+        ],
+        "completeness": [
+          "covers_key_points",
+          "acknowledges_limitations"
+        ],
+        "structure": [
+          "logical_flow",
+          "easy_to_follow"
+        ]
+      }
+    }
+  },
+  {
+    "role": "DataScience",
+    "level": "new_grad",
+    "topic": "feature_engineering",
+    "companies": [
+      "Meta",
+      "Netflix"
+    ],
+    "prompt": "How do you handle overfitting when working with high-dimensional data?",
+    "rubric": {
+      "ideal_answer": "Regularization techniques can be used to prevent overfitting in high-dimensional data. Techniques include L1 and L2 regularization, early stopping, and dropout.",
+      "keywords": [
+        "regularization",
+        "overfitting",
+        "high-dimensional data"
+      ],
+      "dimension_keywords": {
+        "technical_depth": [
+          "explain how regularization works",
+          "provide examples of regularization techniques"
+        ],
+        "clarity": [
+          "define overfitting",
+          "explain why it's a problem"
+        ],
+        "completeness": [
+          "mention L1 and L2 regularization",
+          "mention early stopping and dropout"
+        ],
+        "structure": [
+          "start with the definition of overfitting",
+          "follow up with explanation and examples"
+        ]
       }
     }
   },
   {
     "role": "PM",
-    "level": "new_grad",
-    "companies": ["Meta", "OpenAI"],
-    "prompt": "Before recommending a product decision, how do you gather enough context to be credible?",
-    "rubric": {
-      "ideal_answer": "A strong answer explains that credibility comes from understanding the user problem, product goals, constraints, existing data, stakeholder perspectives, and tradeoffs. The answer should show curiosity and disciplined preparation.",
-      "keywords": ["user problem", "goals", "constraints", "data", "stakeholders", "tradeoffs"],
-      "dimension_keywords": {
-        "technical_depth": ["constraints", "tradeoffs"],
-        "clarity": ["context", "credible recommendation"],
-        "completeness": ["users", "data", "stakeholders", "constraints"],
-        "structure": ["first", "gather", "synthesize"]
-      }
-    }
-  },
-  {
-    "role": "Behavioral",
     "level": "intern",
-    "companies": ["OpenAI", "Anthropic"],
-    "prompt": "Tell me about a time you changed your mind after getting new information.",
+    "topic": "execution",
+    "companies": [
+      "Google",
+      "Meta"
+    ],
+    "prompt": "Design an A/B test to measure the impact of a new feature on user engagement, given that it's difficult to isolate the effect due to concurrent product changes.?",
     "rubric": {
-      "ideal_answer": "A strong answer describes the original belief, the new information that changed the picture, how the candidate adapted, and what they learned. It should show humility, reasoning, and a willingness to update course.",
-      "keywords": ["original view", "new information", "adapted", "learning", "humility", "reasoning"],
+      "ideal_answer": "The candidate would describe a well-defined experiment with clear success metrics, control group, and treatment group. They might mention using regression analysis or matching to account for confounding variables.",
+      "keywords": [
+        "A/B testing",
+        "causality",
+        "confounding variables"
+      ],
       "dimension_keywords": {
-        "technical_depth": ["reasoning", "decision update"],
-        "clarity": ["before", "after", "why"],
-        "completeness": ["initial belief", "new information", "action", "lesson"],
-        "structure": ["situation", "change", "result"]
+        "technical_depth": [
+          "regression analysis",
+          "matching"
+        ],
+        "clarity": [
+          "clear success metrics",
+          "well-defined experiment"
+        ],
+        "completeness": [
+          "control group",
+          "treatment group"
+        ],
+        "structure": [
+          "isolate effect",
+          "concurrent product changes"
+        ]
       }
     }
   },
   {
-    "role": "Behavioral",
+    "role": "PM",
     "level": "intern",
-    "companies": ["NVIDIA", "Databricks"],
-    "prompt": "Describe a time you received difficult feedback and what you did next.",
+    "topic": "experimentation",
+    "companies": [
+      "Google",
+      "Stripe"
+    ],
+    "prompt": "What are three key performance indicators you'd use to measure the success of a new feature that increases user retention?",
     "rubric": {
-      "ideal_answer": "A strong answer explains the feedback clearly, shows the candidate listened without defensiveness, acted on it in a concrete way, and reflects on the improvement that followed. It should show coachability and maturity.",
-      "keywords": ["feedback", "listened", "action", "improvement", "coachability", "reflection"],
+      "ideal_answer": "A concise description of three relevant metrics, including at least one user-centric metric and one business outcome metric.",
+      "keywords": [
+        "retention",
+        "engagement",
+        "revenue"
+      ],
       "dimension_keywords": {
-        "technical_depth": ["action taken", "behavior change"],
-        "clarity": ["what feedback", "what changed"],
-        "completeness": ["feedback", "response", "follow-through", "result"],
-        "structure": ["received", "acted", "learned"]
+        "technical_depth": [
+          "metric selection",
+          "calculation methods"
+        ],
+        "clarity": [
+          "specificity",
+          "actionability"
+        ],
+        "completeness": [
+          "user retention",
+          "business outcomes"
+        ],
+        "structure": [
+          "three key metrics"
+        ]
       }
     }
   },
   {
-    "role": "Behavioral",
-    "level": "new_grad",
-    "companies": ["Airbnb", "Meta"],
-    "prompt": "Tell me about a time you had to build trust with a teammate quickly.",
+    "role": "PM",
+    "level": "intern",
+    "topic": "execution",
+    "companies": [
+      "Google",
+      "Stripe"
+    ],
+    "prompt": "How do you define success for a product with multiple conflicting goals?",
     "rubric": {
-      "ideal_answer": "A strong answer describes the context, why trust mattered, what concrete actions the candidate took, and how the relationship improved. It should show reliability, empathy, and follow-through.",
-      "keywords": ["trust", "context", "actions", "reliability", "empathy", "outcome"],
+      "ideal_answer": "A clear explanation of how to balance competing objectives and measure progress towards them.",
+      "keywords": [
+        "goal alignment",
+        "conflicting priorities",
+        "key performance indicators"
+      ],
       "dimension_keywords": {
-        "technical_depth": ["actions taken", "reliability"],
-        "clarity": ["why trust mattered", "what changed"],
-        "completeness": ["situation", "actions", "result", "lesson"],
-        "structure": ["context", "action", "outcome"]
+        "technical_depth": [
+          "tradeoff analysis",
+          "metric selection"
+        ],
+        "clarity": [
+          "clear definition",
+          "concise explanation"
+        ],
+        "completeness": [
+          "all relevant goals considered",
+          "measurable progress"
+        ],
+        "structure": [
+          "logical framework",
+          "relevant examples"
+        ]
       }
     }
   },
   {
-    "role": "Behavioral",
-    "level": "new_grad",
-    "companies": ["Databricks", "Google"],
-    "prompt": "Describe a time you had to bring structure to an ambiguous situation.",
+    "role": "PM",
+    "level": "intern",
+    "topic": "prioritization",
+    "companies": [
+      "Google",
+      "Stripe"
+    ],
+    "prompt": "What are the essential metrics to track when launching a new feature that affects both user acquisition and retention?",
     "rubric": {
-      "ideal_answer": "A strong answer explains what was unclear, how the candidate created a plan or framework, how they aligned others, and what outcome followed. The answer should demonstrate ownership and structured thinking under uncertainty.",
-      "keywords": ["ambiguity", "plan", "framework", "alignment", "ownership", "outcome"],
+      "ideal_answer": "A concise explanation of key performance indicators for launch success, considering multiple goals.",
+      "keywords": [
+        "metrics",
+        "launch",
+        "goals"
+      ],
       "dimension_keywords": {
-        "technical_depth": ["structured thinking", "alignment", "execution"],
-        "clarity": ["what was unclear", "what you did", "result"],
-        "completeness": ["ambiguity", "plan", "alignment", "outcome"],
-        "structure": ["situation", "approach", "result"]
+        "technical_depth": [
+          "metric selection",
+          "data analysis"
+        ],
+        "clarity": [
+          "clear explanation",
+          "concise answer"
+        ],
+        "completeness": [
+          "user acquisition",
+          "retention"
+        ],
+        "structure": [
+          "key performance indicators",
+          "launch success"
+        ]
+      }
+    }
+  },
+  {
+    "role": "PM",
+    "level": "intern",
+    "topic": "prioritization",
+    "companies": [
+      "Google",
+      "Stripe"
+    ],
+    "prompt": "What are the key factors you'd consider when evaluating whether to invest in an MVP for a new product feature?",
+    "rubric": {
+      "ideal_answer": "The candidate would discuss considering market demand, competitive landscape, and user needs when deciding on MVP investment. They might also mention the importance of defining clear goals and metrics for success.",
+      "keywords": [
+        "market demand",
+        "competitive landscape",
+        "user needs"
+      ],
+      "dimension_keywords": {
+        "technical_depth": [
+          "tradeoffs",
+          "resource allocation"
+        ],
+        "clarity": [
+          "clear goals",
+          "metrics for success"
+        ],
+        "completeness": [
+          "market research",
+          "user feedback"
+        ],
+        "structure": [
+          "prioritization",
+          "resource planning"
+        ]
       }
     }
   }

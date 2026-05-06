@@ -14,8 +14,6 @@ class QuestionService:
         query = self.db.query(Question)
         if role:
             query = query.filter(Question.role == role)
-            if role in {"SWE", "DataScience"}:
-                query = query.filter(Question.topic.isnot(None))
         rows = query.filter(Question.level == level).order_by(Question.id.asc()).all()
 
         return QuestionsResponse(
@@ -43,9 +41,6 @@ class QuestionService:
     ) -> QuestionItem:
         query = self.db.query(Question).filter(Question.role == role, Question.level == level)
         base_query = self.db.query(Question).filter(Question.role == role, Question.level == level)
-        if role in {"SWE", "DataScience"}:
-            query = query.filter(Question.topic.isnot(None))
-            base_query = base_query.filter(Question.topic.isnot(None))
 
         if current_id is not None:
             query = query.filter(Question.id > current_id)

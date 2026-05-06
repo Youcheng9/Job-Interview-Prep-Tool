@@ -2,6 +2,7 @@ import argparse
 import json
 from backend.models.db import SessionLocal
 from backend.models.models import Answer, FeedbackMessage, FeedbackThread, Question, Score
+from backend.generate_questions import normalize_question_record
 
 from dotenv import load_dotenv
 load_dotenv("backend/.env")
@@ -23,7 +24,7 @@ def main():
     db = SessionLocal()
     try:
         with open("backend/data/questions.json", "r", encoding="utf-8") as f:
-            data = json.load(f)
+            data = [normalize_question_record(item) for item in json.load(f)]
 
         if args.purge_history:
             db.query(FeedbackMessage).delete()

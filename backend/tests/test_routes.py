@@ -113,6 +113,18 @@ class RouteTests(unittest.TestCase):
         self.assertEqual(next_question.status_code, 200)
         self.assertEqual(next_question.json()["id"], question_id)
 
+    def test_questions_endpoints_include_items_without_topic(self) -> None:
+        question_id = create_question(prompt="Explain eventual consistency.", topic=None)
+
+        listing = self.client.get("/questions", params={"role": "SWE", "level": "intern"})
+        self.assertEqual(listing.status_code, 200)
+        self.assertEqual(listing.json()["items"][0]["id"], question_id)
+        self.assertIsNone(listing.json()["items"][0]["topic"])
+
+        next_question = self.client.get("/questions/next", params={"role": "SWE", "level": "intern"})
+        self.assertEqual(next_question.status_code, 200)
+        self.assertEqual(next_question.json()["id"], question_id)
+
     def test_reset_password_rejects_reuse_of_token(self) -> None:
         self.client.post(
             "/auth/register",

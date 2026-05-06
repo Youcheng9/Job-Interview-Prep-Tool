@@ -118,12 +118,11 @@ def main() -> None:
                         f"difficulty={difficulty} company={company}"
                     )
                     generated = generate_questions_with_retries(
-                        difficulty=difficulty,
                         role=role,
                         level=level,
                         count=args.count_per_company,
                         companies=[company],
-                        topic=topic,
+                        topic=f"{topic}; target difficulty: {difficulty}",
                     )
                     rebuilt.extend(generated)
                     rebuilt = dedupe_generated_questions(rebuilt)
