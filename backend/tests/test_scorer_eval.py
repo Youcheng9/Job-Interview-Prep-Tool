@@ -51,6 +51,13 @@ QUESTIONS = json.loads(Path("backend/data/questions.json").read_text())
 RUBRIC_BY_PROMPT = {item["prompt"]: item["rubric"] for item in QUESTIONS}
 
 
+def rubric_for_prompt_prefix(prefix: str) -> dict:
+    for prompt, rubric in RUBRIC_BY_PROMPT.items():
+        if prompt.startswith(prefix):
+            return rubric
+    raise KeyError(prefix)
+
+
 def fake_embed_texts(texts: list[str]) -> np.ndarray:
     if len(texts) == 2:
         answer = texts[0].lower()
@@ -86,15 +93,15 @@ class ScorerEvaluationSetTests(unittest.TestCase):
 
         strong_scores, strong_overall, _ = compute_scores(
             strong_answer,
-            RUBRIC_BY_PROMPT["Explain the difference between a process and a thread."],
+            rubric_for_prompt_prefix("Explain the difference between a process and a thread"),
         )
         partial_scores, partial_overall, _ = compute_scores(
             partial_answer,
-            RUBRIC_BY_PROMPT["What is the difference between synchronous and asynchronous execution?"],
+            rubric_for_prompt_prefix("What is the difference between synchronous and asynchronous execution"),
         )
         wrong_scores, wrong_overall, _ = compute_scores(
             wrong_answer,
-            RUBRIC_BY_PROMPT["Describe what TCP does for a client-server connection that UDP does not."],
+            rubric_for_prompt_prefix("Describe what TCP does for a client-server connection that UDP does not"),
         )
 
         self.assertGreaterEqual(strong_overall, 75)

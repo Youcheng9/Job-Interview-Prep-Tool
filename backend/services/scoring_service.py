@@ -27,7 +27,11 @@ class ScoringService:
             self.db.add(answer)
             self.db.flush()
 
-            scores_dict, overall_int, feedback = compute_scores(payload.answer_text, question.rubric)
+            scores_dict, overall_int, feedback = compute_scores(
+                payload.answer_text,
+                question.rubric,
+                role=question.role,
+            )
 
             score = Score(answer_id=answer.id, scores=scores_dict, overall=overall_int, feedback=feedback)
             self.db.add(score)

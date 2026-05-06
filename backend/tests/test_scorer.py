@@ -132,6 +132,40 @@ class ScorerTests(unittest.TestCase):
         self.assertNotIn("shared memory", feedback["missing_keywords"])
         self.assertTrue(feedback["notes"]["quality_indicators"]["has_structure"])
 
+    @patch("backend.ml.scorer.embed_texts")
+    @patch("backend.ml.scorer._cached_embeddings", side_effect=RuntimeError("embedding backend unavailable"))
+    def test_behavioral_scoring_is_open_ended_and_not_keyword_gap_driven(self, _cached_embeddings, embed_texts):
+        rubric = {
+            "ideal_answer": (
+                "A strong answer describes a specific conflict, the candidate's actions, and the impact or lesson learned."
+            ),
+            "keywords": ["conflict resolution", "stakeholders", "ownership", "communication"],
+            "dimension_keywords": {
+                "technical_depth": ["tradeoff", "decision making"],
+                "clarity": ["specific example", "clear explanation"],
+                "completeness": ["situation", "action", "result"],
+                "structure": ["situation", "action", "result"],
+            },
+        }
+        embed_texts.return_value = np.array(
+            [
+                [1.0, 0.0],
+                [0.9, 0.1],
+            ]
+        )
+
+        answer = (
+            "When two teammates disagreed on how to ship a feature, I brought them together, "
+            "clarified the tradeoff, and proposed a short experiment so we could make a decision with data. "
+            "We aligned on a path, shipped on time, and I learned to surface assumptions earlier."
+        )
+        scores, overall, feedback = compute_scores(answer, rubric, role="Behavioral")
+
+        self.assertGreaterEqual(overall, 60)
+        self.assertEqual(feedback["missing_keywords"], [])
+        self.assertGreater(feedback["notes"]["quality_indicators"]["behavioral_signal"], 0.5)
+        self.assertGreaterEqual(scores["structure"], 60)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -217,6 +217,42 @@ def _build_instant_feedback(
     }
 
 
+def _behavioral_signal_score(answer_text: str) -> float:
+    lowered = answer_text.lower()
+
+    signal_checks = {
+        "ownership": any(token in lowered for token in [" i ", " my ", " we ", " our "]),
+        "specific_example": any(token in lowered for token in ["when ", "once ", "during ", "in that situation", "for example"]),
+        "action": any(
+            token in lowered
+            for token in [
+                "decided",
+                "led",
+                "aligned",
+                "communicated",
+                "resolved",
+                "prioritized",
+                "owned",
+                "handled",
+                "drove",
+            ]
+        ),
+        "outcome": any(
+            token in lowered
+            for token in ["result", "impact", "outcome", "improved", "delivered", "shipped", "resolved"]
+        ),
+        "reflection": any(
+            token in lowered
+            for token in ["learned", "would do differently", "next time", "in retrospect", "takeaway"]
+        ),
+    }
+
+    score = sum(1 for present in signal_checks.values() if present) / len(signal_checks)
+    if len(answer_text.split()) >= 60:
+        score = min(1.0, score + 0.1)
+    return score
+
+
 def concept_coverage(answer_text: str, concepts: List[str]) -> tuple[float, Dict[str, float]]:
     """
     Compute semantic concept coverage in [0.0, 1.0].
@@ -236,6 +272,7 @@ def concept_coverage(answer_text: str, concepts: List[str]) -> tuple[float, Dict
 def compute_scores(
     answer_text: str,
     rubric: Dict,
+    role: str | None = None,
     weights: Dict = None,
 ) -> Tuple[Dict[str, int], int, Dict]:
     """
@@ -244,8 +281,12 @@ def compute_scores(
     - rubric: expected to have 'ideal_answer' and 'keywords' at minimum.
     - weights: optional weights for signals; defaults to similarity=0.6, concept=0.4
     """
+    normalized_role = (role or "").strip()
+
     if weights is None:
         weights = {"similarity": 0.6, "keyword": 0.4}
+        if normalized_role == "Behavioral":
+            weights = {"similarity": 0.75, "keyword": 0.1}
 
     ideal = rubric.get("ideal_answer", "")
     keywords = rubric.get("keywords", []) or []
@@ -271,6 +312,7 @@ def compute_scores(
     concept_cov_raw, concept_scores = concept_coverage(answer_text, keywords)
     concept_cov = concept_cov_raw
     dimension_evidence, dimension_unmatched, dimension_matched = _collect_dimension_evidence(answer_text, dim_keys)
+    behavioral_signal = _behavioral_signal_score(answer_text) if normalized_role == "Behavioral" else 0.0
 
     has_structure = any(
         word in answer_text.lower()
@@ -292,6 +334,8 @@ def compute_scores(
         for word in ["example", "for instance", "such as", "like"]
     )
     quality_bonus = (0.1 if has_structure else 0) + (0.1 if has_examples else 0)
+    if normalized_role == "Behavioral":
+        quality_bonus += 0.15 * behavioral_signal
 
     base_score = 100 * min(1.0, weights["similarity"] * similarity + weights["keyword"] * concept_cov + quality_bonus)
 
@@ -301,7 +345,17 @@ def compute_scores(
     scores = {}
     for dim in dimensions:
         dim_kw = dim_keys.get(dim)
-        if dim_kw:
+        if normalized_role == "Behavioral":
+            dim_cov = float(dimension_evidence.get(dim, {}).get("coverage", 0.0))
+            if dim == "structure":
+                dim_score = 100 * (0.30 * semantic_strength + 0.35 * behavioral_signal + 0.35 * (1 if has_structure else 0))
+            elif dim == "clarity":
+                dim_score = 100 * (0.45 * semantic_strength + 0.30 * behavioral_signal + 0.25 * (1 if has_examples else 0))
+            elif dim == "completeness":
+                dim_score = 100 * (0.35 * semantic_strength + 0.30 * behavioral_signal + 0.35 * dim_cov)
+            else:
+                dim_score = 100 * (0.40 * semantic_strength + 0.35 * behavioral_signal + 0.25 * dim_cov)
+        elif dim_kw:
             dim_cov = float(dimension_evidence.get(dim, {}).get("coverage", 0.0))
             if dim == "structure":
                 dim_score = 100 * (0.35 * semantic_strength + 0.25 * dim_cov + 0.40 * (1 if has_structure else 0))
@@ -338,9 +392,12 @@ def compute_scores(
 
     missing = [concept for concept, score in adjusted_concept_scores.items() if score < MISSING_CONCEPT_THRESHOLD]
     covered = [concept for concept, score in adjusted_concept_scores.items() if score >= MATCHED_CONCEPT_THRESHOLD]
-    for concept in dimension_unmatched:
-        if concept not in covered and concept not in missing:
-            missing.append(concept)
+    if normalized_role != "Behavioral":
+        for concept in dimension_unmatched:
+            if concept not in covered and concept not in missing:
+                missing.append(concept)
+    else:
+        missing = []
 
     strengths = []
     weaknesses = []
@@ -352,7 +409,14 @@ def compute_scores(
     else:
         weaknesses.append("Answer lacks alignment with expected concepts.")
 
-    if concept_cov > 0.8:
+    if normalized_role == "Behavioral":
+        if behavioral_signal > 0.75:
+            strengths.append("Good use of a concrete example with clear ownership and outcome.")
+        elif behavioral_signal > 0.45:
+            strengths.append("The answer has a workable story, but it could be more specific about actions and impact.")
+        else:
+            weaknesses.append("The example feels vague - add a concrete situation, actions, and outcome.")
+    elif concept_cov > 0.8:
         strengths.append("Excellent coverage of the core concepts, even with paraphrased wording.")
     elif concept_cov > 0.5:
         strengths.append("Good coverage of important concepts.")
@@ -411,6 +475,7 @@ def compute_scores(
             "quality_indicators": {
                 "has_structure": has_structure,
                 "has_examples": has_examples,
+                "behavioral_signal": round(behavioral_signal, 4),
             },
             "ideal_snippet": ideal[:300] if ideal else None,
         },

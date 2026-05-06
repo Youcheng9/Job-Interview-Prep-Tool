@@ -434,16 +434,14 @@ export default function InterviewPage() {
   }, [phase, score?.answerId]);
 
   const isQuestionSidebarVisible = isQuestionSidebarPinned || isQuestionSidebarPreviewed;
-  const supportsTopicFilter = role === "swe" || role === "data";
-  const topicOptions = supportsTopicFilter
-    ? Array.from(
-        new Set(
-          allQuestions
-            .map((item) => item.topic)
-            .filter((item): item is string => Boolean(item)),
-        ),
-      )
-    : [];
+  const topicOptions = Array.from(
+    new Set(
+      allQuestions
+        .map((item) => item.topic)
+        .filter((item): item is string => Boolean(item)),
+    ),
+  );
+  const supportsTopicFilter = topicOptions.length > 0;
   const matchesTopicFilter = (item: Question, filter: TopicFilter) =>
     !supportsTopicFilter || filter === "all" || item.topic === filter;
   const matchesDifficultyFilter = (item: Question, filter: DifficultyFilter) =>
