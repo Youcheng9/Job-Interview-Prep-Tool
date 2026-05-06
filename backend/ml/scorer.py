@@ -22,6 +22,37 @@ logger = logging.getLogger(__name__)
 MATCHED_CONCEPT_THRESHOLD = 0.75
 MISSING_CONCEPT_THRESHOLD = 0.55
 
+CONCEPT_ALIASES: dict[str, list[str]] = {
+    "address space": [
+        "own memory",
+        "separate memory",
+        "separate memory space",
+        "independent memory",
+    ],
+    "shared memory": [
+        "share memory",
+        "shares memory",
+        "memory shared",
+    ],
+    "resource isolation": [
+        "own resources",
+        "isolated resources",
+        "resource separation",
+    ],
+    "context switch": [
+        "higher overhead",
+        "switching overhead",
+        "context-switch cost",
+        "context switching cost",
+    ],
+    "cost": [
+        "overhead",
+        "heavier weight",
+        "lighter weight",
+        "lightweight",
+    ],
+}
+
 
 def _tokenize(text: str) -> List[str]:
     """
@@ -42,18 +73,24 @@ def _split_answer_segments(answer_text: str) -> List[str]:
 
 
 def _lexical_overlap_score(answer_tokens: set[str], concept: str) -> float:
-    concept_tokens = _tokenize(concept)
-    if not concept_tokens:
-        return 0.0
+    variants = [concept, *CONCEPT_ALIASES.get(concept.lower(), [])]
+    best_score = 0.0
 
-    if all(token in answer_tokens for token in concept_tokens):
-        return 1.0
+    for variant in variants:
+        concept_tokens = _tokenize(variant)
+        if not concept_tokens:
+            continue
 
-    match_count = sum(1 for token in concept_tokens if token in answer_tokens)
-    if match_count == 0:
-        return 0.0
+        if all(token in answer_tokens for token in concept_tokens):
+            return 1.0
 
-    return min(0.85, match_count / len(concept_tokens))
+        match_count = sum(1 for token in concept_tokens if token in answer_tokens)
+        if match_count == 0:
+            continue
+
+        best_score = max(best_score, min(0.85, match_count / len(concept_tokens)))
+
+    return best_score
 
 
 def _semantic_concept_scores(answer_text: str, concepts: List[str]) -> Dict[str, float]:
@@ -237,7 +274,18 @@ def compute_scores(
 
     has_structure = any(
         word in answer_text.lower()
-        for word in ["first", "then", "next", "finally", "however", "therefore"]
+        for word in [
+            "first",
+            "then",
+            "next",
+            "finally",
+            "however",
+            "therefore",
+            "while",
+            "whereas",
+            "in contrast",
+            "by contrast",
+        ]
     )
     has_examples = any(
         word in answer_text.lower()

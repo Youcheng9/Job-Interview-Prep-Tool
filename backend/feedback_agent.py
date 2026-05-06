@@ -9,23 +9,40 @@ from urllib import error, request
 
 from pydantic import BaseModel, Field, ValidationError, field_validator
 
-OLLAMA_URL = os.getenv("OLLAMA_URL", "http://127.0.0.1:11434/api/generate")
-OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3.2:3b") #llama3.2:3b
 
-AI_FEEDBACK_MODEL = os.getenv("AI_FEEDBACK_MODEL", OLLAMA_MODEL)
-AI_CHAT_MODEL = os.getenv("AI_CHAT_MODEL", AI_FEEDBACK_MODEL)
+def _env_str(name: str, default: str, *legacy_names: str) -> str:
+    for key in (name, *legacy_names):
+        value = os.getenv(key)
+        if value is not None:
+            return value
+    return default
+
+
+def _env_int(name: str, default: int, *legacy_names: str) -> int:
+    return int(_env_str(name, str(default), *legacy_names))
+
+
+OLLAMA_URL = os.getenv("OLLAMA_URL", "http://127.0.0.1:11434/api/generate")
+AI_CHAT_MODEL = _env_str("AI_COACH_CHAT_MODEL", "llama3.2:3b", "AI_CHAT_MODEL", "OLLAMA_MODEL")
 
 AI_CHAT_PROMPT_ANSWER_CHARS = int(os.getenv("AI_CHAT_PROMPT_ANSWER_CHARS", "420"))
 AI_CHAT_PROMPT_HISTORY_CHARS = int(os.getenv("AI_CHAT_PROMPT_HISTORY_CHARS", "180"))
 AI_CHAT_NUM_CTX = int(os.getenv("AI_CHAT_NUM_CTX", "768"))
 
-AI_FEEDBACK_ENABLED = os.getenv("AI_FEEDBACK_ENABLED", "true").lower() == "true"
-AI_FEEDBACK_TIMEOUT_SECONDS = int(os.getenv("AI_FEEDBACK_TIMEOUT_SECONDS", "30"))
+AI_COACH_CHAT_ENABLED = _env_str("AI_COACH_CHAT_ENABLED", "true", "AI_FEEDBACK_ENABLED").lower() == "true"
+AI_COACH_TIMEOUT_SECONDS = _env_int("AI_COACH_TIMEOUT_SECONDS", 30, "AI_FEEDBACK_TIMEOUT_SECONDS")
+AI_COACH_CHAT_MAX_TOKENS = _env_int("AI_COACH_CHAT_MAX_TOKENS", 180, "AI_FEEDBACK_CHAT_MAX_TOKENS")
+AI_COACH_PROMPT_IDEAL_CHARS = _env_int("AI_COACH_PROMPT_IDEAL_CHARS", 220, "AI_FEEDBACK_PROMPT_IDEAL_CHARS")
+
+# Legacy aliases for backward compatibility while older code paths are still present
+AI_FEEDBACK_MODEL = _env_str("AI_FEEDBACK_MODEL", AI_CHAT_MODEL, "AI_COACH_CHAT_MODEL", "AI_CHAT_MODEL")
+AI_FEEDBACK_ENABLED = AI_COACH_CHAT_ENABLED
+AI_FEEDBACK_TIMEOUT_SECONDS = AI_COACH_TIMEOUT_SECONDS
 AI_FEEDBACK_FAST_MODE = os.getenv("AI_FEEDBACK_FAST_MODE", "true").lower() == "true"
 AI_FEEDBACK_MAX_TOKENS = int(os.getenv("AI_FEEDBACK_MAX_TOKENS", "120"))
-AI_FEEDBACK_CHAT_MAX_TOKENS = int(os.getenv("AI_FEEDBACK_CHAT_MAX_TOKENS", "180"))
+AI_FEEDBACK_CHAT_MAX_TOKENS = AI_COACH_CHAT_MAX_TOKENS
 AI_FEEDBACK_PROMPT_ANSWER_CHARS = int(os.getenv("AI_FEEDBACK_PROMPT_ANSWER_CHARS", "650"))
-AI_FEEDBACK_PROMPT_IDEAL_CHARS = int(os.getenv("AI_FEEDBACK_PROMPT_IDEAL_CHARS", "220"))
+AI_FEEDBACK_PROMPT_IDEAL_CHARS = AI_COACH_PROMPT_IDEAL_CHARS
 AI_FEEDBACK_NUM_CTX = int(os.getenv("AI_FEEDBACK_NUM_CTX", "1024"))
 AI_FEEDBACK_RETRY_WITH_PLAIN_JSON = os.getenv("AI_FEEDBACK_RETRY_WITH_PLAIN_JSON", "true").lower() == "true"
 AI_FEEDBACK_MAX_RETRIES = max(1, int(os.getenv("AI_FEEDBACK_MAX_RETRIES", "2")))
@@ -68,7 +85,7 @@ def _ollama_installed_models() -> set[str]:
 
 
 def _resolve_model(requested_model: str, *, purpose: str) -> str:
-    candidates = [requested_model, AI_CHAT_MODEL, AI_FEEDBACK_MODEL, OLLAMA_MODEL]
+    candidates = [requested_model, AI_CHAT_MODEL, AI_FEEDBACK_MODEL]
     ordered_candidates: list[str] = []
     for candidate in candidates:
         normalized = (candidate or "").strip()

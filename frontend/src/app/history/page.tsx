@@ -133,11 +133,7 @@ function HistoryQuestionItem({
         borderLeft: `2px solid ${roleColor}`,
       }}
     >
-      <button
-        className="progress-question-toggle"
-        type="button"
-        onClick={() => onOpen(record)}
-      >
+      <div className="progress-question-toggle">
         <span className="progress-question-copy">
           <span className="progress-question-meta mono">
             {ROLE_LABELS[record.question.role]} • {record.question.difficulty} •{" "}
@@ -155,7 +151,7 @@ function HistoryQuestionItem({
           <ScorePill value={record.score.overall} />
           <span className="progress-expand-arrow" aria-hidden="true" />
         </span>
-      </button>
+      </div>
 
       <button
         onClick={() => onOpen(record)}
@@ -172,9 +168,8 @@ function HistoryQuestionItem({
 function HistoryResultModal({ record, onClose }: { record: AnswerRecord; onClose: () => void }) {
   const roleColor = ROLE_COLORS[record.question.role] ?? "var(--cyan)";
   const date = new Date(record.created_at);
-  const aiFeedback = record.score.ai_feedback;
   const instantFeedback = record.score.instant_feedback;
-  const evaluationSummary = aiFeedback?.summary || instantFeedback?.summary || record.score.feedback || "No evaluation recorded.";
+  const evaluationSummary = instantFeedback?.summary || record.score.feedback || "No evaluation recorded.";
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -237,11 +232,11 @@ function HistoryResultModal({ record, onClose }: { record: AnswerRecord; onClose
               <div className="progress-evaluation-grid">
                 <div>
                   <div className="progress-section-label">Strengths</div>
-                  <TextList items={aiFeedback?.strengths?.length ? aiFeedback.strengths : record.score.strengths} />
+                  <TextList items={record.score.strengths} />
                 </div>
                 <div>
                   <div className="progress-section-label">Weaknesses</div>
-                  <TextList items={aiFeedback?.weaknesses?.length ? aiFeedback.weaknesses : record.score.weaknesses} />
+                  <TextList items={record.score.weaknesses} />
                 </div>
               </div>
             </div>
@@ -249,10 +244,10 @@ function HistoryResultModal({ record, onClose }: { record: AnswerRecord; onClose
             <div className="progress-detail-section">
               <div className="progress-section-label">Feedback</div>
               <p className="progress-answer-text">
-                {aiFeedback?.next_focus || instantFeedback?.next_focus || record.score.feedback || "No feedback recorded."}
+                {instantFeedback?.next_focus || record.score.feedback || "No feedback recorded."}
               </p>
-              {(aiFeedback?.improvements?.length || instantFeedback?.improvements?.length) ? (
-                <TextList items={aiFeedback?.improvements?.length ? aiFeedback.improvements : instantFeedback?.improvements ?? []} />
+              {instantFeedback?.improvements?.length ? (
+                <TextList items={instantFeedback.improvements} />
               ) : null}
             </div>
           </div>

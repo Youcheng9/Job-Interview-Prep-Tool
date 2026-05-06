@@ -1,9 +1,46 @@
 from __future__ import annotations
 
+import sys
+import types
 import unittest
 from unittest.mock import patch
 
 import numpy as np
+
+sentence_transformers = types.ModuleType("sentence_transformers")
+
+
+class _SentenceTransformerStub:
+    def __init__(self, *_args, **_kwargs):
+        pass
+
+    def encode(self, texts, convert_to_numpy=True, show_progress_bar=False):
+        return np.zeros((len(texts), 2))
+
+
+sentence_transformers.SentenceTransformer = _SentenceTransformerStub
+sys.modules.setdefault("sentence_transformers", sentence_transformers)
+
+pairwise = types.ModuleType("sklearn.metrics.pairwise")
+
+
+def _cosine_similarity_stub(a, b):
+    a = np.array(a, dtype=float)
+    b = np.array(b, dtype=float)
+    a_norm = np.linalg.norm(a, axis=1, keepdims=True)
+    b_norm = np.linalg.norm(b, axis=1, keepdims=True)
+    denom = np.maximum(a_norm * b_norm.T, 1e-12)
+    return (a @ b.T) / denom
+
+
+pairwise.cosine_similarity = _cosine_similarity_stub
+metrics = types.ModuleType("sklearn.metrics")
+metrics.pairwise = pairwise
+sklearn = types.ModuleType("sklearn")
+sklearn.metrics = metrics
+sys.modules.setdefault("sklearn", sklearn)
+sys.modules.setdefault("sklearn.metrics", metrics)
+sys.modules.setdefault("sklearn.metrics.pairwise", pairwise)
 
 from backend.ml.scorer import compute_scores
 
@@ -60,6 +97,40 @@ class ScorerTests(unittest.TestCase):
         self.assertTrue(feedback["notes"]["degraded"])
         self.assertEqual(feedback["notes"]["confidence"], "low")
         self.assertIsNotNone(feedback["notes"]["embedding_error"])
+
+    @patch("backend.ml.scorer.embed_texts")
+    @patch("backend.ml.scorer._cached_embeddings")
+    def test_process_thread_paraphrase_scores_as_strong_answer(self, cached_embeddings, embed_texts):
+        cached_embeddings.return_value = np.array(
+            [
+                [1.0, 0.0],
+                [0.0, 1.0],
+                [0.8, 0.2],
+                [0.1, 0.9],
+            ]
+        )
+        embed_texts.return_value = np.array(
+            [
+                [1.0, 0.0],
+                [0.95, 0.05],
+                [0.85, 0.15],
+                [0.1, 0.9],
+                [0.7, 0.3],
+            ]
+        )
+
+        answer = (
+            "A process is an independent program with its own memory and resources, "
+            "providing high isolation but higher overhead, while a thread is a lightweight "
+            "unit of execution within a process that shares memory with other threads."
+        )
+        _, overall, feedback = compute_scores(answer, RUBRIC)
+
+        self.assertGreaterEqual(overall, 75)
+        self.assertTrue(feedback["instant_feedback"]["summary"].startswith("Strong answer overall."))
+        self.assertNotIn("memory space", feedback["missing_keywords"])
+        self.assertNotIn("shared memory", feedback["missing_keywords"])
+        self.assertTrue(feedback["notes"]["quality_indicators"]["has_structure"])
 
 
 if __name__ == "__main__":

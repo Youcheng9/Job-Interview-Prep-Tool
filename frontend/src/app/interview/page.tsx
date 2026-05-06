@@ -13,7 +13,6 @@ import {
   type CandidateLevel,
   clearToken,
   type FeedbackChatMessage,
-  generateAIFeedback,
   getFeedbackChatThread,
   getHistory,
   getQuestions,
@@ -254,8 +253,6 @@ export default function InterviewPage() {
   const [isSpeechSupported, setIsSpeechSupported] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [speechError, setSpeechError] = useState<string | null>(null);
-  const [isGeneratingAiFeedback, setIsGeneratingAiFeedback] = useState(false);
-  const [aiFeedbackPollAttempts, setAiFeedbackPollAttempts] = useState(0);
   const [chatMessages, setChatMessages] = useState<FeedbackChatMessage[]>([]);
   const [isLoadingChat, setIsLoadingChat] = useState(false);
   const [isSendingChat, setIsSendingChat] = useState(false);
@@ -385,8 +382,6 @@ export default function InterviewPage() {
         setAnswer("");
         setCharCount(0);
         setScore(null);
-        setIsGeneratingAiFeedback(false);
-        setAiFeedbackPollAttempts(0);
         setChatMessages([]);
         setIsLoadingChat(false);
         setIsSendingChat(false);
@@ -432,26 +427,6 @@ export default function InterviewPage() {
       })
       .finally(() => setIsLoadingChat(false));
   }, [phase, score?.answerId]);
-
-  useEffect(() => {
-    const pollDelays = [800, 1200, 1800, 2600, 3600, 5000];
-    if (
-      phase !== "result" ||
-      !score?.answerId ||
-      score.ai_feedback ||
-      !score.ai_feedback_pending ||
-      isGeneratingAiFeedback ||
-      aiFeedbackPollAttempts >= pollDelays.length
-    ) {
-      return;
-    }
-
-    const timeoutId = window.setTimeout(() => {
-      void handleGenerateAiFeedback();
-    }, pollDelays[aiFeedbackPollAttempts] ?? 5000);
-
-    return () => window.clearTimeout(timeoutId);
-  }, [phase, score, isGeneratingAiFeedback, aiFeedbackPollAttempts]);
 
   const question = questions[qIndex];
   const progress = questions.length ? ((qIndex + 1) / questions.length) * 100 : 0;
@@ -504,8 +479,6 @@ export default function InterviewPage() {
     setAnswer("");
     setCharCount(0);
     setScore(null);
-    setIsGeneratingAiFeedback(false);
-    setAiFeedbackPollAttempts(0);
     setChatMessages([]);
     setIsLoadingChat(false);
     setIsSendingChat(false);
@@ -527,8 +500,6 @@ export default function InterviewPage() {
       return;
     }
     setPhase("submitting");
-    setIsGeneratingAiFeedback(false);
-    setAiFeedbackPollAttempts(0);
     setError(null);
     try {
       const result = await submitAnswer(question.id, answer, role);
@@ -549,44 +520,6 @@ export default function InterviewPage() {
       }
       setError(message);
       setPhase("question");
-    }
-  }
-
-  async function handleGenerateAiFeedback() {
-    if (!score?.answerId || isGeneratingAiFeedback) return;
-
-    setIsGeneratingAiFeedback(true);
-    setError(null);
-
-    try {
-      const result = await generateAIFeedback(score.answerId);
-      const stillPending = result.ai_feedback_source === "pending" && !result.ai_feedback;
-      setAiFeedbackPollAttempts((attempts) => (stillPending ? attempts + 1 : 0));
-      setScore((current) => {
-        if (!current) return current;
-
-        return {
-          ...current,
-          ai_feedback: result.ai_feedback,
-          ai_feedback_error: result.ai_feedback_error,
-          ai_feedback_source: result.ai_feedback_source,
-          ai_feedback_pending: stillPending,
-        };
-      });
-    } catch (err) {
-      const message = err instanceof Error ? err.message : "AI feedback failed. Please retry.";
-      setScore((current) => {
-        if (!current) return current;
-
-        return {
-          ...current,
-          ai_feedback_error: message,
-          ai_feedback_pending: false,
-        };
-      });
-      setAiFeedbackPollAttempts(0);
-    } finally {
-      setIsGeneratingAiFeedback(false);
     }
   }
 
@@ -620,6 +553,10 @@ export default function InterviewPage() {
     }
   }
 
+  function handleRetry() {
+    resetQuestionWorkspace();
+  }
+
   function handleNext() {
     if (qIndex + 1 < questions.length) {
       selectQuestion(qIndex + 1);
@@ -627,10 +564,6 @@ export default function InterviewPage() {
       clearInterviewSession(role, level);
       navigate("/history");
     }
-  }
-
-  function handleRetry() {
-    resetQuestionWorkspace();
   }
 
   function handleTopicFilterChange(nextFilter: TopicFilter) {
@@ -1143,13 +1076,6 @@ export default function InterviewPage() {
                     score={score}
                     onRetry={handleRetry}
                     onNext={handleNext}
-                    onGenerateAiFeedback={
-                      score.ai_feedback && score.ai_feedback_source !== "fallback"
-                        ? undefined
-                        : handleGenerateAiFeedback
-                    }
-                    isGeneratingAiFeedback={isGeneratingAiFeedback}
-                    aiFeedbackPollAttempts={aiFeedbackPollAttempts}
                     chatMessages={chatMessages}
                     chatError={chatError}
                     isLoadingChat={isLoadingChat}

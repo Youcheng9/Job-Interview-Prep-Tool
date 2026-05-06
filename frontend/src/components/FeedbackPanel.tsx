@@ -5,9 +5,6 @@ interface Props {
   score: ScoreResult;
   onRetry: () => void;
   onNext: () => void;
-  onGenerateAiFeedback?: () => void;
-  isGeneratingAiFeedback?: boolean;
-  aiFeedbackPollAttempts?: number;
   chatMessages?: FeedbackChatMessage[];
   chatError?: string | null;
   isLoadingChat?: boolean;
@@ -21,9 +18,6 @@ export function FeedbackPanel({
   score,
   onRetry,
   onNext,
-  onGenerateAiFeedback,
-  isGeneratingAiFeedback = false,
-  aiFeedbackPollAttempts = 0,
   chatMessages = [],
   chatError = null,
   isLoadingChat = false,
@@ -33,17 +27,12 @@ export function FeedbackPanel({
   const [chatDraft, setChatDraft] = useState("");
   const chatEndRef = useRef<HTMLDivElement | null>(null);
   const instant = score.instant_feedback;
-  const ai = score.ai_feedback;
-  const aiError = score.ai_feedback_error;
-  const aiSource = score.ai_feedback_source;
-  const isFallbackFeedback = aiSource === "fallback";
-  const isAiPending = Boolean(score.ai_feedback_pending) && !ai;
-  const visibleSummary = ai ?? instant;
-  const canGenerateAiFeedback =
-    Boolean(onGenerateAiFeedback) &&
-    (!ai || isFallbackFeedback) &&
-    !isGeneratingAiFeedback;
   const canSendChat = Boolean(onSendChatMessage) && Boolean(score.answerId);
+  const coachPrompts = [
+    "Rewrite my answer more strongly.",
+    "Why was my completeness score low?",
+    "What should I improve first?",
+  ];
 
   useEffect(() => {
     setChatDraft("");
@@ -60,6 +49,11 @@ export function FeedbackPanel({
     const nextMessage = chatDraft.trim();
     setChatDraft("");
     await onSendChatMessage?.(nextMessage);
+  }
+
+  async function handlePromptClick(prompt: string) {
+    if (!canSendChat || isSendingChat) return;
+    await onSendChatMessage?.(prompt);
   }
 
   return (
@@ -101,7 +95,7 @@ export function FeedbackPanel({
         Improvement Protocol
       </div>
 
-      {visibleSummary && (
+      {instant && (
         <div style={{ marginBottom: "20px" }}>
           <div
             style={{
@@ -113,42 +107,8 @@ export function FeedbackPanel({
               marginBottom: "12px",
             }}
           >
-            {ai ? (isFallbackFeedback ? "Fallback Coach Summary" : "AI Coach Summary") : "Instant Summary"}
+            Instant Summary
           </div>
-
-          {isFallbackFeedback && (
-            <div
-              style={{
-                marginBottom: "12px",
-                padding: "14px 16px",
-                background: "rgba(245,158,11,0.08)",
-                border: "1px solid rgba(245,158,11,0.22)",
-                borderLeft: "2px solid var(--amber)",
-                fontSize: scaledFont(14),
-                lineHeight: 1.7,
-                color: "var(--text)",
-              }}
-            >
-              Live AI coaching was unavailable, so this fallback guidance was generated from deterministic scoring.
-            </div>
-          )}
-
-          {!ai && isAiPending && (
-            <div
-              style={{
-                marginBottom: "12px",
-                padding: "14px 16px",
-                background: "rgba(34,197,94,0.06)",
-                border: "1px solid rgba(34,197,94,0.18)",
-                borderLeft: "2px solid #22c55e",
-                fontSize: scaledFont(14),
-                lineHeight: 1.7,
-                color: "var(--text)",
-              }}
-            >
-              Instant guidance is ready. Richer AI coaching is still being generated in the background.
-            </div>
-          )}
 
           <div
             style={{
@@ -162,10 +122,10 @@ export function FeedbackPanel({
               marginBottom: "12px",
             }}
           >
-            {visibleSummary.summary}
+            {instant.summary}
           </div>
 
-          {(visibleSummary.improvements?.length ?? 0) > 0 && (
+          {(instant.improvements?.length ?? 0) > 0 && (
             <div style={{ marginBottom: "12px" }}>
               <div
                 style={{
@@ -179,7 +139,7 @@ export function FeedbackPanel({
               >
                 Recommended Improvements
               </div>
-              {visibleSummary.improvements.map((item) => (
+              {instant.improvements.map((item) => (
                 <div
                   key={item}
                   style={{
@@ -201,134 +161,7 @@ export function FeedbackPanel({
             </div>
           )}
 
-          {visibleSummary.next_focus && (
-            <div
-              style={{
-                marginBottom: "12px",
-                padding: "14px 16px",
-                background: "var(--surface2)",
-                border: "1px solid var(--border)",
-                fontSize: scaledFont(14),
-                color: "var(--text)",
-              }}
-            >
-              <span className="mono" style={{ color: "var(--cyan)", marginRight: "8px" }}>
-                NEXT:
-              </span>
-              {visibleSummary.next_focus}
-            </div>
-          )}
-
-          {ai?.improved_answer && (
-            <details style={{ marginBottom: "8px" }}>
-              <summary
-                style={{
-                  fontFamily: "var(--font-head)",
-                  fontSize: scaledFont(12),
-                  letterSpacing: "0.1em",
-                  textTransform: "uppercase",
-                  color: "var(--muted)",
-                  cursor: "pointer",
-                }}
-              >
-                View Improved Answer
-              </summary>
-              <div
-                style={{
-                  marginTop: "10px",
-                  padding: "16px 18px",
-                  background: "var(--surface2)",
-                  border: "1px solid var(--border)",
-                  fontSize: scaledFont(15),
-                  color: "var(--muted)",
-                  lineHeight: 1.75,
-                }}
-              >
-                {ai.improved_answer}
-              </div>
-            </details>
-          )}
         </div>
-      )}
-
-      {!ai && (isAiPending || !aiError) && onGenerateAiFeedback && (
-        <div
-          style={{
-            marginBottom: "20px",
-            padding: "16px 18px",
-            background: "var(--surface2)",
-            border: "1px solid var(--border)",
-          }}
-        >
-          <div
-            style={{
-              fontSize: scaledFont(14),
-              lineHeight: 1.7,
-              color: "var(--muted)",
-              marginBottom: "12px",
-            }}
-          >
-            {isAiPending
-              ? aiFeedbackPollAttempts >= 6
-                ? "AI coaching is taking longer than expected. Use the button below to force a direct generation attempt."
-                : "AI coaching is being generated in the background. We will keep checking automatically."
-              : "Deterministic scoring is ready. AI coaching is optional and may take longer depending on your local Ollama model."}
-          </div>
-          <button
-            className="btn-ghost"
-            type="button"
-            onClick={onGenerateAiFeedback}
-            disabled={!canGenerateAiFeedback}
-            style={{
-              opacity: canGenerateAiFeedback ? 1 : 0.6,
-              cursor: canGenerateAiFeedback ? "pointer" : "not-allowed",
-            }}
-          >
-            {isGeneratingAiFeedback
-              ? "Generating AI Feedback..."
-              : isAiPending && aiFeedbackPollAttempts >= 4
-                ? "Force AI Coach Generation"
-                : isAiPending
-                ? "Refresh AI Coach Feedback"
-                : "Generate AI Coach Feedback"}
-          </button>
-        </div>
-      )}
-
-      {aiError && !isFallbackFeedback && (
-        <div
-          style={{
-            marginBottom: "20px",
-            padding: "16px 18px",
-            background: "rgba(245,158,11,0.08)",
-            border: "1px solid rgba(245,158,11,0.22)",
-            borderLeft: "2px solid var(--amber)",
-            fontSize: scaledFont(14),
-            lineHeight: 1.7,
-            color: "var(--text)",
-          }}
-        >
-          <span className="mono" style={{ color: "var(--amber)", marginRight: "8px" }}>
-            AI COACH:
-          </span>
-          {aiError}
-        </div>
-      )}
-
-      {isFallbackFeedback && onGenerateAiFeedback && (
-        <button
-          className="btn-ghost"
-          type="button"
-          onClick={onGenerateAiFeedback}
-          disabled={!canGenerateAiFeedback}
-          style={{
-            marginBottom: "20px",
-            opacity: canGenerateAiFeedback ? 1 : 0.6,
-            cursor: canGenerateAiFeedback ? "pointer" : "not-allowed",
-          }}
-        >
-          {isGeneratingAiFeedback ? "Retrying AI Feedback..." : "Retry With Live AI Model"}
-        </button>
       )}
 
       {canSendChat && (
@@ -362,6 +195,24 @@ export function FeedbackPanel({
             }}
           >
             Ask focused follow-ups about this answer only. Keep prompts short for the fastest response.
+          </div>
+
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "10px", marginBottom: "16px" }}>
+            {coachPrompts.map((prompt) => (
+              <button
+                key={prompt}
+                className="btn-ghost"
+                type="button"
+                onClick={() => void handlePromptClick(prompt)}
+                disabled={isSendingChat}
+                style={{
+                  opacity: isSendingChat ? 0.6 : 1,
+                  cursor: isSendingChat ? "not-allowed" : "pointer",
+                }}
+              >
+                {prompt}
+              </button>
+            ))}
           </div>
 
           <div

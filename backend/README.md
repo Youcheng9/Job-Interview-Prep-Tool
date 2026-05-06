@@ -7,7 +7,7 @@ The backend is a FastAPI service that supports:
 - User authentication (register/login) with JWT  
 - Question retrieval from PostgreSQL  
 - Answer submission + automatic scoring  
-- Ollama-based AI coaching feedback on submitted answers
+- Ollama-based coach chat for submitted answers
 - User history (past answers + scores)  
 - Database schema migrations via Alembic  
 
@@ -23,7 +23,7 @@ This backend is designed to be the **source of truth** for users, questions, ans
 - **Migrations:** Alembic  
 - **Auth:** JWT (HS256) + bcrypt password hashing  
 - **Scoring:** sentence-transformers embeddings + cosine similarity + keyword coverage  
-- **AI feedback:** Ollama local LLM coaching layer  
+- **AI coach chat:** Ollama local LLM coaching layer  
 
 ---
 
@@ -69,11 +69,16 @@ JWT_SECRET=CHANGE_ME_TO_A_LONG_RANDOM_STRING
 JWT_ALGORITHM=HS256
 ACCESS_TOKEN_EXPIRE_MINUTES=10080
 
-# Ollama AI feedback
+# Ollama coach chat
 OLLAMA_URL=http://127.0.0.1:11434/api/generate
-OLLAMA_MODEL=llama3.1:8b
-AI_FEEDBACK_ENABLED=true
-AI_FEEDBACK_TIMEOUT_SECONDS=90
+AI_COACH_CHAT_MODEL=llama3.2:3b
+AI_COACH_CHAT_ENABLED=true
+AI_COACH_TIMEOUT_SECONDS=30
+AI_COACH_CHAT_MAX_TOKENS=180
+AI_COACH_PROMPT_IDEAL_CHARS=220
+AI_CHAT_NUM_CTX=768
+AI_CHAT_PROMPT_ANSWER_CHARS=420
+AI_CHAT_PROMPT_HISTORY_CHARS=180
 ```
 
 ### Notes
@@ -110,7 +115,7 @@ python -m backend.seed_questions
 uvicorn backend.main:app --reload --port 8000
 ```
 
-### 5. Start Ollama for AI feedback
+### 5. Start Ollama for coach chat
 
 ```bash
 ollama serve
