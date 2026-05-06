@@ -28,11 +28,22 @@ export function FeedbackPanel({
   const chatEndRef = useRef<HTMLDivElement | null>(null);
   const instant = score.instant_feedback;
   const canSendChat = Boolean(onSendChatMessage) && Boolean(score.answerId);
-  const coachPrompts = [
-    "Rewrite my answer more strongly.",
-    "Why was my completeness score low?",
-    "What should I improve first?",
-  ];
+  const evaluationPrompts =
+    score.overall < 50
+      ? [
+          "Why did this score as insufficient?",
+          "What are the biggest gaps in my answer?",
+        ]
+      : score.overall < 75
+        ? [
+            "Why does this still need work?",
+            "How should I improve this answer first?",
+          ]
+        : [
+            "What made this a strong answer?",
+            "How can I make this answer even sharper?",
+          ];
+  const coachPrompts = ["Rewrite my answer more strongly.", ...evaluationPrompts];
 
   useEffect(() => {
     setChatDraft("");
@@ -230,7 +241,7 @@ export function FeedbackPanel({
               <div style={{ fontSize: scaledFont(14), color: "var(--muted)" }}>Loading coach chat...</div>
             ) : chatMessages.length === 0 ? (
               <div style={{ fontSize: scaledFont(14), color: "var(--muted)" }}>
-                Try: “Why was my completeness low?” or “Rewrite this more strongly.”
+                Try one of the quick prompts above or ask a focused follow-up.
               </div>
             ) : (
               <>
