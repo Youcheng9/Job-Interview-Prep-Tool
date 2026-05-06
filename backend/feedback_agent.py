@@ -4,12 +4,13 @@ import json
 import logging
 import os
 import socket
+from functools import lru_cache
 from urllib import error, request
 
 from pydantic import BaseModel, Field, ValidationError, field_validator
 
 OLLAMA_URL = os.getenv("OLLAMA_URL", "http://127.0.0.1:11434/api/generate")
-OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3.1:8b")
+OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3.2:3b") #llama3.2:3b
 
 AI_FEEDBACK_MODEL = os.getenv("AI_FEEDBACK_MODEL", OLLAMA_MODEL)
 AI_CHAT_MODEL = os.getenv("AI_CHAT_MODEL", AI_FEEDBACK_MODEL)
@@ -34,6 +35,69 @@ logger = logging.getLogger(__name__)
 
 class FeedbackAgentError(RuntimeError):
     pass
+
+
+@lru_cache(maxsize=1)
+def _ollama_installed_models() -> set[str]:
+    req = request.Request(
+        OLLAMA_URL.replace("/api/generate", "/api/tags"),
+        headers={"Content-Type": "application/json"},
+        method="GET",
+    )
+    timeout = None if AI_FEEDBACK_TIMEOUT_SECONDS <= 0 else AI_FEEDBACK_TIMEOUT_SECONDS
+
+    try:
+        with request.urlopen(req, timeout=timeout) as response:
+            payload = json.loads(response.read().decode("utf-8"))
+    except (error.URLError, error.HTTPError, socket.timeout, json.JSONDecodeError):
+        return set()
+
+    models = payload.get("models")
+    if not isinstance(models, list):
+        return set()
+
+    installed: set[str] = set()
+    for item in models:
+        if not isinstance(item, dict):
+            continue
+        for key in ("name", "model"):
+            value = item.get(key)
+            if isinstance(value, str) and value.strip():
+                installed.add(value.strip())
+    return installed
+
+
+def _resolve_model(requested_model: str, *, purpose: str) -> str:
+    candidates = [requested_model, AI_CHAT_MODEL, AI_FEEDBACK_MODEL, OLLAMA_MODEL]
+    ordered_candidates: list[str] = []
+    for candidate in candidates:
+        normalized = (candidate or "").strip()
+        if normalized and normalized not in ordered_candidates:
+            ordered_candidates.append(normalized)
+
+    installed_models = _ollama_installed_models()
+    if not installed_models:
+        return requested_model
+
+    for candidate in ordered_candidates:
+        if candidate in installed_models:
+            if candidate != requested_model:
+                logger.warning(
+                    "Requested Ollama model '%s' for %s is unavailable; falling back to installed model '%s'.",
+                    requested_model,
+                    purpose,
+                    candidate,
+                )
+            return candidate
+
+    fallback_model = sorted(installed_models)[0]
+    logger.warning(
+        "None of the configured Ollama models %s are installed for %s; falling back to '%s'.",
+        ordered_candidates,
+        purpose,
+        fallback_model,
+    )
+    return fallback_model
 
 
 def public_feedback_error_message(raw_error: str | None) -> str:
@@ -294,9 +358,10 @@ def call_ollama(
     max_tokens: int,
     num_ctx: int,
 ) -> str:
+    resolved_model = _resolve_model(model, purpose="structured feedback")
     body = json.dumps(
         {
-            "model": model,
+            "model": resolved_model,
             "prompt": prompt,
             "stream": False,
             "format": AI_FEEDBACK_JSON_SCHEMA if use_schema_format else "json",
@@ -345,9 +410,10 @@ def call_ollama(
 
 
 def call_ollama_text(prompt: str, *, model: str, max_tokens: int, num_ctx: int) -> str:
+    resolved_model = _resolve_model(model, purpose="chat coaching")
     body = json.dumps(
         {
-            "model": model,
+            "model": resolved_model,
             "prompt": prompt,
             "stream": False,
             "options": {
