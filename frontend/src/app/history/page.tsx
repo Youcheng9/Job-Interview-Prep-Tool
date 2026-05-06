@@ -37,6 +37,21 @@ const DATE_FILTER_OPTIONS = [
 ] as const;
 const PAGE_SIZE = 3;
 
+function parseApiDateTime(value: string): Date {
+  const normalized = /z$|[+-]\d{2}:\d{2}$/i.test(value) ? value : `${value}Z`;
+  return new Date(normalized);
+}
+
+function formatHistoryDateTime(value: string): string {
+  return parseApiDateTime(value).toLocaleString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
 function ScorePill({ value }: { value: number }) {
   const color =
     value >= 75 ? "#22c55e" : value >= 50 ? "#f59e0b" : "#ef4444";
@@ -123,7 +138,7 @@ function HistoryQuestionItem({
   onOpen: (record: AnswerRecord) => void;
 }) {
   const roleColor = ROLE_COLORS[record.question.role] ?? "var(--cyan)";
-  const date = new Date(record.created_at);
+  const timestamp = formatHistoryDateTime(record.created_at);
 
   return (
     <div
@@ -136,13 +151,7 @@ function HistoryQuestionItem({
       <div className="progress-question-toggle">
         <span className="progress-question-copy">
           <span className="progress-question-meta mono">
-            {ROLE_LABELS[record.question.role]} • {record.question.difficulty} •{" "}
-            {date.toLocaleDateString("en-US", {
-              month: "short",
-              day: "numeric",
-              hour: "2-digit",
-              minute: "2-digit",
-            })}
+            {ROLE_LABELS[record.question.role]} - {record.question.difficulty} - {timestamp}
           </span>
           <span className="progress-question-title">{record.question.text}</span>
           <span className="progress-question-answer-preview">{record.answer}</span>
@@ -167,9 +176,18 @@ function HistoryQuestionItem({
 
 function HistoryResultModal({ record, onClose }: { record: AnswerRecord; onClose: () => void }) {
   const roleColor = ROLE_COLORS[record.question.role] ?? "var(--cyan)";
-  const date = new Date(record.created_at);
+  const timestamp = formatHistoryDateTime(record.created_at);
   const instantFeedback = record.score.instant_feedback;
-  const evaluationSummary = instantFeedback?.summary || record.score.feedback || "No evaluation recorded.";
+  const evaluationSummary =
+    instantFeedback?.summary ||
+    record.score.strengths[0] ||
+    record.score.weaknesses[0] ||
+    "No evaluation recorded.";
+  const nextStep =
+    instantFeedback?.next_focus ||
+    instantFeedback?.improvements?.[0] ||
+    record.score.weaknesses[0] ||
+    "No follow-up guidance recorded.";
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -194,13 +212,7 @@ function HistoryResultModal({ record, onClose }: { record: AnswerRecord; onClose
         <div className="progress-result-modal-header" style={{ borderTopColor: roleColor }}>
           <div>
             <div className="progress-question-meta mono">
-              {ROLE_LABELS[record.question.role]} • {record.question.difficulty} •{" "}
-              {date.toLocaleDateString("en-US", {
-                month: "short",
-                day: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
+              {ROLE_LABELS[record.question.role]} - {record.question.difficulty} - {timestamp}
             </div>
             <h2 id="progress-result-modal-title" className="progress-result-modal-title">
               {record.question.text}
@@ -242,12 +254,18 @@ function HistoryResultModal({ record, onClose }: { record: AnswerRecord; onClose
             </div>
 
             <div className="progress-detail-section">
-              <div className="progress-section-label">Feedback</div>
-              <p className="progress-answer-text">
-                {instantFeedback?.next_focus || record.score.feedback || "No feedback recorded."}
-              </p>
+              <div className="progress-section-label">Next Focus</div>
+              <p className="progress-answer-text">{nextStep}</p>
               {instantFeedback?.improvements?.length ? (
                 <TextList items={instantFeedback.improvements} />
+              ) : null}
+              {record.score.missing_concepts.length ? (
+                <>
+                  <div className="progress-section-label" style={{ marginTop: "16px" }}>
+                    Missing Concepts
+                  </div>
+                  <TextList items={record.score.missing_concepts} />
+                </>
               ) : null}
             </div>
           </div>
@@ -320,7 +338,7 @@ export default function HistoryPage() {
     const roleMatches = selectedRoles.includes(record.question.role);
     const difficultyMatches =
       difficultyFilter === "all" || record.question.difficulty === difficultyFilter;
-    const createdAt = new Date(record.created_at).getTime();
+    const createdAt = parseApiDateTime(record.created_at).getTime();
     const dateMatches =
       dateFilter === "all"
         ? true
@@ -650,3 +668,4 @@ export default function HistoryPage() {
     </div>
   );
 }
+
