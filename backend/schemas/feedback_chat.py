@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 
 MessageRole = Literal["user", "assistant"]
@@ -23,6 +23,13 @@ class FeedbackChatThreadResponse(BaseModel):
 
 class CreateFeedbackChatMessageRequest(BaseModel):
     content: str = Field(min_length=1, max_length=1500)
+
+    @field_validator("content")
+    @classmethod
+    def validate_content_not_blank(cls, value: str) -> str:
+        if not value.strip():
+            raise ValueError("content must not be blank")
+        return value
 
 
 class CreateFeedbackChatMessageResponse(BaseModel):
