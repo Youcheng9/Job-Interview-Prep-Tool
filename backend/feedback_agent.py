@@ -171,7 +171,7 @@ AI_FEEDBACK_JSON_SCHEMA = {
 
 
 def feedback_enabled() -> bool:
-    return AI_FEEDBACK_ENABLED
+    return AI_COACH_CHAT_ENABLED
 
 
 def generate_agentic_feedback(
@@ -586,8 +586,8 @@ def generate_feedback_chat_reply(
     feedback: dict,
     history: list[dict[str, str]],
 ) -> str:
-    if not AI_FEEDBACK_ENABLED:
-        raise FeedbackAgentError("AI feedback is disabled")
+    if not AI_COACH_CHAT_ENABLED:
+        raise FeedbackAgentError("AI coach chat is disabled")
 
     prompt = build_feedback_chat_prompt(
         role=role,
@@ -602,7 +602,7 @@ def generate_feedback_chat_reply(
     reply = call_ollama_text(
         prompt,
         model=AI_CHAT_MODEL,
-        max_tokens=AI_FEEDBACK_CHAT_MAX_TOKENS,
+        max_tokens=AI_COACH_CHAT_MAX_TOKENS,
         num_ctx=AI_CHAT_NUM_CTX,
     )
     if not reply:
@@ -647,7 +647,7 @@ def build_feedback_chat_prompt(
 ) -> str:
     compact_question = _compact_text(question_prompt, limit=220)
     compact_answer = _compact_text(answer_text, limit=AI_CHAT_PROMPT_ANSWER_CHARS)
-    compact_ideal = _compact_text(rubric.get("ideal_answer", ""), limit=AI_FEEDBACK_PROMPT_IDEAL_CHARS)
+    compact_ideal = _compact_text(rubric.get("ideal_answer", ""), limit=AI_COACH_PROMPT_IDEAL_CHARS)
     keywords = rubric.get("keywords", [])[:8]
     missing_keywords = (feedback.get("missing_keywords", []) or [])[:5]
     ai_feedback = feedback.get("ai_feedback") or {}
