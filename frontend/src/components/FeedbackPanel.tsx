@@ -178,7 +178,7 @@ export function FeedbackPanel({
       {canSendChat && (
         <div
           style={{
-            marginTop: "20px",
+            marginTop: "28px",
             padding: "24px",
             background: "var(--surface2)",
             border: "1px solid var(--border)",
@@ -187,11 +187,14 @@ export function FeedbackPanel({
           <div
             style={{
               fontFamily: "var(--font-head)",
-              fontSize: scaledFont(12),
-              letterSpacing: "0.1em",
+              fontSize: scaledFont(16),
+              fontWeight: 600,
+              letterSpacing: "0.12em",
               textTransform: "uppercase",
               color: "var(--cyan)",
-              marginBottom: "12px",
+              marginBottom: "20px",
+              paddingBottom: "12px",
+              borderBottom: "1px solid var(--border)",
             }}
           >
             Coach Chat
