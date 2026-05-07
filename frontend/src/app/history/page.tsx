@@ -148,7 +148,20 @@ function HistoryQuestionItem({
         borderLeft: `2px solid ${roleColor}`,
       }}
     >
-      <div className="progress-question-toggle">
+      <button
+        type="button"
+        className="progress-question-toggle"
+        onClick={() => onOpen(record)}
+        aria-label={`View history details for ${record.question.text}`}
+        style={{
+          width: "100%",
+          background: "transparent",
+          border: "none",
+          padding: 0,
+          textAlign: "left",
+          cursor: "pointer",
+        }}
+      >
         <span className="progress-question-copy">
           <span className="progress-question-meta mono">
             {ROLE_LABELS[record.question.role]} - {record.question.difficulty} - {timestamp}
@@ -160,7 +173,7 @@ function HistoryQuestionItem({
           <ScorePill value={record.score.overall} />
           <span className="progress-expand-arrow" aria-hidden="true" />
         </span>
-      </div>
+      </button>
 
       <button
         onClick={() => onOpen(record)}
