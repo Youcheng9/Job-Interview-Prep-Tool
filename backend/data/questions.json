@@ -11,13 +11,13 @@
     "prompt": "Explain the difference between a process and a thread.?",
     "rubric": {
       "ideal_answer": "A strong answer explains that a process has its own address space and OS-managed resources, while threads are execution units inside a process that share memory and most resources. It should mention isolation, context-switch cost, and why threads are lighter weight.",
-      "keywords": [
+      "concepts": [
         "process",
         "thread",
         "address space",
         "shared memory"
       ],
-      "dimension_keywords": {
+      "dimension_concepts": {
         "technical_depth": [
           "address space",
           "shared memory"
@@ -50,13 +50,13 @@
     "prompt": "What is the difference between stack memory and heap memory?",
     "rubric": {
       "ideal_answer": "A strong answer explains that stack memory is generally used for function frames and local variables with automatic lifetime management, while heap memory is used for dynamic allocation and has more flexible lifetime. It should mention allocation speed, lifetime, and management tradeoffs.",
-      "keywords": [
+      "concepts": [
         "stack",
         "heap",
         "local variables",
         "dynamic allocation"
       ],
-      "dimension_keywords": {
+      "dimension_concepts": {
         "technical_depth": [
           "dynamic allocation",
           "lifetime"
@@ -89,13 +89,13 @@
     "prompt": "What problem does a hash table solve, and what happens when two keys map to the same bucket?",
     "rubric": {
       "ideal_answer": "A strong answer explains that hash tables provide fast average-case lookup, insert, and delete by hashing keys to buckets. It should describe collisions and mention common strategies such as chaining or open addressing, along with the effect on performance.",
-      "keywords": [
+      "concepts": [
         "hash table",
         "bucket",
         "collision",
         "chaining"
       ],
-      "dimension_keywords": {
+      "dimension_concepts": {
         "technical_depth": [
           "hash function",
           "collision handling"
@@ -128,13 +128,13 @@
     "prompt": "Describe what TCP does for a client-server connection that UDP does not.?",
     "rubric": {
       "ideal_answer": "A strong answer explains that TCP provides connection setup, ordering, retransmission, and flow or congestion control, while UDP is connectionless and does not guarantee delivery or order. It should tie those differences to reliability and latency tradeoffs.",
-      "keywords": [
+      "concepts": [
         "TCP",
         "UDP",
         "connection",
         "ordering"
       ],
-      "dimension_keywords": {
+      "dimension_concepts": {
         "technical_depth": [
           "flow control",
           "congestion control"
@@ -167,13 +167,13 @@
     "prompt": "What is a race condition and how can it happen in a multithreaded program?",
     "rubric": {
       "ideal_answer": "A strong answer explains that a race condition occurs when multiple threads access shared mutable state and the result depends on timing or interleaving. It should mention unsynchronized reads or writes and typical mitigations such as locks, atomics, or reducing shared state.",
-      "keywords": [
+      "concepts": [
         "race condition",
         "threads",
         "shared state",
         "interleaving"
       ],
-      "dimension_keywords": {
+      "dimension_concepts": {
         "technical_depth": [
           "shared mutable state",
           "synchronization"
@@ -206,13 +206,13 @@
     "prompt": "What is a database index, and why can it speed up reads while slowing down writes?",
     "rubric": {
       "ideal_answer": "A strong answer explains that an index is an auxiliary structure used to find rows more quickly without scanning the full table. It should mention that writes become more expensive because inserts, updates, and deletes must also maintain the index.",
-      "keywords": [
+      "concepts": [
         "index",
         "table scan",
         "read performance",
         "insert"
       ],
-      "dimension_keywords": {
+      "dimension_concepts": {
         "technical_depth": [
           "auxiliary structure",
           "table scan"
@@ -245,14 +245,14 @@
     "prompt": "What happens when you make an HTTP request from a browser to a server?",
     "rubric": {
       "ideal_answer": "A strong answer walks through DNS resolution, connection establishment, sending the HTTP request, server processing, and receiving the response. It should mention TLS if HTTPS is used and explain the request-response flow clearly.",
-      "keywords": [
+      "concepts": [
         "DNS",
         "TCP",
         "TLS",
         "HTTP request",
         "response"
       ],
-      "dimension_keywords": {
+      "dimension_concepts": {
         "technical_depth": [
           "DNS",
           "TLS"
@@ -285,13 +285,13 @@
     "prompt": "What is the difference between synchronous and asynchronous execution?",
     "rubric": {
       "ideal_answer": "A strong answer explains that synchronous execution waits for an operation to complete before continuing, while asynchronous execution lets other work proceed while waiting for completion. It should connect the difference to I/O latency, throughput, and responsiveness.",
-      "keywords": [
+      "concepts": [
         "synchronous",
         "asynchronous",
         "blocking",
         "I/O"
       ],
-      "dimension_keywords": {
+      "dimension_concepts": {
         "technical_depth": [
           "I/O latency",
           "blocking"
@@ -324,13 +324,13 @@
     "prompt": "What problem does virtual memory solve, and what role does the page table play?",
     "rubric": {
       "ideal_answer": "A strong answer explains that virtual memory gives each process the illusion of a large private address space while mapping addresses to physical memory on demand. It should explain that the page table stores the mapping from virtual pages to physical frames and supports protection and isolation.",
-      "keywords": [
+      "concepts": [
         "virtual memory",
         "page table",
         "virtual address",
         "physical memory"
       ],
-      "dimension_keywords": {
+      "dimension_concepts": {
         "technical_depth": [
           "address translation",
           "page table"
@@ -363,13 +363,13 @@
     "prompt": "When would you choose breadth-first search over depth-first search, and why?",
     "rubric": {
       "ideal_answer": "A strong answer explains that breadth-first search explores level by level and is useful when you need the shortest path in an unweighted graph, while depth-first search is often simpler for exhaustive traversal, backtracking, or topological-style reasoning. It should mention tradeoffs in memory and traversal behavior.",
-      "keywords": [
+      "concepts": [
         "BFS",
         "DFS",
         "shortest path",
         "graph"
       ],
-      "dimension_keywords": {
+      "dimension_concepts": {
         "technical_depth": [
           "unweighted shortest path",
           "memory tradeoff"
@@ -402,13 +402,13 @@
     "prompt": "What isolation problem are transactions trying to prevent, and what is a dirty read?",
     "rubric": {
       "ideal_answer": "A strong answer explains that transactions try to preserve consistency when operations happen concurrently or fail partway through. It should define a dirty read as reading uncommitted data from another transaction and mention that isolation levels trade off correctness and performance.",
-      "keywords": [
+      "concepts": [
         "transaction",
         "isolation",
         "dirty read",
         "uncommitted"
       ],
-      "dimension_keywords": {
+      "dimension_concepts": {
         "technical_depth": [
           "isolation level",
           "uncommitted data"
@@ -441,13 +441,13 @@
     "prompt": "Why is cache invalidation hard in a distributed system?",
     "rubric": {
       "ideal_answer": "A strong answer explains that cached data can become stale when the source of truth changes, and the challenge is coordinating updates or expiration across many machines without serving inconsistent data. It should mention propagation delay, eviction strategy, and correctness versus performance tradeoffs.",
-      "keywords": [
+      "concepts": [
         "cache invalidation",
         "stale data",
         "source of truth",
         "propagation"
       ],
-      "dimension_keywords": {
+      "dimension_concepts": {
         "technical_depth": [
           "staleness",
           "propagation delay"
@@ -480,13 +480,13 @@
     "prompt": "What does it mean for an API request to be idempotent, and why does that matter in production systems?",
     "rubric": {
       "ideal_answer": "A strong answer explains that an idempotent request can be repeated without changing the final outcome beyond the first successful application. It should connect idempotency to retries, network failures, and avoiding duplicate side effects such as duplicate payments or writes.",
-      "keywords": [
+      "concepts": [
         "idempotent",
         "retry",
         "duplicate side effects",
         "network failure"
       ],
-      "dimension_keywords": {
+      "dimension_concepts": {
         "technical_depth": [
           "retry safety",
           "side effects"
@@ -519,13 +519,13 @@
     "prompt": "What is overfitting and why does it hurt model performance on new data?",
     "rubric": {
       "ideal_answer": "A strong answer explains that overfitting happens when a model learns noise or overly specific patterns in the training data, reducing its ability to generalize to unseen data. It should connect the concept to train-versus-validation behavior.",
-      "keywords": [
+      "concepts": [
         "overfitting",
         "noise",
         "generalization",
         "training data"
       ],
-      "dimension_keywords": {
+      "dimension_concepts": {
         "technical_depth": [
           "generalization",
           "noise"
@@ -557,13 +557,13 @@
     "prompt": "What is the difference between precision and recall?",
     "rubric": {
       "ideal_answer": "A strong answer explains that precision measures how many predicted positives are actually positive, while recall measures how many actual positives were found. It should mention that the tradeoff depends on the cost of false positives versus false negatives.",
-      "keywords": [
+      "concepts": [
         "precision",
         "recall",
         "false positive",
         "false negative"
       ],
-      "dimension_keywords": {
+      "dimension_concepts": {
         "technical_depth": [
           "false positive",
           "false negative"
@@ -596,13 +596,13 @@
     "prompt": "What is the difference between correlation and causation?",
     "rubric": {
       "ideal_answer": "A strong answer explains that correlation means two variables move together, while causation means a change in one variable directly produces a change in the other. It should mention confounding variables and why observational patterns alone are not enough to prove causality.",
-      "keywords": [
+      "concepts": [
         "correlation",
         "causation",
         "confounding",
         "observational"
       ],
-      "dimension_keywords": {
+      "dimension_concepts": {
         "technical_depth": [
           "confounding",
           "observational data"
@@ -635,13 +635,13 @@
     "prompt": "What is feature leakage, and why can it make a model look better than it really is?",
     "rubric": {
       "ideal_answer": "A strong answer explains that feature leakage happens when information unavailable at prediction time leaks into training features, causing unrealistically strong validation performance. It should mention that the model appears better offline than it will be in production.",
-      "keywords": [
+      "concepts": [
         "feature leakage",
         "prediction time",
         "training feature",
         "validation"
       ],
-      "dimension_keywords": {
+      "dimension_concepts": {
         "technical_depth": [
           "target leakage",
           "offline evaluation"
@@ -674,13 +674,13 @@
     "prompt": "What assumptions does linear regression make?",
     "rubric": {
       "ideal_answer": "A strong answer mentions key assumptions such as linearity, independent observations, homoscedasticity, and low multicollinearity, and should note that residual behavior matters. It should also explain that violating assumptions can make estimates unreliable or hard to interpret.",
-      "keywords": [
+      "concepts": [
         "linearity",
         "independence",
         "homoscedasticity",
         "multicollinearity"
       ],
-      "dimension_keywords": {
+      "dimension_concepts": {
         "technical_depth": [
           "residual behavior",
           "homoscedasticity"
@@ -713,13 +713,13 @@
     "prompt": "What is the bias-variance tradeoff?",
     "rubric": {
       "ideal_answer": "A strong answer explains that high bias means a model is too simple and underfits, while high variance means it is too sensitive to training data and overfits. It should explain that model selection balances these two sources of error to improve generalization.",
-      "keywords": [
+      "concepts": [
         "bias",
         "variance",
         "underfitting",
         "overfitting"
       ],
-      "dimension_keywords": {
+      "dimension_concepts": {
         "technical_depth": [
           "underfitting",
           "overfitting"
@@ -752,13 +752,13 @@
     "prompt": "Why is randomization important in an A/B test?",
     "rubric": {
       "ideal_answer": "A strong answer explains that randomization helps make treatment and control groups comparable so that differences in outcomes are more likely to be caused by the change rather than pre-existing differences. It should mention bias reduction and confounding.",
-      "keywords": [
+      "concepts": [
         "randomization",
         "A/B test",
         "treatment",
         "control"
       ],
-      "dimension_keywords": {
+      "dimension_concepts": {
         "technical_depth": [
           "group comparability",
           "confounding"
@@ -791,13 +791,13 @@
     "prompt": "Why can accuracy be a misleading metric for an imbalanced classification problem?",
     "rubric": {
       "ideal_answer": "A strong answer explains that if one class is much more common, a model can achieve high accuracy by predicting the majority class most of the time while still failing on the minority class. It should mention alternative metrics such as precision, recall, F1, or PR-AUC depending on the task.",
-      "keywords": [
+      "concepts": [
         "accuracy",
         "imbalanced classes",
         "majority class",
         "precision"
       ],
-      "dimension_keywords": {
+      "dimension_concepts": {
         "technical_depth": [
           "class imbalance",
           "minority class"
@@ -830,13 +830,13 @@
     "prompt": "Why should you fit normalization or standardization parameters on the training split only?",
     "rubric": {
       "ideal_answer": "A strong answer explains that fitting preprocessing parameters on the full dataset leaks information from validation or test data into training, which biases evaluation. It should mention that transforms should be learned on training data and then applied unchanged to validation and test splits.",
-      "keywords": [
+      "concepts": [
         "normalization",
         "standardization",
         "training split",
         "data leakage"
       ],
-      "dimension_keywords": {
+      "dimension_concepts": {
         "technical_depth": [
           "data leakage",
           "fit versus transform"
@@ -867,13 +867,13 @@
     "prompt": "How do you prioritize when several things all look important?",
     "rubric": {
       "ideal_answer": "A strong answer explains a prioritization framework that considers user impact, urgency, strategic importance, effort, and dependencies. The answer should show that prioritization is about tradeoffs, not trying to do everything.",
-      "keywords": [
+      "concepts": [
         "user impact",
         "urgency",
         "effort",
         "dependencies"
       ],
-      "dimension_keywords": {
+      "dimension_concepts": {
         "technical_depth": [
           "tradeoff",
           "dependencies"
@@ -905,13 +905,13 @@
     "prompt": "What makes a product metric actionable instead of just interesting?",
     "rubric": {
       "ideal_answer": "A strong answer explains that an actionable metric should connect to a decision, reflect user or business value, move in response to real changes, and help teams know what to do next. The answer should distinguish insight from vanity.",
-      "keywords": [
+      "concepts": [
         "decision",
         "value",
         "signal",
         "behavior change"
       ],
-      "dimension_keywords": {
+      "dimension_concepts": {
         "technical_depth": [
           "signal",
           "vanity metric"
@@ -942,13 +942,13 @@
     "prompt": "How do you define success for a new feature before it launches?",
     "rubric": {
       "ideal_answer": "A strong answer covers the user problem, expected behavior change, key success metrics, guardrails, and the decision the team will make after launch. It should show that success is defined before building, not retrofitted later.",
-      "keywords": [
+      "concepts": [
         "user problem",
         "behavior change",
         "success metric",
         "guardrail"
       ],
-      "dimension_keywords": {
+      "dimension_concepts": {
         "technical_depth": [
           "guardrail",
           "behavior change"
@@ -980,13 +980,13 @@
     "prompt": "Before recommending a product decision, how do you gather enough context to be credible?",
     "rubric": {
       "ideal_answer": "A strong answer explains that credibility comes from understanding the user problem, product goals, constraints, existing data, stakeholder perspectives, and tradeoffs. The answer should show curiosity and disciplined preparation.",
-      "keywords": [
+      "concepts": [
         "user problem",
         "goals",
         "constraints",
         "data"
       ],
-      "dimension_keywords": {
+      "dimension_concepts": {
         "technical_depth": [
           "constraints",
           "tradeoffs"
@@ -1018,13 +1018,13 @@
     "prompt": "Tell me about a time you changed your mind after getting new information.?",
     "rubric": {
       "ideal_answer": "A strong answer describes the original belief, the new information that changed the picture, how the candidate adapted, and what they learned. It should show humility, reasoning, and a willingness to update course.",
-      "keywords": [
+      "concepts": [
         "original view",
         "new information",
         "adapted",
         "learning"
       ],
-      "dimension_keywords": {
+      "dimension_concepts": {
         "technical_depth": [
           "reasoning",
           "decision update"
@@ -1056,13 +1056,13 @@
     "prompt": "Describe a time you received difficult feedback and what you did next.?",
     "rubric": {
       "ideal_answer": "A strong answer explains the feedback clearly, shows the candidate listened without defensiveness, acted on it in a concrete way, and reflects on the improvement that followed. It should show coachability and maturity.",
-      "keywords": [
+      "concepts": [
         "feedback",
         "listened",
         "action",
         "improvement"
       ],
-      "dimension_keywords": {
+      "dimension_concepts": {
         "technical_depth": [
           "action taken",
           "behavior change"
@@ -1094,13 +1094,13 @@
     "prompt": "Tell me about a time you had to build trust with a teammate quickly.?",
     "rubric": {
       "ideal_answer": "A strong answer describes the context, why trust mattered, what concrete actions the candidate took, and how the relationship improved. It should show reliability, empathy, and follow-through.",
-      "keywords": [
+      "concepts": [
         "trust",
         "context",
         "actions",
         "reliability"
       ],
-      "dimension_keywords": {
+      "dimension_concepts": {
         "technical_depth": [
           "actions taken",
           "reliability"
@@ -1132,13 +1132,13 @@
     "prompt": "Describe a time you had to bring structure to an ambiguous situation.?",
     "rubric": {
       "ideal_answer": "A strong answer explains what was unclear, how the candidate created a plan or framework, how they aligned others, and what outcome followed. The answer should demonstrate ownership and structured thinking under uncertainty.",
-      "keywords": [
+      "concepts": [
         "ambiguity",
         "plan",
         "framework",
         "alignment"
       ],
-      "dimension_keywords": {
+      "dimension_concepts": {
         "technical_depth": [
           "structured thinking",
           "alignment"
@@ -1170,12 +1170,12 @@
     "prompt": "How do you handle the 'curse of dimensionality' when dealing with high-dimensional data?",
     "rubric": {
       "ideal_answer": "A concise explanation of techniques to mitigate the curse of dimensionality, such as feature selection or dimensionality reduction.",
-      "keywords": [
+      "concepts": [
         "dimensionality",
         "reduction",
         "feature"
       ],
-      "dimension_keywords": {
+      "dimension_concepts": {
         "technical_depth": [
           "manifold learning",
           "autoencoders"
@@ -1206,12 +1206,12 @@
     "prompt": "When evaluating model performance on a regression task, what's the tradeoff between minimizing mean squared error and maximizing R-squared?",
     "rubric": {
       "ideal_answer": "A concise explanation of the tradeoff between MSE and R-squared, including considerations for overfitting and underfitting.",
-      "keywords": [
+      "concepts": [
         "regression",
         "mean squared error",
         "R-squared"
       ],
-      "dimension_keywords": {
+      "dimension_concepts": {
         "technical_depth": [
           "bias-variance tradeoff",
           "regularization techniques"
@@ -1242,12 +1242,12 @@
     "prompt": "How do you handle missing values in a dataset without losing valuable information?",
     "rubric": {
       "ideal_answer": "Carefully assess the nature of the missing data and consider imputation techniques, such as mean or median imputation, or more advanced methods like multiple imputation by chained equations. Consider also whether there are patterns in the missing data that could indicate an underlying issue with data collection.",
-      "keywords": [
+      "concepts": [
         "imputation",
         "missing values",
         "data preprocessing"
       ],
-      "dimension_keywords": {
+      "dimension_concepts": {
         "technical_depth": [
           "regression",
           "machine learning algorithms"
@@ -1275,12 +1275,12 @@
     "prompt": "Given two sets of data with identical distributions, what's the key difference between model calibration and bias?",
     "rubric": {
       "ideal_answer": "Model calibration refers to how well a model's predictions align with the true probabilities, while bias refers to the systematic error in expected value. Calibration is about ensuring the model's confidence levels reflect reality.",
-      "keywords": [
+      "concepts": [
         "calibration",
         "bias",
         "model evaluation"
       ],
-      "dimension_keywords": {
+      "dimension_concepts": {
         "technical_depth": [
           "probability distributions",
           "expected values"
@@ -1311,12 +1311,12 @@
     "prompt": "How do you handle feature correlations when selecting a subset of predictors for a regression task?",
     "rubric": {
       "ideal_answer": "A strong answer would discuss the importance of correlation coefficient, feature selection techniques such as mutual information or recursive feature elimination, and potential issues with multicollinearity.",
-      "keywords": [
+      "concepts": [
         "correlation",
         "feature selection",
         "multicollinearity"
       ],
-      "dimension_keywords": {
+      "dimension_concepts": {
         "technical_depth": [
           "correlation matrix",
           "mutual information"
@@ -1348,12 +1348,12 @@
     "prompt": "How can you detect overfitting in a model trained on a small dataset with many features?",
     "rubric": {
       "ideal_answer": "Overfitting is detected by monitoring the model's performance on unseen data, such as a validation set. The model is likely overfitting if its performance on the training set is significantly better than its performance on the validation set.",
-      "keywords": [
+      "concepts": [
         "overfitting",
         "validation set",
         "model performance"
       ],
-      "dimension_keywords": {
+      "dimension_concepts": {
         "technical_depth": [
           "regularization techniques",
           "early stopping"
@@ -1384,12 +1384,12 @@
     "prompt": "What's the relationship between precision and recall, especially in imbalanced datasets?",
     "rubric": {
       "ideal_answer": "Precision is the ratio of true positives to all predicted positive instances. Recall measures the proportion of actual positives correctly identified. They're not interchangeable metrics, especially when dealing with class imbalance.",
-      "keywords": [
+      "concepts": [
         "precision",
         "recall",
         "class imbalance"
       ],
-      "dimension_keywords": {
+      "dimension_concepts": {
         "technical_depth": [
           "calibration curve",
           "roc curve"
@@ -1420,12 +1420,12 @@
     "prompt": "How do you handle feature leakage when using historical data for forecasting?",
     "rubric": {
       "ideal_answer": "Feature selection and engineering techniques are used to prevent feature leakage. This involves identifying the relevant features that impact the target variable and ensuring they are not correlated with future events.",
-      "keywords": [
+      "concepts": [
         "feature_leakage",
         "forecasting",
         "historical_data"
       ],
-      "dimension_keywords": {
+      "dimension_concepts": {
         "technical_depth": [
           "regression",
           "feature_selection"
@@ -1456,12 +1456,12 @@
     "prompt": "Can a model's accuracy on the training set be a good indicator of its performance on unseen data?",
     "rubric": {
       "ideal_answer": "A strong answer would discuss the limitations of using training set accuracy as an evaluation metric, potentially referencing issues like overfitting and feature leakage. It may also mention the importance of using techniques like cross-validation or holdout sets for a more accurate assessment.",
-      "keywords": [
+      "concepts": [
         "overfitting",
         "feature_leakage",
         "cross_validation"
       ],
-      "dimension_keywords": {
+      "dimension_concepts": {
         "technical_depth": [
           "model_evaluation",
           "evaluation_metrics"
@@ -1492,12 +1492,12 @@
     "prompt": "How do you handle overfitting when working with high-dimensional data?",
     "rubric": {
       "ideal_answer": "Regularization techniques can be used to prevent overfitting in high-dimensional data. Techniques include L1 and L2 regularization, early stopping, and dropout.",
-      "keywords": [
+      "concepts": [
         "regularization",
         "overfitting",
         "high-dimensional data"
       ],
-      "dimension_keywords": {
+      "dimension_concepts": {
         "technical_depth": [
           "explain how regularization works",
           "provide examples of regularization techniques"
@@ -1528,12 +1528,12 @@
     "prompt": "Design an A/B test to measure the impact of a new feature on user engagement, given that it's difficult to isolate the effect due to concurrent product changes.?",
     "rubric": {
       "ideal_answer": "The candidate would describe a well-defined experiment with clear success metrics, control group, and treatment group. They might mention using regression analysis or matching to account for confounding variables.",
-      "keywords": [
+      "concepts": [
         "A/B testing",
         "causality",
         "confounding variables"
       ],
-      "dimension_keywords": {
+      "dimension_concepts": {
         "technical_depth": [
           "regression analysis",
           "matching"
@@ -1564,12 +1564,12 @@
     "prompt": "What are three key performance indicators you'd use to measure the success of a new feature that increases user retention?",
     "rubric": {
       "ideal_answer": "A concise description of three relevant metrics, including at least one user-centric metric and one business outcome metric.",
-      "keywords": [
+      "concepts": [
         "retention",
         "engagement",
         "revenue"
       ],
-      "dimension_keywords": {
+      "dimension_concepts": {
         "technical_depth": [
           "metric selection",
           "calculation methods"
@@ -1599,12 +1599,12 @@
     "prompt": "How do you define success for a product with multiple conflicting goals?",
     "rubric": {
       "ideal_answer": "A clear explanation of how to balance competing objectives and measure progress towards them.",
-      "keywords": [
+      "concepts": [
         "goal alignment",
         "conflicting priorities",
         "key performance indicators"
       ],
-      "dimension_keywords": {
+      "dimension_concepts": {
         "technical_depth": [
           "tradeoff analysis",
           "metric selection"
@@ -1635,12 +1635,12 @@
     "prompt": "What are the essential metrics to track when launching a new feature that affects both user acquisition and retention?",
     "rubric": {
       "ideal_answer": "A concise explanation of key performance indicators for launch success, considering multiple goals.",
-      "keywords": [
+      "concepts": [
         "metrics",
         "launch",
         "goals"
       ],
-      "dimension_keywords": {
+      "dimension_concepts": {
         "technical_depth": [
           "metric selection",
           "data analysis"
@@ -1671,12 +1671,12 @@
     "prompt": "What are the key factors you'd consider when evaluating whether to invest in an MVP for a new product feature?",
     "rubric": {
       "ideal_answer": "The candidate would discuss considering market demand, competitive landscape, and user needs when deciding on MVP investment. They might also mention the importance of defining clear goals and metrics for success.",
-      "keywords": [
+      "concepts": [
         "market demand",
         "competitive landscape",
         "user needs"
       ],
-      "dimension_keywords": {
+      "dimension_concepts": {
         "technical_depth": [
           "tradeoffs",
           "resource allocation"
@@ -1707,12 +1707,12 @@
     "prompt": "What metrics would you track to measure the adoption of a new feature?",
     "rubric": {
       "ideal_answer": "A concise explanation of relevant product and user metrics, including any potential tradeoffs in measurement.",
-      "keywords": [
+      "concepts": [
         "adoption rate",
         "user engagement",
         "feature retention"
       ],
-      "dimension_keywords": {
+      "dimension_concepts": {
         "technical_depth": [
           "metric definition",
           "data source"
@@ -1743,12 +1743,12 @@
     "prompt": "How do you prioritize features for a product launch when resources are limited?",
     "rubric": {
       "ideal_answer": "A strong answer would discuss how to balance competing priorities, consider user needs, and allocate resources effectively. It might mention metrics or goals that inform the prioritization process.",
-      "keywords": [
+      "concepts": [
         "prioritization",
         "resource allocation",
         "user needs"
       ],
-      "dimension_keywords": {
+      "dimension_concepts": {
         "technical_depth": [
           "tradeoff analysis",
           "cost-benefit assessment"
@@ -1779,12 +1779,12 @@
     "prompt": "What are the key performance indicators to measure the impact of a newly introduced feature on user retention?",
     "rubric": {
       "ideal_answer": "A strong answer would discuss specific metrics such as user engagement, retention rates, and feature adoption, highlighting how these metrics inform product decisions. The candidate should also mention potential trade-offs between short-term gains and long-term sustainability.",
-      "keywords": [
+      "concepts": [
         "user_retention",
         "key_performance_indicators",
         "feature_adoption"
       ],
-      "dimension_keywords": {
+      "dimension_concepts": {
         "technical_depth": [
           "metric_selection",
           "data_driven_decision_making"
@@ -1815,12 +1815,12 @@
     "prompt": "How would you structure an experiment to validate the effectiveness of a new in-app recommendation system?",
     "rubric": {
       "ideal_answer": "A strong answer outlines the key research questions, identifies relevant metrics for evaluation, and describes how the experiment design addresses potential confounding variables. The candidate should demonstrate an understanding of experimental methodology and its application to product development.",
-      "keywords": [
+      "concepts": [
         "experimentation",
         "product validation",
         "metrics"
       ],
-      "dimension_keywords": {
+      "dimension_concepts": {
         "technical_depth": [
           "experimental design",
           "confounding variables"
@@ -1851,12 +1851,12 @@
     "prompt": "What are the essential metrics to track when launching a freemium pricing model, and how would you use them to inform future product decisions?",
     "rubric": {
       "ideal_answer": "A clear explanation of the key performance indicators for measuring adoption and revenue growth, including retention rates and average revenue per user. The candidate should demonstrate an understanding of how these metrics can be used to inform future product development.",
-      "keywords": [
+      "concepts": [
         "freemium pricing",
         "key performance indicators",
         "product development"
       ],
-      "dimension_keywords": {
+      "dimension_concepts": {
         "technical_depth": [
           "adoption rates",
           "retention rates"
@@ -1884,12 +1884,12 @@
     "prompt": "How do you determine the optimal price point for a freemium tier when introducing a new pricing model?",
     "rubric": {
       "ideal_answer": "A detailed explanation of the factors considered in setting the price point, including market research and customer feedback.",
-      "keywords": [
+      "concepts": [
         "price elasticity",
         "customer segmentation",
         "revenue growth"
       ],
-      "dimension_keywords": {
+      "dimension_concepts": {
         "technical_depth": [
           "cost-benefit analysis",
           "market sizing"
@@ -1920,12 +1920,12 @@
     "prompt": "What are the key drivers of user engagement for a newly launched feature, and how would you measure their impact?",
     "rubric": {
       "ideal_answer": "A strong answer will discuss relevant metrics such as time spent in-app, session frequency, and retention rates. It should also explain how to track these metrics and use them to inform future product decisions.",
-      "keywords": [
+      "concepts": [
         "engagement",
         "metrics",
         "retention"
       ],
-      "dimension_keywords": {
+      "dimension_concepts": {
         "technical_depth": [
           "user behavior analysis",
           "A/B testing"
@@ -1956,13 +1956,13 @@
     "prompt": "How do you balance short-term gains with long-term product vision when faced with a tight feature launch deadline?",
     "rubric": {
       "ideal_answer": "A strong answer would discuss the importance of prioritizing features that drive immediate user value while also considering the impact on future roadmap and customer needs. The candidate should demonstrate an understanding of how to weigh short-term trade-offs against long-term goals, potentially referencing metrics or experimentation approaches.",
-      "keywords": [
+      "concepts": [
         "feature launch",
         "short-term gains",
         "long-term vision",
         "trade-offs"
       ],
-      "dimension_keywords": {
+      "dimension_concepts": {
         "technical_depth": [
           "prioritization frameworks",
           "roadmap planning"
@@ -1993,12 +1993,12 @@
     "prompt": "A new in-app notification system is being considered to improve user engagement. What are the key metrics you would track to measure its impact, and how would you use them to inform future product decisions?",
     "rubric": {
       "ideal_answer": "The candidate outlines a clear set of metrics that measure user engagement, such as click-through rates and notification open rates. They explain how these metrics will be used to inform future product decisions, such as optimizing the notification content or frequency.",
-      "keywords": [
+      "concepts": [
         "user engagement",
         "metrics",
         "product decision"
       ],
-      "dimension_keywords": {
+      "dimension_concepts": {
         "technical_depth": [
           "metric selection",
           "data analysis"
@@ -2029,13 +2029,13 @@
     "prompt": "When launching a new feature with limited resources, what are the essential trade-offs between user acquisition and retention?",
     "rubric": {
       "ideal_answer": "A strong answer would discuss the importance of prioritizing features based on business goals, weighing the pros and cons of each option, and considering metrics such as user adoption rate and retention time. The candidate should also mention how they would measure the impact of their decision and adjust course accordingly.",
-      "keywords": [
+      "concepts": [
         "trade-off",
         "user acquisition",
         "retention",
         "business goals"
       ],
-      "dimension_keywords": {
+      "dimension_concepts": {
         "technical_depth": [
           "feature prioritization",
           "resource allocation"
@@ -2066,12 +2066,12 @@
     "prompt": "When working on a high-priority project, how do you handle disagreements with your team about the best approach?",
     "rubric": {
       "ideal_answer": "A strong answer will describe a specific situation where the candidate had to navigate conflicting opinions and find a resolution that met the project's needs.",
-      "keywords": [
+      "concepts": [
         "conflict resolution",
         "teamwork",
         "prioritization"
       ],
-      "dimension_keywords": {
+      "dimension_concepts": {
         "technical_depth": [
           "approach justification",
           "tradeoff explanation"
@@ -2102,12 +2102,12 @@
     "prompt": "Describe a situation where you had to adjust your plan due to unexpected technical constraints?",
     "rubric": {
       "ideal_answer": "A strong answer should summarize the candidate's experience in handling unexpected technical challenges, including their thought process and actions taken.",
-      "keywords": [
+      "concepts": [
         "technical constraints",
         "adjusting plans",
         "communication"
       ],
-      "dimension_keywords": {
+      "dimension_concepts": {
         "technical_depth": [
           "identifying root causes",
           "trade-off analysis"
@@ -2138,12 +2138,12 @@
     "prompt": "When faced with conflicting priorities from stakeholders, how do you prioritize tasks and communicate the trade-offs to ensure project goals are met?",
     "rubric": {
       "ideal_answer": "A strong answer would describe a specific situation where the candidate had to balance competing demands and effectively communicate their decisions to stakeholders.",
-      "keywords": [
+      "concepts": [
         "prioritization",
         "stakeholder management",
         "communication"
       ],
-      "dimension_keywords": {
+      "dimension_concepts": {
         "technical_depth": [
           "trade-offs",
           "risk assessment"
@@ -2174,12 +2174,12 @@
     "prompt": "You're leading a small team on a tight deadline, but one member is pushing for an approach you strongly disagree with. How do you navigate the situation?",
     "rubric": {
       "ideal_answer": "A strong answer would describe a specific instance where the candidate had to manage conflict and prioritize project goals while maintaining good relationships.",
-      "keywords": [
+      "concepts": [
         "conflict resolution",
         "prioritization",
         "team management"
       ],
-      "dimension_keywords": {
+      "dimension_concepts": {
         "technical_depth": [
           "approach justification",
           "trade-off analysis"
@@ -2210,12 +2210,12 @@
     "prompt": "How do you handle conflicting priorities from stakeholders when working on a high-priority project?",
     "rubric": {
       "ideal_answer": "A strong answer should describe a specific situation where the candidate had to navigate competing demands, communicate effectively with stakeholders, and prioritize tasks accordingly.",
-      "keywords": [
+      "concepts": [
         "conflicting priorities",
         "stakeholder management",
         "prioritization"
       ],
-      "dimension_keywords": {
+      "dimension_concepts": {
         "technical_depth": [
           "trade-offs",
           "communication strategy"
@@ -2246,12 +2246,12 @@
     "prompt": "You're part of a team implementing a new feature, but the design is not meeting stakeholder expectations. How do you adjust the approach to meet their needs without compromising the project timeline?",
     "rubric": {
       "ideal_answer": "A strong answer would describe a specific situation where the candidate had to adapt to changing requirements and communicate effectively with stakeholders.",
-      "keywords": [
+      "concepts": [
         "stakeholder management",
         "communication",
         "adaptability"
       ],
-      "dimension_keywords": {
+      "dimension_concepts": {
         "technical_depth": [
           "requirements gathering",
           "iterative design"
@@ -2282,12 +2282,12 @@
     "prompt": "Describe a situation where you had to influence team members who were not aligned with your technical approach, without having direct authority over them.?",
     "rubric": {
       "ideal_answer": "A detailed example of influencing team members without direct authority, including the context, actions taken, and outcomes.",
-      "keywords": [
+      "concepts": [
         "influence",
         "technical leadership",
         "team alignment"
       ],
-      "dimension_keywords": {
+      "dimension_concepts": {
         "technical_depth": [
           "approach",
           "tradeoffs"
@@ -2318,12 +2318,12 @@
     "prompt": "How do you handle a situation where a team member is pushing for an approach that may compromise the project's technical integrity?",
     "rubric": {
       "ideal_answer": "A strong answer would describe a specific instance where the candidate had to navigate conflicting opinions, and how they ensured the project's success while maintaining their professional relationships.",
-      "keywords": [
+      "concepts": [
         "conflict resolution",
         "team management",
         "technical decisions"
       ],
-      "dimension_keywords": {
+      "dimension_concepts": {
         "technical_depth": [
           "project scope",
           "team dynamics"
@@ -2354,12 +2354,12 @@
     "prompt": "A team member on your project has proposed a solution that you strongly disagree with. How do you handle the situation?",
     "rubric": {
       "ideal_answer": "A strong answer would describe a specific instance where you had to navigate conflicting opinions, and how you ensured the project's success while maintaining a positive team dynamic.",
-      "keywords": [
+      "concepts": [
         "conflict",
         "teamwork",
         "communication"
       ],
-      "dimension_keywords": {
+      "dimension_concepts": {
         "technical_depth": [
           "approach",
           "solution"
@@ -2389,12 +2389,12 @@
     "prompt": "Describe a time when you had to adjust your approach due to unexpected technical constraints, while still meeting project deadlines.?",
     "rubric": {
       "ideal_answer": "A strong answer would describe the specific situation, the adjustments made, and the outcome. It should demonstrate an understanding of how to handle unexpected challenges in a technical context.",
-      "keywords": [
+      "concepts": [
         "technical constraints",
         "project deadlines",
         "adjustment"
       ],
-      "dimension_keywords": {
+      "dimension_concepts": {
         "technical_depth": [
           "trade-offs",
           "priority"
@@ -2425,12 +2425,12 @@
     "prompt": "How do you handle disagreements with a colleague over technical direction?",
     "rubric": {
       "ideal_answer": "A strong answer would describe a specific situation where the candidate had to navigate a disagreement, including their approach to resolving it and any outcomes.",
-      "keywords": [
+      "concepts": [
         "disagreement",
         "technical direction",
         "communication"
       ],
-      "dimension_keywords": {
+      "dimension_concepts": {
         "technical_depth": [
           "trade-offs",
           "alternatives"
@@ -2461,12 +2461,12 @@
     "prompt": "When faced with conflicting priorities from stakeholders, how do you ensure that the most critical tasks are completed on time?",
     "rubric": {
       "ideal_answer": "A strong answer would describe a specific situation where the candidate had to manage competing demands and prioritize tasks effectively. The candidate should highlight their communication skills, ability to negotiate with stakeholders, and any trade-offs they made to meet deadlines.",
-      "keywords": [
+      "concepts": [
         "conflicting priorities",
         "stakeholder management",
         "prioritization"
       ],
-      "dimension_keywords": {
+      "dimension_concepts": {
         "technical_depth": [
           "trade-off analysis",
           "communication strategy"
@@ -2497,12 +2497,12 @@
     "prompt": "Describe a situation where you had to influence a team's technical direction without having direct authority over the project.?",
     "rubric": {
       "ideal_answer": "A strong answer would summarize a specific instance of influencing a team's technical direction, highlighting the candidate's communication and problem-solving skills. The ideal answer should demonstrate how the candidate addressed potential resistance or disagreements within the team, and ultimately achieved their goals.",
-      "keywords": [
+      "concepts": [
         "influence",
         "team leadership",
         "technical direction"
       ],
-      "dimension_keywords": {
+      "dimension_concepts": {
         "technical_depth": [
           "trade-offs",
           "communication strategy"
@@ -2533,12 +2533,12 @@
     "prompt": "Can you describe an instance where you had to adjust your approach due to unforeseen technical constraints?",
     "rubric": {
       "ideal_answer": "A concise example of adapting to unexpected technical obstacles, highlighting the candidate's problem-solving skills and ability to pivot under pressure.",
-      "keywords": [
+      "concepts": [
         "technical constraints",
         "adaptability",
         "problem-solving"
       ],
-      "dimension_keywords": {
+      "dimension_concepts": {
         "technical_depth": [
           "trade-offs",
           "mitigation strategies"
@@ -2569,12 +2569,12 @@
     "prompt": "A team member is struggling with a complex task, and you need to help them prioritize their work without taking over the project.?",
     "rubric": {
       "ideal_answer": "The candidate describes a specific situation where they helped a teammate prioritize tasks, focusing on key performance indicators and delegating responsibilities as needed. They highlight effective communication strategies used to ensure the team member felt supported while maintaining ownership of the task.",
-      "keywords": [
+      "concepts": [
         "prioritization",
         "communication",
         "ownership"
       ],
-      "dimension_keywords": {
+      "dimension_concepts": {
         "technical_depth": [
           "task delegation",
           "resource allocation"
@@ -2605,12 +2605,12 @@
     "prompt": "How do you handle a situation where your team's technical direction is at odds with that of another team, and stakeholders are pushing for a compromise?",
     "rubric": {
       "ideal_answer": "A strong example of how they navigated the conflict, prioritized stakeholder needs, and communicated effectively to find a solution.",
-      "keywords": [
+      "concepts": [
         "conflict resolution",
         "stakeholder management",
         "communication"
       ],
-      "dimension_keywords": {
+      "dimension_concepts": {
         "technical_depth": [
           "trade-offs",
           "compromise"
@@ -2641,12 +2641,12 @@
     "prompt": "When working on a high-priority project, you realize that the initial technical approach won't meet stakeholder expectations. How do you adjust your plan to ensure timely delivery?",
     "rubric": {
       "ideal_answer": "A clear description of how they adjusted their plan and prioritized tasks, with consideration for stakeholder expectations and team capabilities.",
-      "keywords": [
+      "concepts": [
         "adjusting plan",
         "prioritization",
         "stakeholder expectations"
       ],
-      "dimension_keywords": {
+      "dimension_concepts": {
         "technical_depth": [
           "approach adjustment",
           "priority rebalancing"
@@ -2677,12 +2677,12 @@
     "prompt": "You're leading a team working on a tight deadline, but the technical lead is pushing for an approach that you think will compromise quality. How do you handle this situation?",
     "rubric": {
       "ideal_answer": "A strong answer would describe a specific instance where the candidate had to navigate conflicting priorities and communicate their concerns effectively to the team.",
-      "keywords": [
+      "concepts": [
         "conflicting priorities",
         "technical lead",
         "quality control"
       ],
-      "dimension_keywords": {
+      "dimension_concepts": {
         "technical_depth": [
           "scope creep",
           "trade-offs"
@@ -2713,12 +2713,12 @@
     "prompt": "Describe a time when you had to navigate conflicting priorities from multiple stakeholders with incomplete information.?",
     "rubric": {
       "ideal_answer": "A strong answer should describe a situation where the candidate had to weigh competing demands, communicate effectively with stakeholders, and make informed decisions under uncertainty. The candidate should demonstrate their ability to prioritize tasks, manage stakeholder expectations, and adapt to changing circumstances.",
-      "keywords": [
+      "concepts": [
         "conflicting priorities",
         "incomplete information",
         "stakeholder management"
       ],
-      "dimension_keywords": {
+      "dimension_concepts": {
         "technical_depth": [
           "tradeoff analysis",
           "communication strategy"
@@ -2749,12 +2749,12 @@
     "prompt": "Can you describe an instance where you had to recover from a technical mistake that impacted the team's ability to meet a deadline?",
     "rubric": {
       "ideal_answer": "A strong answer would describe a specific situation, including the mistakes made, the steps taken to rectify the issue, and any lessons learned.",
-      "keywords": [
+      "concepts": [
         "technical recovery",
         "mistake management",
         "team impact"
       ],
-      "dimension_keywords": {
+      "dimension_concepts": {
         "technical_depth": [
           "mitigation strategies",
           "root cause analysis"
@@ -2775,3 +2775,4 @@
     }
   }
 ]
+

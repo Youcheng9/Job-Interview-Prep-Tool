@@ -45,7 +45,7 @@ backend/
 │   ├── scoring.py           # Pydantic request/response types for scoring
 │   └── history.py           # Pydantic request/response types for history
 ├── ml/
-│   └── scorer.py            # compute_scores(): embeddings + keywords scoring logic
+│   └── scorer.py            # compute_scores(): semantic similarity + concept coverage scoring logic
 ├── migrations/              # Alembic migration scripts
 ├── data/
 │   └── questions.json       # Seed data for initial questions + rubric
@@ -209,8 +209,8 @@ Example `backend/data/questions.json` entry:
   "prompt": "Explain the difference between a process and a thread.",
   "rubric": {
     "ideal_answer": "A process has its own address space and resources; threads share memory within a process and are lighter weight.",
-    "keywords": ["address space", "shared memory", "context switch", "lightweight"],
-    "dimension_keywords": {
+    "concepts": ["address space", "shared memory", "context switch", "lightweight"],
+    "dimension_concepts": {
       "technical_depth": ["address space", "context switch"],
       "clarity": ["difference", "example"],
       "completeness": ["address space", "shared memory", "context switch"],
@@ -223,11 +223,11 @@ Example `backend/data/questions.json` entry:
 ### Minimum required keys
 
 - `ideal_answer` (string)  
-- `keywords` (list of strings)  
+- `concepts` (list of strings)  
 
 ### Optional
 
-- `dimension_keywords` (dict of lists)  
+- `dimension_concepts` (dict of lists)  
 
 ---
 
@@ -291,10 +291,10 @@ compute_scores(answer_text, rubric)
 - Computes cosine similarity  
 - Mapped into a 0–1 range  
 
-#### 2. Keyword coverage
+#### 2. Concept coverage
 
-- Measures what fraction of `rubric["keywords"]` appear in the answer  
-- Simple tokenization (lowercase word boundaries)  
+- Measures semantic coverage of `rubric["concepts"]`
+- Exact wording is not required; paraphrases can still receive credit
 
 ### Outputs
 
@@ -304,7 +304,7 @@ Numeric scoring remains deterministic, but written coaching feedback is generate
 
 Current flow:
 
-1. `compute_scores()` creates numeric scores and keyword-gap feedback.
+1. `compute_scores()` creates numeric scores and concept-gap feedback.
 2. `backend/feedback_agent.py` sends the question, answer, rubric, and score breakdown to Ollama.
 3. Ollama returns structured coaching feedback:
    - summary
@@ -326,8 +326,8 @@ If Ollama is unavailable, scoring still works and the request does not fail. Onl
 - `feedback` dict:
   - strengths  
   - weaknesses  
-  - missing_keywords  
-  - notes (similarity & keyword coverage)
+  - missing_concepts  
+  - notes (similarity & concept coverage)
 
 ---
 
@@ -409,7 +409,7 @@ alembic current
 - sentence-transformers may download model on first run  
 - Confirm dependencies installed  
 - Check server logs for traceback  
-- Confirm rubric contains `ideal_answer` and `keywords`  
+- Confirm rubric contains `ideal_answer` and `concepts`  
 
 ### Seed questions not showing
 

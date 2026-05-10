@@ -93,6 +93,7 @@ interface ApiSubmitAnswerResponse {
   feedback?: {
     strengths?: string[];
     weaknesses?: string[];
+    missing_concepts?: string[];
     missing_keywords?: string[];
     instant_feedback?: {
       summary?: string;
@@ -103,6 +104,7 @@ interface ApiSubmitAnswerResponse {
     };
     notes?: {
       similarity_raw?: number;
+      concept_coverage?: number;
       keyword_coverage?: number;
       ideal_snippet?: string | null;
       confidence?: "low" | "medium" | "high";
@@ -218,6 +220,7 @@ function normalizeInstantFeedback(
 }
 
 function normalizeScore(payload: ApiSubmitAnswerResponse): ScoreResult {
+  const missingConcepts = payload.feedback?.missing_concepts ?? payload.feedback?.missing_keywords ?? [];
   return {
     answerId: payload.answer_id,
     overall: payload.overall,
@@ -225,7 +228,7 @@ function normalizeScore(payload: ApiSubmitAnswerResponse): ScoreResult {
     clarity: payload.scores.clarity ?? payload.overall,
     completeness: payload.scores.completeness ?? payload.overall,
     structure: payload.scores.structure ?? payload.overall,
-    missing_concepts: payload.feedback?.missing_keywords ?? [],
+    missing_concepts: missingConcepts,
     strengths: payload.feedback?.strengths ?? [],
     weaknesses: payload.feedback?.weaknesses ?? [],
     feedback: formatFeedback(payload.feedback),
@@ -405,7 +408,7 @@ export async function getHistory(): Promise<AnswerRecord[]> {
         clarity: item.scores.clarity ?? item.overall,
         completeness: item.scores.completeness ?? item.overall,
         structure: item.scores.structure ?? item.overall,
-        missing_concepts: item.feedback?.missing_keywords ?? [],
+        missing_concepts: item.feedback?.missing_concepts ?? item.feedback?.missing_keywords ?? [],
         strengths: item.feedback?.strengths ?? [],
         weaknesses: item.feedback?.weaknesses ?? [],
         feedback: formatFeedback(item.feedback),

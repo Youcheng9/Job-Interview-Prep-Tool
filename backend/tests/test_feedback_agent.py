@@ -9,7 +9,7 @@ class FeedbackAgentFallbackTests(unittest.TestCase):
     def test_rewrite_prompt_returns_rewrite_guidance(self) -> None:
         reply = build_fallback_chat_reply(
             user_message="Rewrite my answer more strongly.",
-            feedback={"missing_keywords": ["isolation", "overhead"]},
+            feedback={"missing_concepts": ["isolation", "overhead"]},
         )
         self.assertIn("explicitly mention isolation, overhead", reply)
 

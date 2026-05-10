@@ -31,6 +31,7 @@ class FeedbackChatServiceTests(unittest.TestCase):
                 feedback={
                     "strengths": ["You identified the main distinction."],
                     "weaknesses": ["Mention isolation and overhead more directly."],
+                    "missing_concepts": ["isolation", "overhead"],
                     "missing_keywords": ["isolation", "overhead"],
                     "instant_feedback": {
                         "summary": "Good start, but still needs work.",

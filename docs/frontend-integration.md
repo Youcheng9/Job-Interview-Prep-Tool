@@ -289,12 +289,12 @@ Response:
       "Answer semantically aligns with the ideal response."
     ],
     "weaknesses": [],
-    "missing_keywords": [
+    "missing_concepts": [
       "context switch"
     ],
     "notes": {
       "similarity_raw": 0.79,
-      "keyword_coverage": 0.75,
+      "concept_coverage": 0.75,
       "ideal_snippet": "A process has its own address space..."
     }
   }

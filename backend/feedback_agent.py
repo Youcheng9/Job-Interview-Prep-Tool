@@ -50,6 +50,11 @@ AI_FEEDBACK_MAX_RETRIES = max(1, int(os.getenv("AI_FEEDBACK_MAX_RETRIES", "2")))
 logger = logging.getLogger(__name__)
 
 
+def _feedback_missing_concepts(feedback: dict, *, limit: int | None = None) -> list[str]:
+    concepts = list(feedback.get("missing_concepts") or feedback.get("missing_keywords") or [])
+    return concepts[:limit] if limit is not None else concepts
+
+
 class FeedbackAgentError(RuntimeError):
     pass
 
@@ -227,7 +232,7 @@ def build_fallback_feedback(
 ) -> dict:
     strengths = (feedback.get("strengths", []) or [])[:2]
     weaknesses = (feedback.get("weaknesses", []) or [])[:2]
-    missing_keywords = (feedback.get("missing_keywords", []) or [])[:2]
+    missing_concepts = _feedback_missing_concepts(feedback, limit=2)
     strength_text = " ".join(strengths).lower()
     weakness_text = " ".join(weaknesses).lower()
 
@@ -237,8 +242,8 @@ def build_fallback_feedback(
         weaknesses = ["The answer needs clearer detail and stronger explanation of key ideas."]
 
     improvements = []
-    if missing_keywords:
-        improvements.append(f"Explicitly mention {', '.join(missing_keywords)}.")
+    if missing_concepts:
+        improvements.append(f"Explicitly cover the missing ideas around {', '.join(missing_concepts)}.")
     if "example" in weakness_text:
         improvements.append("Add one concrete example or tradeoff to support your explanation.")
     if "organizing" in weakness_text or "structure" in weakness_text:
@@ -259,8 +264,8 @@ def build_fallback_feedback(
         improved_answer += f" Original answer focus: {answer_excerpt}"
 
     next_focus = "Specificity"
-    if missing_keywords:
-        next_focus = missing_keywords[0]
+    if missing_concepts:
+        next_focus = missing_concepts[0]
     elif "structure" in weakness_text or "organizing" in weakness_text:
         next_focus = "Answer structure"
     elif "example" in weakness_text:
@@ -294,8 +299,8 @@ def build_feedback_prompt(
     overall: int,
     feedback: dict,
 ) -> str:
-    keywords = rubric.get("keywords", [])[:6]
-    missing_keywords = (feedback.get("missing_keywords", []) or [])[:4]
+    concepts = (rubric.get("concepts") or rubric.get("keywords") or [])[:6]
+    missing_concepts = _feedback_missing_concepts(feedback, limit=4)
     strengths = (feedback.get("strengths", []) or [])[:1]
     weaknesses = (feedback.get("weaknesses", []) or [])[:1]
     compact_question = _compact_text(question_prompt, limit=220)
@@ -312,8 +317,8 @@ Answer: {compact_answer}
 Ideal: {compact_ideal}
 Overall: {overall}
 Scores: {json.dumps(scores, separators=(",", ":"))}
-Expected keywords: {json.dumps(keywords, separators=(",", ":"))}
-Missing keywords: {json.dumps(missing_keywords, separators=(",", ":"))}
+Expected concepts: {json.dumps(concepts, separators=(",", ":"))}
+Missing concepts: {json.dumps(missing_concepts, separators=(",", ":"))}
 Known strengths: {json.dumps(strengths, separators=(",", ":"))}
 Known weaknesses: {json.dumps(weaknesses, separators=(",", ":"))}
 
@@ -340,12 +345,12 @@ You are given:
 - interview question: {compact_question}
 - candidate answer: {compact_answer}
 - ideal answer: {compact_ideal}
-- rubric keywords: {json.dumps(keywords, separators=(",", ":"))}
+- rubric concepts: {json.dumps(concepts, separators=(",", ":"))}
 - current overall score: {overall}
 - dimension scores: {json.dumps(scores, separators=(",", ":"))}
 - existing deterministic strengths: {json.dumps(strengths, separators=(",", ":"))}
 - existing deterministic weaknesses: {json.dumps(weaknesses, separators=(",", ":"))}
-- missing keywords: {json.dumps(missing_keywords, separators=(",", ":"))}
+- missing concepts: {json.dumps(missing_concepts, separators=(",", ":"))}
 
 Return exactly this JSON shape:
 {{
@@ -614,7 +619,7 @@ def build_fallback_chat_reply(*, user_message: str, feedback: dict) -> str:
     ai_feedback = feedback.get("ai_feedback") or {}
     instant_feedback = feedback.get("instant_feedback") or {}
     improvements = ai_feedback.get("improvements") or feedback.get("weaknesses") or []
-    missing = feedback.get("missing_keywords") or []
+    missing = feedback.get("missing_concepts") or feedback.get("missing_keywords") or []
     lower_message = user_message.lower()
 
     if "rewrite" in lower_message or "improve" in lower_message:
@@ -648,8 +653,8 @@ def build_feedback_chat_prompt(
     compact_question = _compact_text(question_prompt, limit=220)
     compact_answer = _compact_text(answer_text, limit=AI_CHAT_PROMPT_ANSWER_CHARS)
     compact_ideal = _compact_text(rubric.get("ideal_answer", ""), limit=AI_COACH_PROMPT_IDEAL_CHARS)
-    keywords = rubric.get("keywords", [])[:8]
-    missing_keywords = (feedback.get("missing_keywords", []) or [])[:5]
+    concepts = (rubric.get("concepts") or rubric.get("keywords") or [])[:8]
+    missing_concepts = _feedback_missing_concepts(feedback, limit=5)
     ai_feedback = feedback.get("ai_feedback") or {}
     instant_feedback = feedback.get("instant_feedback") or {}
     transcript = "\n".join(
@@ -674,8 +679,8 @@ Candidate answer: {compact_answer}
 Ideal answer: {compact_ideal}
 Overall score: {overall}
 Dimension scores: {json.dumps(scores, separators=(",", ":"))}
-Expected keywords: {json.dumps(keywords, separators=(",", ":"))}
-Missing keywords: {json.dumps(missing_keywords, separators=(",", ":"))}
+Expected concepts: {json.dumps(concepts, separators=(",", ":"))}
+Missing concepts: {json.dumps(missing_concepts, separators=(",", ":"))}
 Known weaknesses: {json.dumps(feedback.get("weaknesses", [])[:2], separators=(",", ":"))}
 Instant summary: {_compact_text(instant_feedback.get("summary", ""), limit=180)}
 Instant next focus: {_compact_text(instant_feedback.get("next_focus", ""), limit=120)}

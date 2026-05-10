@@ -47,7 +47,7 @@ sys.modules.setdefault("sklearn.metrics.pairwise", pairwise)
 from backend.ml.scorer import compute_scores
 
 
-QUESTIONS = json.loads(Path("backend/data/questions.json").read_text())
+QUESTIONS = json.loads(Path("backend/data/questions.json").read_text(encoding="utf-8-sig"))
 RUBRIC_BY_PROMPT = {item["prompt"]: item["rubric"] for item in QUESTIONS}
 
 

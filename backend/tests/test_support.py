@@ -113,8 +113,8 @@ def create_question(
     if rubric is None:
         rubric = {
             "ideal_answer": "A process has its own memory; threads share memory in a process.",
-            "keywords": ["process", "thread", "memory", "shared memory"],
-            "dimension_keywords": {
+            "concepts": ["process", "thread", "memory", "shared memory"],
+            "dimension_concepts": {
                 "technical_depth": ["memory", "shared memory"],
                 "clarity": ["difference", "share"],
                 "completeness": ["process", "thread", "memory"],

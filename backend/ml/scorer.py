@@ -19,8 +19,8 @@ from backend.ml.embedder import cosine_similarity_safe, embed_texts
 
 logger = logging.getLogger(__name__)
 
-MATCHED_CONCEPT_THRESHOLD = 0.75
-MISSING_CONCEPT_THRESHOLD = 0.55
+MATCHED_CONCEPT_THRESHOLD = 0.72
+MISSING_CONCEPT_THRESHOLD = 0.52
 
 CONCEPT_ALIASES: dict[str, list[str]] = {
     "address space": [
@@ -82,15 +82,23 @@ def _lexical_overlap_score(answer_tokens: set[str], concept: str) -> float:
             continue
 
         if all(token in answer_tokens for token in concept_tokens):
-            return 1.0
+            return 0.72
 
         match_count = sum(1 for token in concept_tokens if token in answer_tokens)
         if match_count == 0:
             continue
 
-        best_score = max(best_score, min(0.85, match_count / len(concept_tokens)))
+        best_score = max(best_score, min(0.58, match_count / len(concept_tokens)))
 
     return best_score
+
+
+def _get_primary_concepts(rubric: Dict) -> List[str]:
+    return rubric.get("concepts") or rubric.get("keywords", []) or []
+
+
+def _get_dimension_concepts(rubric: Dict) -> Dict[str, List[str]]:
+    return rubric.get("dimension_concepts") or rubric.get("dimension_keywords", {}) or {}
 
 
 def _semantic_concept_scores(answer_text: str, concepts: List[str]) -> Dict[str, float]:
@@ -160,10 +168,10 @@ def _collect_dimension_evidence(
     return evidence, unmatched_any, matched_any
 
 
-def _score_confidence(*, embedding_error: str | None, answer_words: int, keyword_count: int) -> str:
+def _score_confidence(*, embedding_error: str | None, answer_words: int, concept_count: int) -> str:
     if embedding_error:
         return "low"
-    if answer_words < 25 or keyword_count < 3:
+    if answer_words < 25 or concept_count < 3:
         return "medium"
     return "high"
 
@@ -173,7 +181,7 @@ def _build_instant_feedback(
     overall_score: int,
     strengths: list[str],
     weaknesses: list[str],
-    missing_keywords: list[str],
+    missing_concepts: list[str],
     has_structure: bool,
     has_examples: bool,
 ) -> dict[str, object]:
@@ -185,8 +193,8 @@ def _build_instant_feedback(
         summary = "The answer is not yet interview-ready. It needs stronger coverage of the key concepts and a clearer explanation."
 
     improvements: list[str] = []
-    if missing_keywords:
-        improvements.append(f"Explicitly cover {', '.join(missing_keywords[:2])}.")
+    if missing_concepts:
+        improvements.append(f"Explicitly cover the missing ideas around {', '.join(missing_concepts[:2])}.")
     if not has_structure:
         improvements.append("Use a tighter structure: direct answer, reasoning, example, takeaway.")
     if not has_examples:
@@ -197,8 +205,8 @@ def _build_instant_feedback(
         improvements.append("Make the explanation more specific and tie it back to the question.")
 
     next_focus = "Specificity"
-    if missing_keywords:
-        next_focus = missing_keywords[0]
+    if missing_concepts:
+        next_focus = missing_concepts[0]
     elif not has_structure:
         next_focus = "Answer structure"
     elif not has_examples:
@@ -486,12 +494,13 @@ def _compute_behavioral_scores(
     confidence = _score_confidence(
         embedding_error=embedding_error,
         answer_words=answer_words,
-        keyword_count=len(rubric.get("keywords", []) or []),
+        concept_count=len(_get_primary_concepts(rubric)),
     )
 
     feedback = {
         "strengths": strengths,
         "weaknesses": weaknesses,
+        "missing_concepts": [],
         "missing_keywords": [],
         "instant_feedback": _build_behavioral_instant_feedback(
             overall_score=overall_score,
@@ -507,6 +516,7 @@ def _compute_behavioral_scores(
             "keyword_coverage": concept_cov,
             "keyword_coverage_raw": concept_cov_raw,
             "concept_coverage": concept_cov,
+            "meaning_coverage": concept_cov,
             "length_penalty": 1.0,
             "embedding_error": embedding_error,
             "degraded": degraded,
@@ -550,19 +560,19 @@ def compute_scores(
     """
     Compute per-dimension integer scores (0-100), overall score, and feedback.
 
-    - rubric: expected to have 'ideal_answer' and 'keywords' at minimum.
-    - weights: optional weights for signals; defaults to similarity=0.6, concept=0.4
+    - rubric: expected to have 'ideal_answer' and concept targets.
+    - weights: optional weights for signals; defaults to similarity-first semantic scoring.
     """
     normalized_role = (role or "").strip()
 
     if weights is None:
-        weights = {"similarity": 0.6, "keyword": 0.4}
+        weights = {"similarity": 0.72, "concept": 0.28}
         if normalized_role == "Behavioral":
-            weights = {"similarity": 0.75, "keyword": 0.1}
+            weights = {"similarity": 0.82, "concept": 0.08}
 
     ideal = rubric.get("ideal_answer", "")
-    keywords = rubric.get("keywords", []) or []
-    dim_keys = rubric.get("dimension_keywords", {}) or {}
+    primary_concepts = _get_primary_concepts(rubric)
+    dim_keys = _get_dimension_concepts(rubric)
 
     answer_words = len(answer_text.split())
     ideal_words = len(ideal.split())
@@ -581,7 +591,7 @@ def compute_scores(
         embedding_error = str(exc)
         logger.warning("Ideal-answer embedding failed; falling back to lexical scoring: %s", exc)
 
-    concept_cov_raw, concept_scores = concept_coverage(answer_text, keywords)
+    concept_cov_raw, concept_scores = concept_coverage(answer_text, primary_concepts)
     concept_cov = concept_cov_raw
     dimension_evidence, dimension_unmatched, dimension_matched = _collect_dimension_evidence(answer_text, dim_keys)
 
@@ -624,7 +634,7 @@ def compute_scores(
     if normalized_role == "Behavioral":
         quality_bonus += 0.15 * behavioral_signal
 
-    base_score = 100 * min(1.0, weights["similarity"] * similarity + weights["keyword"] * concept_cov + quality_bonus)
+    base_score = 100 * min(1.0, weights["similarity"] * similarity + weights["concept"] * concept_cov + quality_bonus)
 
     semantic_strength = max(similarity, semantic_equivalence)
 
@@ -729,18 +739,19 @@ def compute_scores(
     confidence = _score_confidence(
         embedding_error=embedding_error,
         answer_words=answer_words,
-        keyword_count=len(keywords),
+        concept_count=len(primary_concepts),
     )
 
     feedback = {
         "strengths": strengths,
         "weaknesses": weaknesses,
+        "missing_concepts": missing,
         "missing_keywords": missing,
         "instant_feedback": _build_instant_feedback(
             overall_score=overall_score,
             strengths=strengths,
             weaknesses=weaknesses,
-            missing_keywords=missing,
+            missing_concepts=missing,
             has_structure=has_structure,
             has_examples=has_examples,
         ),
@@ -751,6 +762,7 @@ def compute_scores(
             "keyword_coverage": concept_cov,
             "keyword_coverage_raw": concept_cov_raw,
             "concept_coverage": concept_cov,
+            "meaning_coverage": concept_cov,
             "covered_concepts": covered,
             "matched_concepts": sorted(dimension_matched),
             "concept_scores": {concept: round(score, 4) for concept, score in adjusted_concept_scores.items()},

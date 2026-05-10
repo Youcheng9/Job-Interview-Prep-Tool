@@ -47,8 +47,8 @@ from backend.ml.scorer import compute_scores
 
 RUBRIC = {
     "ideal_answer": "Processes have separate memory spaces. Threads share memory within a process.",
-    "keywords": ["process", "thread", "memory space", "shared memory"],
-    "dimension_keywords": {
+    "concepts": ["process", "thread", "memory space", "shared memory"],
+    "dimension_concepts": {
         "technical_depth": ["memory space", "shared memory"],
         "clarity": ["difference", "share"],
         "completeness": ["process", "thread", "memory space", "shared memory"],
@@ -82,8 +82,9 @@ class ScorerTests(unittest.TestCase):
         )
 
         self.assertLess(scores["completeness"], 90)
-        self.assertIn("memory space", feedback["missing_keywords"])
-        self.assertIn("shared memory", feedback["missing_keywords"])
+        self.assertIn("memory space", feedback["missing_concepts"])
+        self.assertIn("shared memory", feedback["missing_concepts"])
+        self.assertEqual(feedback["missing_concepts"], feedback["missing_keywords"])
         self.assertFalse(feedback["notes"]["degraded"])
 
     @patch("backend.ml.scorer.embed_texts", side_effect=RuntimeError("embedding backend unavailable"))
@@ -128,8 +129,8 @@ class ScorerTests(unittest.TestCase):
 
         self.assertGreaterEqual(overall, 75)
         self.assertTrue(feedback["instant_feedback"]["summary"].startswith("Strong answer overall."))
-        self.assertNotIn("memory space", feedback["missing_keywords"])
-        self.assertNotIn("shared memory", feedback["missing_keywords"])
+        self.assertNotIn("memory space", feedback["missing_concepts"])
+        self.assertNotIn("shared memory", feedback["missing_concepts"])
         self.assertTrue(feedback["notes"]["quality_indicators"]["has_structure"])
 
     @patch("backend.ml.scorer.embed_texts")
@@ -139,8 +140,8 @@ class ScorerTests(unittest.TestCase):
             "ideal_answer": (
                 "A strong answer describes a specific conflict, the candidate's actions, and the impact or lesson learned."
             ),
-            "keywords": ["conflict resolution", "stakeholders", "ownership", "communication"],
-            "dimension_keywords": {
+            "concepts": ["conflict resolution", "stakeholders", "ownership", "communication"],
+            "dimension_concepts": {
                 "technical_depth": ["tradeoff", "decision making"],
                 "clarity": ["specific example", "clear explanation"],
                 "completeness": ["situation", "action", "result"],
@@ -162,7 +163,7 @@ class ScorerTests(unittest.TestCase):
         scores, overall, feedback = compute_scores(answer, rubric, role="Behavioral")
 
         self.assertGreaterEqual(overall, 60)
-        self.assertEqual(feedback["missing_keywords"], [])
+        self.assertEqual(feedback["missing_concepts"], [])
         self.assertGreater(feedback["notes"]["quality_indicators"]["behavioral_signal"], 0.5)
         self.assertGreaterEqual(scores["structure"], 60)
         self.assertEqual(feedback["notes"]["narrative_framework"], "SAR")
@@ -174,8 +175,8 @@ class ScorerTests(unittest.TestCase):
     def test_behavioral_star_answer_gets_star_feedback(self, _cached_embeddings, embed_texts):
         rubric = {
             "ideal_answer": "A strong behavioral answer uses STAR with clear ownership, action, and impact.",
-            "keywords": ["ownership", "action", "impact"],
-            "dimension_keywords": {
+            "concepts": ["ownership", "action", "impact"],
+            "dimension_concepts": {
                 "completeness": ["situation", "task", "action", "result"],
                 "structure": ["situation", "task", "action", "result"],
             },

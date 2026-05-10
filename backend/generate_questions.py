@@ -95,20 +95,20 @@ class QuestionGenerationError(RuntimeError):
 
 class RubricModel(BaseModel):
     ideal_answer: str = Field(min_length=20)
-    keywords: list[str] = Field(min_length=3)
-    dimension_keywords: dict[str, list[str]] = Field(default_factory=dict)
+    concepts: list[str] = Field(min_length=3)
+    dimension_concepts: dict[str, list[str]] = Field(default_factory=dict)
 
-    @field_validator("keywords")
+    @field_validator("concepts")
     @classmethod
-    def validate_keywords(cls, value: list[str]) -> list[str]:
+    def validate_concepts(cls, value: list[str]) -> list[str]:
         cleaned = [item.strip() for item in value if item and item.strip()]
         if len(cleaned) < 3:
-            raise ValueError("keywords must include at least 3 items")
+            raise ValueError("concepts must include at least 3 items")
         return cleaned
 
-    @field_validator("dimension_keywords")
+    @field_validator("dimension_concepts")
     @classmethod
-    def validate_dimension_keywords(cls, value: dict[str, list[str]]) -> dict[str, list[str]]:
+    def validate_dimension_concepts(cls, value: dict[str, list[str]]) -> dict[str, list[str]]:
         normalized: dict[str, list[str]] = {}
         for key, items in value.items():
             cleaned = [item.strip() for item in items if item and item.strip()]
@@ -218,6 +218,19 @@ def normalize_question_record(item: dict) -> dict:
 
     if not normalized["topic"] and role and prompt:
         normalized["topic"] = auto_assign_topic(role=role, prompt=prompt)
+
+    rubric = normalized.get("rubric")
+    if isinstance(rubric, dict):
+        migrated_rubric = dict(rubric)
+        if "concepts" not in migrated_rubric and "keywords" in migrated_rubric:
+            migrated_rubric["concepts"] = migrated_rubric.pop("keywords")
+        else:
+            migrated_rubric.pop("keywords", None)
+        if "dimension_concepts" not in migrated_rubric and "dimension_keywords" in migrated_rubric:
+            migrated_rubric["dimension_concepts"] = migrated_rubric.pop("dimension_keywords")
+        else:
+            migrated_rubric.pop("dimension_keywords", None)
+        normalized["rubric"] = migrated_rubric
 
     return normalized
 
@@ -343,8 +356,8 @@ Each object must match this schema exactly:
   "prompt": "A concise interview question ending with a question mark",
   "rubric": {{
     "ideal_answer": "A strong 2 to 5 sentence answer summary",
-    "keywords": ["keyword1", "keyword2", "keyword3"],
-    "dimension_keywords": {{
+    "concepts": ["concept1", "concept2", "concept3"],
+    "dimension_concepts": {{
       "technical_depth": ["item", "item"],
       "clarity": ["item", "item"],
       "completeness": ["item", "item"],
@@ -362,8 +375,8 @@ Requirements:
 - Make all prompts distinct from one another.
 - Avoid repeating common textbook prompts unless they are rewritten in a meaningfully different way.
 - Do not include numbering or commentary.
-- Keywords should be specific and useful for scoring.
-- dimension_keywords should contain short phrases, not sentences.
+- Concepts should be specific and useful for semantic scoring.
+- dimension_concepts should contain short phrases, not sentences.
 - Avoid markdown fences.
 - The prompt must not mention any company name directly.
 - Keep the language crisp and interviewer-like.

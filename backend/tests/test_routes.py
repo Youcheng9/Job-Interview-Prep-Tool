@@ -75,6 +75,7 @@ class RouteTests(unittest.TestCase):
             {
                 "strengths": ["Good distinction between process and thread."],
                 "weaknesses": ["Could be more concise."],
+                "missing_concepts": ["context switch"],
                 "missing_keywords": ["context switch"],
                 "instant_feedback": {
                     "summary": "Strong foundation with one gap.",
