@@ -1,49 +1,167 @@
+--- InterviewAce Software Design Pattern ---
+
+Selected Design Pattern: Service Layer Pattern
+
 Recommendation
+InterviewAce should use the Service Layer pattern for the backend architecture.
 
-  Use a Service Layer pattern for this project.
+The current backend design places too much responsibility inside the API routers. For example, the scoring router handles request validation, answer creation, score calculation, score persistence, AI feedback workflow, and background task coordination. That means the router is acting as both a controller and a business logic service.
 
-  Right now the backend routers are doing HTTP handling, DB access,
-  scoring orchestration, and AI feedback workflow all in one place.
-  The clearest example is backend/routers/scoring.py:1, where the
-  route validates input, creates Answer, computes scores, stores
-  Score, manages pending AI feedback state, and launches background
-  work. That is a service, not just a controller.
+The Service Layer pattern fixes this by separating request handling from application logic.
 
-  A Service Layer fits this repo because it gives you a clean
-  split:
+Pattern Purpose
+The Service Layer pattern organizes business operations into service classes or modules. Routers/controllers only handle HTTP requests and responses, while services coordinate workflows such as authentication, question retrieval, scoring, feedback generation, and history assembly.
 
-  - Routers/controllers: request/response only
-  - Services: interview scoring, question flow, auth, history
-    assembly
-  - Repositories/data access: SQLAlchemy queries
-  - Domain/ML helpers: scorer, embedder, feedback agent
+Recommended Backend Structure
 
-  That structure matches what the app already wants to be:
+backend/
+  routers/
+    auth.py
+    questions.py
+    scoring.py
+    history.py
 
-  - backend/routers/auth.py:1, backend/routers/history.py:1, and
-    backend/routers/questions.py:1 all contain business logic that
-    will keep growing.
-  - backend/ml/scorer.py:1 and backend/feedback_agent.py:1 are
-    already service-like dependencies waiting to be orchestrated
-    from one layer up.
+  services/
+    auth_service.py
+    question_service.py
+    scoring_service.py
+    history_service.py
 
-  A practical target shape would be:
+  repositories/
+    user_repository.py
+    question_repository.py
+    answer_repository.py
+    score_repository.py
 
-  backend/
-    services/
-      auth_service.py
-      question_service.py
-      scoring_service.py
-      history_service.py
-    repositories/
-      question_repository.py
-      answer_repository.py
-      user_repository.py
-      score_repository.py
+  ml/
+    scorer.py
+    embedder.py
 
-  Example responsibility split:
+  feedback_agent.py
 
-  - ScoringService.submit_answer(...)
-  - ScoringService.generate_ai_feedback(...)
-  - QuestionService.list_questions(...)
-  - HistoryService.get_user_history(...)
+Layer Responsibilities
+
+1. Routers / Controllers
+- Receive HTTP requests
+- Validate request schemas
+- Call the correct service method
+- Return API responses
+- Avoid direct business logic and complex database workflows
+
+2. Services
+- Contain application workflows
+- Coordinate repositories, ML helpers, and feedback generation
+- Enforce business rules
+- Keep use cases organized and testable
+
+Example services:
+- AuthService
+- QuestionService
+- ScoringService
+- HistoryService
+
+3. Repositories
+- Encapsulate SQLAlchemy database queries
+- Create, update, retrieve, and delete database records
+- Keep database logic out of routers and services
+
+Example repositories:
+- UserRepository
+- QuestionRepository
+- AnswerRepository
+- ScoreRepository
+
+4. Domain / ML Helpers
+- Handle scoring algorithms, embeddings, cosine similarity, STAR evaluation, and AI feedback generation
+- Stay independent from HTTP request handling
+
+Example Service Responsibilities
+
+AuthService
+- register_user(...)
+- login_user(...)
+- reset_password(...)
+- validate_jwt(...)
+
+QuestionService
+- list_questions(...)
+- get_question_by_role_level(...)
+- apply_question_filters(...)
+- manage_question_bank(...)
+
+ScoringService
+- submit_answer(...)
+- calculate_score(...)
+- generate_deterministic_feedback(...)
+- request_ai_coach_feedback(...)
+- store_score_result(...)
+
+HistoryService
+- get_user_history(...)
+- get_score_trends(...)
+- get_progress_summary(...)
+
+Why This Pattern Fits InterviewAce
+
+The Service Layer pattern fits InterviewAce because the project includes multiple workflows that combine API handling, database persistence, AI/ML scoring, and feedback generation. These workflows are more complex than basic CRUD operations.
+
+InterviewAce includes:
+- User registration and JWT authentication
+- Password reset through Brevo SMTP email
+- Role and level based question delivery
+- Text and speech answer submission
+- AI-powered scoring using sentence-transformers
+- Deterministic rubric-based feedback
+- AI Coach chat through Ollama
+- Answer history and progress tracking
+- PostgreSQL persistence
+- Docker-based deployment
+
+Without a service layer, routers will continue to grow and become harder to test, debug, and maintain. With a service layer, each backend module has one clear responsibility.
+
+Before Service Layer
+
+scoring.py router:
+- Parses request
+- Creates Answer record
+- Calls ML scorer
+- Creates Score record
+- Generates feedback
+- Handles AI feedback state
+- Starts background task
+- Returns response
+
+After Service Layer
+
+scoring.py router:
+- Receives request
+- Calls ScoringService.submit_answer(...)
+- Returns response
+
+ScoringService:
+- Creates Answer record through AnswerRepository
+- Calls scorer.py for multi-dimensional scoring
+- Calls feedback_agent.py for feedback
+- Stores Score through ScoreRepository
+- Coordinates AI Coach feedback workflow
+
+Benefits
+
+1. Cleaner Routers
+Routers become easier to read because they only manage HTTP request and response behavior.
+
+2. Better Maintainability
+Business logic is grouped into services, so future changes to scoring, feedback, or history do not require editing large router files.
+
+3. Easier Testing
+Services can be unit tested without starting the FastAPI server.
+
+4. Reusable Logic
+The same service methods can be reused by different endpoints or background jobs.
+
+5. Clearer Architecture
+The backend matches the architecture diagram: Presentation Layer calls Application/API Layer, which delegates to Service Layer, Data Layer, and AI/ML helpers.
+
+Final Design Pattern Statement
+
+InterviewAce uses the Service Layer design pattern to separate API routing from business logic. FastAPI routers act as controllers that receive requests and return responses. Service modules such as AuthService, QuestionService, ScoringService, and HistoryService coordinate core workflows, including authentication, question delivery, AI scoring, deterministic feedback, AI Coach chat, and progress history. Repository modules isolate SQLAlchemy database operations, while ML helpers handle embedding, cosine similarity scoring, and feedback generation. This pattern improves maintainability, testability, and separation of concerns as InterviewAce grows.
