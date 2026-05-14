@@ -2,14 +2,22 @@ import { useState, useEffect, useRef } from "react";
 import { useSearchParams, useNavigate, useLocation } from "react-router-dom";
 import { ScoreCard } from "../../components/ScoreCard";
 import { FeedbackPanel } from "../../components/FeedbackPanel";
-import { readSavedQuestionId, saveInterviewSession } from "../../lib/interviewSession";
+import {
+  clearInterviewSession,
+  readSavedQuestionId,
+  readSavedQuestionOrder,
+  saveInterviewSession,
+  saveQuestionOrder,
+} from "../../lib/interviewSession";
 import {
   type CandidateLevel,
   clearToken,
-  generateAIFeedback,
+  type FeedbackChatMessage,
+  getFeedbackChatThread,
   getHistory,
   getQuestions,
   isAuthenticated,
+  sendFeedbackChatMessage,
   submitAnswer,
   type Role,
   type Question,
@@ -128,15 +136,70 @@ function LevelBadge({ level }: { level: CandidateLevel }) {
   );
 }
 
+function CompanyBadge({ companies }: { companies: string[] }) {
+  return (
+    <span
+      className="mono"
+      style={{
+        fontSize: "12px",
+        letterSpacing: "0.12em",
+        textTransform: "uppercase",
+        color: "#7dd3fc",
+        border: "1px solid rgba(125,211,252,0.35)",
+        background: "rgba(125,211,252,0.1)",
+        padding: "4px 10px",
+      }}
+    >
+      {companies.join(" · ")}
+    </span>
+  );
+}
+
+function TopicBadge({ topic }: { topic: string }) {
+  return (
+    <span
+      className="mono"
+      style={{
+        fontSize: "12px",
+        letterSpacing: "0.12em",
+        textTransform: "uppercase",
+        color: "#c4b5fd",
+        border: "1px solid rgba(196,181,253,0.35)",
+        background: "rgba(196,181,253,0.1)",
+        padding: "4px 10px",
+      }}
+    >
+      {formatTopicLabel(topic)}
+    </span>
+  );
+}
+
 type Phase = "question" | "submitting" | "result";
 type DifficultyFilter = "all" | Question["difficulty"];
 type CompletionFilter = "all" | "done" | "not_done";
+type TopicFilter = "all" | string;
 
 const ROLE_LABELS: Record<Role, string> = {
   swe: "SWE",
-  data: "DSA",
+  data: "DS/ML",
   pm: "PM",
   behavioral: "Behavioral",
+};
+const TOPIC_LABELS: Record<string, string> = {
+  operating_systems: "OS",
+  memory: "Memory",
+  dsa: "DSA",
+  networking: "Networking",
+  concurrency: "Concurrency",
+  databases: "Databases",
+  distributed_systems: "Distributed Systems",
+  apis: "APIs",
+  ml_fundamentals: "ML Fundamentals",
+  model_evaluation: "Model Evaluation",
+  statistics: "Statistics",
+  experimentation: "Experimentation",
+  feature_engineering: "Feature Engineering",
+  data_processing: "Data Processing",
 };
 const DIFFICULTY_FILTERS: { value: DifficultyFilter; label: string }[] = [
   { value: "all", label: "All" },
@@ -150,6 +213,23 @@ const COMPLETION_FILTERS: { value: CompletionFilter; label: string }[] = [
   { value: "not_done", label: "Not done" },
 ];
 
+function getFilterOptionLabel(label: string, count: number) {
+  return `${label} (${count})`;
+}
+
+function shuffleQuestions(questions: Question[]) {
+  const next = [...questions];
+  for (let index = next.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(Math.random() * (index + 1));
+    [next[index], next[swapIndex]] = [next[swapIndex], next[index]];
+  }
+  return next;
+}
+
+function formatTopicLabel(topic: string) {
+  return TOPIC_LABELS[topic] ?? topic.replace(/_/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
 export default function InterviewPage() {
   const [params] = useSearchParams();
   const navigate = useNavigate();
@@ -160,24 +240,28 @@ export default function InterviewPage() {
   const level: CandidateLevel = levelParam === "intern" ? "intern" : "new_grad";
   const requestedQuestionId = Number(params.get("questionId"));
 
-  const [questions, setQuestions] = useState<Question[]>([]);
+  const [allQuestions, setAllQuestions] = useState<Question[]>([]);
   const [qIndex, setQIndex] = useState(0);
   const [answer, setAnswer] = useState("");
   const [phase, setPhase] = useState<Phase>("question");
   const [score, setScore] = useState<ScoreResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isQuestionsLoading, setIsQuestionsLoading] = useState(false);
   const [charCount, setCharCount] = useState(0);
   const [authed, setAuthed] = useState(isAuthenticated());
   const [completedIds, setCompletedIds] = useState<number[]>([]);
   const [isSpeechSupported, setIsSpeechSupported] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [speechError, setSpeechError] = useState<string | null>(null);
-  const [isGeneratingAiFeedback, setIsGeneratingAiFeedback] = useState(false);
-  const [aiFeedbackPollAttempts, setAiFeedbackPollAttempts] = useState(0);
+  const [chatMessages, setChatMessages] = useState<FeedbackChatMessage[]>([]);
+  const [isLoadingChat, setIsLoadingChat] = useState(false);
+  const [isSendingChat, setIsSendingChat] = useState(false);
+  const [chatError, setChatError] = useState<string | null>(null);
   const [isQuestionSidebarPinned, setIsQuestionSidebarPinned] = useState(false);
   const [isQuestionSidebarPreviewed, setIsQuestionSidebarPreviewed] = useState(false);
   const [difficultyFilter, setDifficultyFilter] = useState<DifficultyFilter>("all");
   const [completionFilter, setCompletionFilter] = useState<CompletionFilter>("all");
+  const [topicFilter, setTopicFilter] = useState<TopicFilter>("all");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const recognitionRef = useRef<InstanceType<SpeechRecognitionCtor> | null>(null);
 
@@ -251,34 +335,65 @@ export default function InterviewPage() {
   }, []);
 
   useEffect(() => {
+    setTopicFilter("all");
+  }, [role, level]);
+
+  useEffect(() => {
     if (!authed) return;
 
     setError(null);
+    setIsQuestionsLoading(true);
     getQuestions(role, level)
       .then((loadedQuestions) => {
-        setQuestions(loadedQuestions);
         if (!loadedQuestions.length) {
+          setAllQuestions([]);
           setError(`No ${level === "intern" ? "intern" : "new grad"} questions are available for this track yet.`);
           return;
         }
 
-        const requestedIndex = Number.isFinite(requestedQuestionId)
-          ? loadedQuestions.findIndex((item) => item.id === requestedQuestionId)
-          : -1;
+        const savedOrder = readSavedQuestionOrder(role, level);
         const savedQuestionId = readSavedQuestionId(role, level);
+        const questionById = new Map(loadedQuestions.map((item) => [item.id, item]));
+
+        let orderedQuestions: Question[];
+        if (savedOrder?.length) {
+          const ordered = savedOrder
+            .map((questionId) => questionById.get(questionId))
+            .filter((item): item is Question => Boolean(item));
+          const remaining = loadedQuestions.filter((item) => !savedOrder.includes(item.id));
+          orderedQuestions = [...ordered, ...remaining];
+        } else {
+          orderedQuestions = shuffleQuestions(loadedQuestions);
+          saveQuestionOrder(
+            role,
+            level,
+            orderedQuestions.map((item) => item.id),
+          );
+        }
+
+        const requestedIndex = Number.isFinite(requestedQuestionId)
+          ? orderedQuestions.findIndex((item) => item.id === requestedQuestionId)
+          : -1;
         const savedIndex =
-          savedQuestionId === null ? -1 : loadedQuestions.findIndex((item) => item.id === savedQuestionId);
+          savedQuestionId === null ? -1 : orderedQuestions.findIndex((item) => item.id === savedQuestionId);
         const nextIndex = requestedIndex >= 0 ? requestedIndex : savedIndex >= 0 ? savedIndex : 0;
 
+        setAllQuestions(orderedQuestions);
         setQIndex(nextIndex);
         setAnswer("");
         setCharCount(0);
         setScore(null);
-        setIsGeneratingAiFeedback(false);
-        setAiFeedbackPollAttempts(0);
+        setChatMessages([]);
+        setIsLoadingChat(false);
+        setIsSendingChat(false);
+        setChatError(null);
         setPhase("question");
       })
-      .catch(() => setError("Failed to load questions."));
+      .catch(() => {
+        setAllQuestions([]);
+        setError("Failed to load questions.");
+      })
+      .finally(() => setIsQuestionsLoading(false));
   }, [authed, level, role, requestedQuestionId]);
 
   useEffect(() => {
@@ -300,50 +415,87 @@ export default function InterviewPage() {
   }, [authed, level, role]);
 
   useEffect(() => {
-    if (
-      phase !== "result" ||
-      !score?.answerId ||
-      score.ai_feedback ||
-      !score.ai_feedback_pending ||
-      isGeneratingAiFeedback ||
-      aiFeedbackPollAttempts >= 4
-    ) {
+    if (phase !== "result" || !score?.answerId) {
+      setChatMessages([]);
+      setIsLoadingChat(false);
+      setChatError(null);
       return;
     }
 
-    const timeoutId = window.setTimeout(() => {
-      void handleGenerateAiFeedback();
-    }, 2000);
+    setIsLoadingChat(true);
+    setChatError(null);
+    getFeedbackChatThread(score.answerId)
+      .then((thread) => setChatMessages(thread.messages))
+      .catch((err) => {
+        const message = err instanceof Error ? err.message : "Failed to load coach chat.";
+        setChatError(message);
+      })
+      .finally(() => setIsLoadingChat(false));
+  }, [phase, score?.answerId]);
 
-    return () => window.clearTimeout(timeoutId);
-  }, [phase, score, isGeneratingAiFeedback, aiFeedbackPollAttempts]);
-
-  const question = questions[qIndex];
-  const progress = questions.length ? ((qIndex + 1) / questions.length) * 100 : 0;
   const isQuestionSidebarVisible = isQuestionSidebarPinned || isQuestionSidebarPreviewed;
+  const topicOptions = Array.from(
+    new Set(
+      allQuestions
+        .map((item) => item.topic)
+        .filter((item): item is string => Boolean(item)),
+    ),
+  );
+  const supportsTopicFilter = topicOptions.length > 0;
+  const matchesTopicFilter = (item: Question, filter: TopicFilter) =>
+    !supportsTopicFilter || filter === "all" || item.topic === filter;
+  const matchesDifficultyFilter = (item: Question, filter: DifficultyFilter) =>
+    filter === "all" || item.difficulty === filter;
   const matchesCompletionFilter = (item: Question, filter: CompletionFilter) => {
     const completed = completedIds.includes(item.id);
     return filter === "all" || (filter === "done" ? completed : !completed);
   };
+  const getFilteredQuestions = ({
+    topic,
+    difficulty,
+    completion,
+  }: {
+    topic: TopicFilter;
+    difficulty: DifficultyFilter;
+    completion: CompletionFilter;
+  }) =>
+    allQuestions
+      .filter((item) => matchesTopicFilter(item, topic))
+      .filter((item) => matchesDifficultyFilter(item, difficulty))
+      .filter((item) => matchesCompletionFilter(item, completion));
+  const topicFilteredQuestions = allQuestions.filter((item) => matchesTopicFilter(item, topicFilter));
+  const difficultyFilteredQuestions = topicFilteredQuestions.filter((item) =>
+    matchesDifficultyFilter(item, difficultyFilter),
+  );
+  const questions = difficultyFilteredQuestions.filter((item) =>
+    matchesCompletionFilter(item, completionFilter),
+  );
+  const getTopicFilterCount = (filter: TopicFilter) =>
+    allQuestions.filter((item) => matchesTopicFilter(item, filter)).length;
   const getDifficultyFilterCount = (filter: DifficultyFilter) =>
-    questions.filter(
-      (item) =>
-        (filter === "all" || item.difficulty === filter) &&
-        matchesCompletionFilter(item, completionFilter),
-    ).length;
+    topicFilteredQuestions.filter((item) => matchesDifficultyFilter(item, filter)).length;
   const getCompletionFilterCount = (filter: CompletionFilter) =>
-    questions.filter(
-      (item) =>
-        (difficultyFilter === "all" || item.difficulty === difficultyFilter) &&
-        matchesCompletionFilter(item, filter),
-    ).length;
-  const filteredSidebarQuestions = questions
-    .map((item, index) => ({ item, index }))
-    .filter(
-      ({ item }) =>
-        (difficultyFilter === "all" || item.difficulty === difficultyFilter) &&
-        matchesCompletionFilter(item, completionFilter),
-    );
+    difficultyFilteredQuestions.filter((item) => matchesCompletionFilter(item, filter)).length;
+  const topicFilterOptions = supportsTopicFilter
+    ? [{ value: "all", label: "All" }, ...topicOptions.map((topic) => ({
+        value: topic,
+        label: formatTopicLabel(topic),
+      }))]
+    : [];
+  const filteredSidebarQuestions = questions.map((item, index) => ({ item, index }));
+  const question = questions[qIndex];
+  const progress = questions.length ? ((qIndex + 1) / questions.length) * 100 : 0;
+
+  function resetQuestionWorkspace() {
+    setAnswer("");
+    setCharCount(0);
+    setScore(null);
+    setChatMessages([]);
+    setIsLoadingChat(false);
+    setIsSendingChat(false);
+    setChatError(null);
+    setPhase("question");
+  }
 
   useEffect(() => {
     if (!question) return;
@@ -352,6 +504,19 @@ export default function InterviewPage() {
     navigate(`/interview?role=${role}&level=${level}&questionId=${question.id}`, { replace: true });
   }, [level, navigate, question, role]);
 
+  useEffect(() => {
+    if (!questions.length) {
+      if (qIndex !== 0) {
+        setQIndex(0);
+      }
+      return;
+    }
+
+    if (qIndex >= questions.length) {
+      setQIndex(0);
+    }
+  }, [qIndex, questions]);
+
   async function handleSubmit() {
     if (!question || answer.trim().length < 20) return;
     if (!authed) {
@@ -359,8 +524,6 @@ export default function InterviewPage() {
       return;
     }
     setPhase("submitting");
-    setIsGeneratingAiFeedback(false);
-    setAiFeedbackPollAttempts(0);
     setError(null);
     try {
       const result = await submitAnswer(question.id, answer, role);
@@ -384,52 +547,26 @@ export default function InterviewPage() {
     }
   }
 
-  async function handleGenerateAiFeedback() {
-    if (!score?.answerId || isGeneratingAiFeedback) return;
+  async function handleSendChatMessage(content: string) {
+    if (!score?.answerId || isSendingChat) return;
 
-    setIsGeneratingAiFeedback(true);
-    setError(null);
+    setIsSendingChat(true);
+    setChatError(null);
 
     try {
-      const result = await generateAIFeedback(score.answerId);
-      const stillPending = result.ai_feedback_source === "pending" && !result.ai_feedback;
-      setAiFeedbackPollAttempts((attempts) => (stillPending ? attempts + 1 : 0));
-      setScore((current) => {
-        if (!current) return current;
-
-        return {
-          ...current,
-          ai_feedback: result.ai_feedback,
-          ai_feedback_error: result.ai_feedback_error,
-          ai_feedback_source: result.ai_feedback_source,
-          ai_feedback_pending: stillPending,
-        };
-      });
+      const result = await sendFeedbackChatMessage(score.answerId, content);
+      setChatMessages((current) => [...current, result.user_message, result.assistant_message]);
     } catch (err) {
-      const message = err instanceof Error ? err.message : "AI feedback failed. Please retry.";
-      setScore((current) => {
-        if (!current) return current;
-
-        return {
-          ...current,
-          ai_feedback_error: message,
-          ai_feedback_pending: false,
-        };
-      });
-      setAiFeedbackPollAttempts(0);
+      const message = err instanceof Error ? err.message : "Coach chat failed. Please retry.";
+      setChatError(message);
     } finally {
-      setIsGeneratingAiFeedback(false);
+      setIsSendingChat(false);
     }
   }
 
   function selectQuestion(index: number) {
     setQIndex(index);
-    setAnswer("");
-    setCharCount(0);
-    setScore(null);
-    setIsGeneratingAiFeedback(false);
-    setAiFeedbackPollAttempts(0);
-    setPhase("question");
+    resetQuestionWorkspace();
     setTimeout(() => textareaRef.current?.focus(), 100);
   }
 
@@ -440,20 +577,62 @@ export default function InterviewPage() {
     }
   }
 
+  function handleRetry() {
+    resetQuestionWorkspace();
+  }
+
   function handleNext() {
     if (qIndex + 1 < questions.length) {
       selectQuestion(qIndex + 1);
     } else {
+      clearInterviewSession(role, level);
       navigate("/history");
     }
   }
 
-  function handleRetry() {
-    setAnswer("");
-    setScore(null);
-    setIsGeneratingAiFeedback(false);
-    setAiFeedbackPollAttempts(0);
-    setPhase("question");
+  function handleTopicFilterChange(nextFilter: TopicFilter) {
+    const nextQuestions = getFilteredQuestions({
+      topic: nextFilter,
+      difficulty: difficultyFilter,
+      completion: completionFilter,
+    });
+    const currentQuestionId = question?.id;
+    const nextIndex =
+      currentQuestionId === undefined ? 0 : nextQuestions.findIndex((item) => item.id === currentQuestionId);
+
+    setTopicFilter(nextFilter);
+    setQIndex(nextIndex >= 0 ? nextIndex : 0);
+    resetQuestionWorkspace();
+  }
+
+  function handleDifficultyFilterChange(nextFilter: DifficultyFilter) {
+    const nextQuestions = getFilteredQuestions({
+      topic: topicFilter,
+      difficulty: nextFilter,
+      completion: completionFilter,
+    });
+    const currentQuestionId = question?.id;
+    const nextIndex =
+      currentQuestionId === undefined ? 0 : nextQuestions.findIndex((item) => item.id === currentQuestionId);
+
+    setDifficultyFilter(nextFilter);
+    setQIndex(nextIndex >= 0 ? nextIndex : 0);
+    resetQuestionWorkspace();
+  }
+
+  function handleCompletionFilterChange(nextFilter: CompletionFilter) {
+    const nextQuestions = getFilteredQuestions({
+      topic: topicFilter,
+      difficulty: difficultyFilter,
+      completion: nextFilter,
+    });
+    const currentQuestionId = question?.id;
+    const nextIndex =
+      currentQuestionId === undefined ? 0 : nextQuestions.findIndex((item) => item.id === currentQuestionId);
+
+    setCompletionFilter(nextFilter);
+    setQIndex(nextIndex >= 0 ? nextIndex : 0);
+    resetQuestionWorkspace();
   }
 
   function handleSpeechToggle() {
@@ -478,7 +657,7 @@ export default function InterviewPage() {
   }
 
   // Loading state
-  if (!questions.length && !error) {
+  if (isQuestionsLoading) {
     return (
       <div
         style={{
@@ -508,10 +687,10 @@ export default function InterviewPage() {
                 animation: `flicker 1.2s ${i * 0.2}s infinite`,
               }}
             />
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
-    );
+      );
   }
 
   return (
@@ -555,54 +734,60 @@ export default function InterviewPage() {
           </div>
 
           <div className="question-sidebar-filter-shell">
-            <div className="question-sidebar-filter-section" aria-label="Filter questions by difficulty">
-              <div className="question-sidebar-filter-label">Mode</div>
-              <div className="question-sidebar-filter-grid question-sidebar-filter-grid-mode">
-                {DIFFICULTY_FILTERS.map((filter) => {
-                  const active = difficultyFilter === filter.value;
-                  const count = getDifficultyFilterCount(filter.value);
-
-                  return (
-                    <button
-                      key={filter.value}
-                      type="button"
-                      className={`question-sidebar-filter-button question-sidebar-filter-button-${filter.value} ${
-                        active ? "question-sidebar-filter-button-active" : ""
-                      }`}
-                      onClick={() => setDifficultyFilter(filter.value)}
-                      aria-pressed={active}
-                    >
-                      <span>{filter.label}</span>
-                      <span className="mono question-sidebar-filter-count">{count}</span>
-                    </button>
-                  );
-                })}
+            {supportsTopicFilter && topicOptions.length > 0 ? (
+              <div className="question-sidebar-filter-section" aria-label="Filter questions by topic">
+                <label className="question-sidebar-filter-label" htmlFor="question-topic-filter">
+                  Topic
+                </label>
+                <select
+                  id="question-topic-filter"
+                  className="input-shell question-sidebar-filter-select"
+                  value={topicFilter}
+                  onChange={(event) => handleTopicFilterChange(event.target.value as TopicFilter)}
+                >
+                  {topicFilterOptions.map((filter) => (
+                    <option key={filter.value} value={filter.value}>
+                      {getFilterOptionLabel(filter.label, getTopicFilterCount(filter.value))}
+                    </option>
+                  ))}
+                </select>
               </div>
+            ) : null}
+
+            <div className="question-sidebar-filter-section" aria-label="Filter questions by difficulty">
+              <label className="question-sidebar-filter-label" htmlFor="question-difficulty-filter">
+                Mode
+              </label>
+              <select
+                id="question-difficulty-filter"
+                className="input-shell question-sidebar-filter-select"
+                value={difficultyFilter}
+                onChange={(event) => handleDifficultyFilterChange(event.target.value as DifficultyFilter)}
+              >
+                {DIFFICULTY_FILTERS.map((filter) => (
+                  <option key={filter.value} value={filter.value}>
+                    {getFilterOptionLabel(filter.label, getDifficultyFilterCount(filter.value))}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div className="question-sidebar-filter-section" aria-label="Filter questions by completion">
-              <div className="question-sidebar-filter-label">Completed</div>
-              <div className="question-sidebar-filter-grid question-sidebar-filter-grid-completed">
-                {COMPLETION_FILTERS.map((filter) => {
-                  const active = completionFilter === filter.value;
-                  const count = getCompletionFilterCount(filter.value);
-
-                  return (
-                    <button
-                      key={filter.value}
-                      type="button"
-                      className={`question-sidebar-filter-button question-sidebar-filter-button-${filter.value} ${
-                        active ? "question-sidebar-filter-button-active" : ""
-                      }`}
-                      onClick={() => setCompletionFilter(filter.value)}
-                      aria-pressed={active}
-                    >
-                      <span>{filter.label}</span>
-                      <span className="mono question-sidebar-filter-count">{count}</span>
-                    </button>
-                  );
-                })}
-              </div>
+              <label className="question-sidebar-filter-label" htmlFor="question-completion-filter">
+                Completed
+              </label>
+              <select
+                id="question-completion-filter"
+                className="input-shell question-sidebar-filter-select"
+                value={completionFilter}
+                onChange={(event) => handleCompletionFilterChange(event.target.value as CompletionFilter)}
+              >
+                {COMPLETION_FILTERS.map((filter) => (
+                  <option key={filter.value} value={filter.value}>
+                    {getFilterOptionLabel(filter.label, getCompletionFilterCount(filter.value))}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
 
@@ -721,7 +906,7 @@ export default function InterviewPage() {
           </div>
         )}
 
-        {question && (
+        {question ? (
           <>
             {/* Question panel */}
             <div
@@ -748,6 +933,8 @@ export default function InterviewPage() {
                 </span>
                 <LevelBadge level={level} />
                 <DiffBadge level={question.difficulty} />
+                {question.topic ? <TopicBadge topic={question.topic} /> : null}
+                {question.companies?.length ? <CompanyBadge companies={question.companies} /> : null}
                 <div style={{ flex: 1, height: "1px", background: "var(--border)" }} />
               </div>
 
@@ -936,7 +1123,7 @@ export default function InterviewPage() {
                   className="interview-result-grid"
                   style={{
                     display: "grid",
-                    gridTemplateColumns: "minmax(0, 1fr) minmax(320px, 360px)",
+                    gridTemplateColumns: "minmax(0, 0.95fr) minmax(440px, 1.05fr)",
                     gap: "24px",
                     alignItems: "stretch",
                   }}
@@ -946,19 +1133,44 @@ export default function InterviewPage() {
                     score={score}
                     onRetry={handleRetry}
                     onNext={handleNext}
-                    onGenerateAiFeedback={
-                      score.ai_feedback && score.ai_feedback_source !== "fallback"
-                        ? undefined
-                        : handleGenerateAiFeedback
-                    }
-                    isGeneratingAiFeedback={isGeneratingAiFeedback}
-                    aiFeedbackPollAttempts={aiFeedbackPollAttempts}
+                    chatMessages={chatMessages}
+                    chatError={chatError}
+                    isLoadingChat={isLoadingChat}
+                    isSendingChat={isSendingChat}
+                    onSendChatMessage={handleSendChatMessage}
                   />
                 </div>
               )
             )}
           </>
-        )}
+        ) : allQuestions.length ? (
+          <div
+            className="panel animate-fade-up"
+            style={{ padding: "34px", marginBottom: "28px" }}
+          >
+            <div
+              className="mono"
+              style={{
+                fontSize: "13px",
+                color: "var(--cyan)",
+                letterSpacing: "0.15em",
+                marginBottom: "12px",
+              }}
+            >
+              NO QUESTIONS AVAILABLE
+            </div>
+            <p
+              style={{
+                fontSize: "18px",
+                lineHeight: 1.7,
+                color: "var(--muted)",
+                margin: 0,
+              }}
+            >
+              No questions match the current topic, mode, and completed filters. Adjust the sidebar filters to continue.
+            </p>
+          </div>
+        ) : null}
         </main>
       </div>
     </div>

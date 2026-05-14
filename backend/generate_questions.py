@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 from pathlib import Path
 import random
+import re
 from urllib import error, request
 
 from dotenv import load_dotenv
@@ -16,14 +18,75 @@ QUESTIONS_PATH = ROOT_DIR / "data" / "questions.json"
 
 load_dotenv(dotenv_path=ENV_PATH)
 
+
+def _env_str(name: str, default: str, *legacy_names: str) -> str:
+    for key in (name, *legacy_names):
+        value = os.getenv(key)
+        if value is not None:
+            return value
+    return default
+
+
+def _env_int(name: str, default: int, *legacy_names: str) -> int:
+    return int(_env_str(name, str(default), *legacy_names))
+
+
 OLLAMA_URL = os.getenv("OLLAMA_URL", "http://127.0.0.1:11434/api/generate")
-OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3.1:8b")
-OLLAMA_TIMEOUT_SECONDS = int(os.getenv("AI_FEEDBACK_TIMEOUT_SECONDS", "90"))
-OLLAMA_MAX_TOKENS = int(os.getenv("QUESTION_GENERATION_MAX_TOKENS", "1800"))
-MAX_GENERATION_ATTEMPTS = int(os.getenv("QUESTION_GENERATION_MAX_ATTEMPTS", "8"))
+OLLAMA_MODEL = _env_str("QUESTION_GENERATION_MODEL", "llama3.1:8b", "AI_COACH_CHAT_MODEL", "OLLAMA_MODEL")
+OLLAMA_TIMEOUT_SECONDS = _env_int(
+    "QUESTION_GENERATION_TIMEOUT_SECONDS",
+    90,
+    "AI_COACH_TIMEOUT_SECONDS",
+    "AI_FEEDBACK_TIMEOUT_SECONDS",
+)
+OLLAMA_MAX_TOKENS = _env_int("QUESTION_GENERATION_MAX_TOKENS", 1800)
+MAX_GENERATION_ATTEMPTS = _env_int("QUESTION_GENERATION_MAX_ATTEMPTS", 8)
+NEAR_DUPLICATE_WORD_OVERLAP = float(os.getenv("QUESTION_GENERATION_DUPLICATE_OVERLAP", "0.8"))
 
 VALID_ROLES = {"SWE", "DataScience", "PM", "Behavioral"}
 VALID_LEVELS = {"intern", "new_grad"}
+ROLE_TOPIC_POOLS = {
+    "SWE": [
+        "operating_systems",
+        "memory",
+        "dsa",
+        "networking",
+        "concurrency",
+        "databases",
+        "distributed_systems",
+        "apis",
+    ],
+    "DataScience": [
+        "ml_fundamentals",
+        "model_evaluation",
+        "statistics",
+        "experimentation",
+        "feature_engineering",
+        "data_processing",
+    ],
+    "PM": [
+        "product_sense",
+        "prioritization",
+        "metrics",
+        "experimentation",
+        "roadmap",
+        "execution",
+    ],
+    "Behavioral": [
+        "ownership",
+        "conflict_resolution",
+        "communication",
+        "ambiguity",
+        "feedback",
+        "decision_making",
+    ],
+}
+DEFAULT_COMPANY_TAGS = {
+    "SWE": ["Google", "Meta", "Stripe", "Databricks", "OpenAI", "Anthropic", "Airbnb", "Notion"],
+    "DataScience": ["Meta", "Netflix", "Airbnb", "Notion", "OpenAI", "Databricks", "Google"],
+    "PM": ["Google", "Stripe", "Notion", "Meta", "OpenAI"],
+    "Behavioral": ["Google", "Meta", "Stripe", "Airbnb", "OpenAI"],
+}
 
 
 class QuestionGenerationError(RuntimeError):
@@ -32,20 +95,20 @@ class QuestionGenerationError(RuntimeError):
 
 class RubricModel(BaseModel):
     ideal_answer: str = Field(min_length=20)
-    keywords: list[str] = Field(min_length=3)
-    dimension_keywords: dict[str, list[str]] = Field(default_factory=dict)
+    concepts: list[str] = Field(min_length=3)
+    dimension_concepts: dict[str, list[str]] = Field(default_factory=dict)
 
-    @field_validator("keywords")
+    @field_validator("concepts")
     @classmethod
-    def validate_keywords(cls, value: list[str]) -> list[str]:
+    def validate_concepts(cls, value: list[str]) -> list[str]:
         cleaned = [item.strip() for item in value if item and item.strip()]
         if len(cleaned) < 3:
-            raise ValueError("keywords must include at least 3 items")
+            raise ValueError("concepts must include at least 3 items")
         return cleaned
 
-    @field_validator("dimension_keywords")
+    @field_validator("dimension_concepts")
     @classmethod
-    def validate_dimension_keywords(cls, value: dict[str, list[str]]) -> dict[str, list[str]]:
+    def validate_dimension_concepts(cls, value: dict[str, list[str]]) -> dict[str, list[str]]:
         normalized: dict[str, list[str]] = {}
         for key, items in value.items():
             cleaned = [item.strip() for item in items if item and item.strip()]
@@ -57,6 +120,8 @@ class RubricModel(BaseModel):
 class QuestionModel(BaseModel):
     role: str
     level: str
+    topic: str | None = None
+    companies: list[str] = Field(min_length=1)
     prompt: str = Field(min_length=12)
     rubric: RubricModel
 
@@ -76,6 +141,29 @@ class QuestionModel(BaseModel):
             raise ValueError(f"level must be one of {sorted(VALID_LEVELS)}")
         return cleaned
 
+    @field_validator("topic")
+    @classmethod
+    def validate_topic(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
+        cleaned = slugify_topic(value)
+        return cleaned or None
+
+    @field_validator("companies")
+    @classmethod
+    def validate_companies(cls, value: list[str]) -> list[str]:
+        cleaned: list[str] = []
+        seen: set[str] = set()
+        for item in value:
+            normalized = item.strip()
+            if not normalized or normalized in seen:
+                continue
+            seen.add(normalized)
+            cleaned.append(normalized)
+        if not cleaned:
+            raise ValueError("companies must include at least one company tag")
+        return cleaned
+
     @field_validator("prompt")
     @classmethod
     def validate_prompt(cls, value: str) -> str:
@@ -86,7 +174,153 @@ class QuestionModel(BaseModel):
 
 
 def looks_like_question_object(value: object) -> bool:
-    return isinstance(value, dict) and {"role", "level", "prompt", "rubric"}.issubset(value.keys())
+    return isinstance(value, dict) and {"role", "level", "companies", "prompt", "rubric"}.issubset(
+        value.keys()
+    )
+
+
+def slugify_topic(value: str) -> str:
+    cleaned = re.sub(r"[^a-z0-9]+", "_", value.strip().lower())
+    return cleaned.strip("_")
+
+
+def normalize_company(value: str) -> str:
+    return " ".join(value.strip().split())
+
+
+def auto_assign_topic(*, role: str, prompt: str) -> str | None:
+    pool = ROLE_TOPIC_POOLS.get(role)
+    if not pool:
+        return None
+    digest = hashlib.sha256(f"{role}:{prompt}".encode("utf-8")).digest()
+    index = int.from_bytes(digest[:4], "big") % len(pool)
+    return pool[index]
+
+
+def normalize_question_record(item: dict) -> dict:
+    normalized = dict(item)
+    role = str(normalized.get("role", "")).strip()
+    prompt = " ".join(str(normalized.get("prompt", "")).split()).strip()
+    if prompt:
+        normalized["prompt"] = prompt if prompt.endswith("?") else f"{prompt}?"
+
+    companies = normalized.get("companies")
+    if isinstance(companies, list):
+        normalized["companies"] = [company for company in (normalize_company(str(item)) for item in companies) if company]
+    elif normalized.get("company"):
+        normalized["companies"] = [normalize_company(str(normalized["company"]))]
+
+    topic = normalized.get("topic")
+    if isinstance(topic, str):
+        normalized["topic"] = slugify_topic(topic) or None
+    else:
+        normalized["topic"] = None
+
+    if not normalized["topic"] and role and prompt:
+        normalized["topic"] = auto_assign_topic(role=role, prompt=prompt)
+
+    rubric = normalized.get("rubric")
+    if isinstance(rubric, dict):
+        migrated_rubric = dict(rubric)
+        if "concepts" not in migrated_rubric and "keywords" in migrated_rubric:
+            migrated_rubric["concepts"] = migrated_rubric.pop("keywords")
+        else:
+            migrated_rubric.pop("keywords", None)
+        if "dimension_concepts" not in migrated_rubric and "dimension_keywords" in migrated_rubric:
+            migrated_rubric["dimension_concepts"] = migrated_rubric.pop("dimension_keywords")
+        else:
+            migrated_rubric.pop("dimension_keywords", None)
+        normalized["rubric"] = migrated_rubric
+
+    return normalized
+
+
+def finalize_generated_questions(items: list[QuestionModel]) -> list[QuestionModel]:
+    finalized: list[QuestionModel] = []
+    for item in items:
+        payload = item.model_dump()
+        payload["topic"] = payload.get("topic") or auto_assign_topic(role=item.role, prompt=item.prompt)
+        finalized.append(QuestionModel.model_validate(payload))
+    return finalized
+
+
+def normalize_prompt_for_similarity(prompt: str) -> list[str]:
+    text = prompt.lower()
+    text = re.sub(r"[^a-z0-9\s]", " ", text)
+    words = [word for word in text.split() if len(word) > 2]
+    stop_words = {
+        "what",
+        "when",
+        "where",
+        "which",
+        "why",
+        "how",
+        "does",
+        "would",
+        "could",
+        "should",
+        "explain",
+        "describe",
+        "difference",
+        "between",
+        "from",
+        "with",
+        "that",
+        "this",
+        "into",
+        "about",
+        "your",
+        "make",
+    }
+    return [word for word in words if word not in stop_words]
+
+
+def prompts_are_near_duplicates(left: str, right: str) -> bool:
+    left_words = set(normalize_prompt_for_similarity(left))
+    right_words = set(normalize_prompt_for_similarity(right))
+
+    if not left_words or not right_words:
+        return left.strip().lower() == right.strip().lower()
+
+    overlap = len(left_words & right_words) / min(len(left_words), len(right_words))
+    return overlap >= NEAR_DUPLICATE_WORD_OVERLAP
+
+
+def build_role_style_instructions(role: str) -> str:
+    if role == "SWE":
+        return """
+- Every prompt must be a hard technical fundamentals grill for a software engineer.
+- Focus on operating systems, networking, concurrency, memory, databases, APIs, debugging, performance, and distributed systems fundamentals.
+- Do not include behavioral, leadership, teamwork, preference, or story-based prompts.
+- Prefer concrete technical prompts such as process vs thread, indexing tradeoffs, locks vs atomics, TCP vs UDP, caching, transactions, and consistency.
+""".strip()
+
+    if role == "DataScience":
+        return """
+- Every prompt must be a hard technical fundamentals grill for a data science or machine learning candidate.
+- Focus on statistics, experimentation, model evaluation, bias-variance, feature leakage, regression/classification fundamentals, probability, and data system tradeoffs.
+- Do not include behavioral, stakeholder-management, product-sense, or story-based prompts.
+- Prefer concrete technical prompts such as precision vs recall, overfitting, calibration, regularization, hypothesis testing, and offline vs online evaluation.
+""".strip()
+
+    if role == "PM":
+        return """
+- Every prompt must be a rigorous PM fundamentals question, not a generic behavioral prompt.
+- Focus on product sense, prioritization, metrics, experimentation, tradeoffs, roadmap judgment, execution risk, and decision quality.
+- The prompt should test structured thinking about products, users, markets, goals, and measurement.
+- Do not ask for personal stories, teamwork anecdotes, conflict resolution stories, or "tell me about a time" answers.
+- Prefer concrete PM prompts such as defining success metrics, diagnosing metric movement, prioritizing features, evaluating tradeoffs, choosing experiments, and scoping an MVP.
+- Strong prompts should force the candidate to reason, not recite frameworks mechanically.
+""".strip()
+
+    return """
+- Every prompt must be a rigorous behavioral interview question for a technical candidate.
+- Focus on ownership, conflict, execution under ambiguity, failure recovery, prioritization under pressure, stakeholder management, feedback, and decision-making.
+- The prompt should invite a concrete real example from the candidate and reveal judgment, accountability, and communication quality.
+- Do not ask abstract opinion questions or lightweight culture-fit questions.
+- Prefer direct prompts such as handling disagreement, recovering from mistakes, influencing without authority, managing scope pressure, and making tradeoffs with incomplete information.
+- Avoid vague prompts that can be answered with generic advice; make the candidate ground the answer in a specific situation.
+""".strip()
 
 
 def build_prompt(
@@ -95,10 +329,12 @@ def build_prompt(
     level: str,
     count: int,
     topic: str | None,
+    companies: list[str],
     banned_prompts: list[str] | None = None,
 ) -> str:
     topic_line = f"Focus area: {topic}\n" if topic else ""
     freshness_hint = random.randint(1000, 9999)
+    company_pool = ", ".join(companies)
     banned_section = ""
     if banned_prompts:
         banned_lines = "\n".join(f'- "{prompt}"' for prompt in banned_prompts[:50])
@@ -116,11 +352,12 @@ Each object must match this schema exactly:
 {{
   "role": "{role}",
   "level": "{level}",
+  "companies": ["Company A", "Company B"],
   "prompt": "A concise interview question ending with a question mark",
   "rubric": {{
     "ideal_answer": "A strong 2 to 5 sentence answer summary",
-    "keywords": ["keyword1", "keyword2", "keyword3"],
-    "dimension_keywords": {{
+    "concepts": ["concept1", "concept2", "concept3"],
+    "dimension_concepts": {{
       "technical_depth": ["item", "item"],
       "clarity": ["item", "item"],
       "completeness": ["item", "item"],
@@ -133,12 +370,17 @@ Requirements:
 - Role must always be "{role}".
 - Level must always be "{level}".
 - Keep prompts realistic for {role} candidates at the {level} level.
+- Each question must include 1 to 3 company tags chosen from: {company_pool}.
+- Multiple companies may share the same question if the question is broadly representative.
 - Make all prompts distinct from one another.
 - Avoid repeating common textbook prompts unless they are rewritten in a meaningfully different way.
 - Do not include numbering or commentary.
-- Keywords should be specific and useful for scoring.
-- dimension_keywords should contain short phrases, not sentences.
+- Concepts should be specific and useful for semantic scoring.
+- dimension_concepts should contain short phrases, not sentences.
 - Avoid markdown fences.
+- The prompt must not mention any company name directly.
+- Keep the language crisp and interviewer-like.
+- {build_role_style_instructions(role)}
 - Internal variation hint: {freshness_hint}
 {topic_line}
 {banned_section}
@@ -242,9 +484,10 @@ def parse_generated_questions(raw: str) -> list[QuestionModel]:
         raise QuestionGenerationError("LLM returned an empty question list")
 
     try:
-        return [QuestionModel.model_validate(item) for item in question_items]
+        validated = [QuestionModel.model_validate(item) for item in question_items]
     except ValidationError as exc:
         raise QuestionGenerationError(f"Generated questions failed validation: {exc}") from exc
+    return finalize_generated_questions(validated)
 
 
 def shorten_for_debug(text: str, max_chars: int = 500) -> str:
@@ -264,7 +507,7 @@ def load_existing_questions() -> list[dict]:
     if not isinstance(data, list):
         raise QuestionGenerationError("questions.json must contain a top-level JSON array")
 
-    return data
+    return [normalize_question_record(item) for item in data]
 
 
 def dedupe_and_merge(existing: list[dict], generated: list[QuestionModel]) -> tuple[list[dict], int]:
@@ -284,6 +527,13 @@ def dedupe_and_merge(existing: list[dict], generated: list[QuestionModel]) -> tu
         key = (item.role, item.level, item.prompt)
         if key in seen:
             continue
+        if any(
+            str(existing_item.get("role", "")).strip() == item.role
+            and str(existing_item.get("level", "")).strip() == item.level
+            and prompts_are_near_duplicates(str(existing_item.get("prompt", "")).strip(), item.prompt)
+            for existing_item in merged
+        ):
+            continue
         merged.append(item.model_dump())
         seen.add(key)
         added += 1
@@ -299,13 +549,27 @@ def dedupe_generated_questions(generated: list[QuestionModel]) -> list[QuestionM
         key = (item.role, item.level, item.prompt)
         if key in seen:
             continue
+        if any(
+            existing.role == item.role
+            and existing.level == item.level
+            and prompts_are_near_duplicates(existing.prompt, item.prompt)
+            for existing in unique_items
+        ):
+            continue
         seen.add(key)
         unique_items.append(item)
 
     return unique_items
 
 
-def generate_questions_with_retries(*, role: str, level: str, count: int, topic: str | None) -> list[QuestionModel]:
+def generate_questions_with_retries(
+    *,
+    role: str,
+    level: str,
+    count: int,
+    topic: str | None,
+    companies: list[str],
+) -> list[QuestionModel]:
     collected: list[QuestionModel] = []
     last_error: QuestionGenerationError | None = None
     stalled_attempts = 0
@@ -328,6 +592,7 @@ def generate_questions_with_retries(*, role: str, level: str, count: int, topic:
             level=level,
             count=min(remaining, 3),
             topic=topic,
+            companies=companies,
             banned_prompts=banned_prompts,
         )
         raw = call_ollama(prompt)
@@ -369,9 +634,10 @@ def generate_questions_with_retries(*, role: str, level: str, count: int, topic:
 
 
 def save_questions(items: list[dict]) -> None:
+    normalized_items = [normalize_question_record(item) for item in items]
     QUESTIONS_PATH.parent.mkdir(parents=True, exist_ok=True)
     with QUESTIONS_PATH.open("w", encoding="utf-8") as handle:
-        json.dump(items, handle, indent=2)
+        json.dump(normalized_items, handle, indent=2)
         handle.write("\n")
 
 
@@ -383,6 +649,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--level", required=True, choices=sorted(VALID_LEVELS))
     parser.add_argument("--count", type=int, default=5)
     parser.add_argument("--topic", help="Optional topic to focus the generated questions on.")
+    parser.add_argument(
+        "--companies",
+        nargs="+",
+        help="Optional company tag pool to sample from. Defaults to a curated list per role.",
+    )
     return parser.parse_args()
 
 
@@ -392,11 +663,18 @@ def main() -> None:
     if args.count < 1 or args.count > 25:
         raise QuestionGenerationError("--count must be between 1 and 25")
 
+    companies = args.companies or DEFAULT_COMPANY_TAGS.get(args.role, [])
+    if not companies:
+        raise QuestionGenerationError(
+            f"No company tags configured for role {args.role}. Pass --companies explicitly."
+        )
+
     generated = generate_questions_with_retries(
         role=args.role,
         level=args.level,
         count=args.count,
         topic=args.topic,
+        companies=companies,
     )
 
     existing = load_existing_questions()

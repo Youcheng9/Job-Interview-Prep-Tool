@@ -19,6 +19,9 @@ class QuestionItem(BaseModel):
     id: int
     role: str
     level: str
+    topic: str | None = None
+    company: str | None = None
+    companies: list[str] = []
     prompt: str
     difficulty: str
 

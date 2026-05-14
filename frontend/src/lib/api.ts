@@ -14,12 +14,13 @@ export interface Question {
   id: number;
   role: Role;
   level: CandidateLevel;
+  topic?: string | null;
+  company?: string | null;
+  companies?: string[];
   text: string;
   rubric: string[];
   difficulty: "easy" | "medium" | "hard";
 }
-
-export type AIFeedbackSource = "model" | "fallback" | "pending";
 
 export interface ScoreResult {
   answerId?: number;
@@ -32,18 +33,13 @@ export interface ScoreResult {
   strengths: string[];
   weaknesses: string[];
   feedback: string;
-  ai_feedback_source?: AIFeedbackSource;
-  ai_feedback_pending?: boolean;
-  ai_feedback?: {
+  instant_feedback?: {
     summary: string;
-    strengths: string[];
-    weaknesses: string[];
     improvements: string[];
-    improved_answer: string;
     next_focus: string;
     label?: string;
+    source?: string;
   };
-  ai_feedback_error?: string;
   score_confidence?: "low" | "medium" | "high";
   scoring_degraded?: boolean;
 }
@@ -56,11 +52,28 @@ export interface AnswerRecord {
   created_at: string;
 }
 
+export interface FeedbackChatMessage {
+  id: number;
+  role: "user" | "assistant";
+  content: string;
+  created_at: string;
+}
+
+export interface FeedbackChatThread {
+  thread_id: number;
+  answer_id: number;
+  ai_available: boolean;
+  messages: FeedbackChatMessage[];
+}
+
 interface ApiQuestionsResponse {
   items: Array<{
     id: number;
     role: ApiRole;
     level: CandidateLevel;
+    topic?: string | null;
+    company?: string | null;
+    companies?: string[];
     prompt: string;
     difficulty: Question["difficulty"];
   }>;
@@ -80,21 +93,18 @@ interface ApiSubmitAnswerResponse {
   feedback?: {
     strengths?: string[];
     weaknesses?: string[];
+    missing_concepts?: string[];
     missing_keywords?: string[];
-    ai_feedback_source?: AIFeedbackSource;
-    ai_feedback_pending?: boolean;
-    ai_feedback?: {
+    instant_feedback?: {
       summary?: string;
-      strengths?: string[];
-      weaknesses?: string[];
       improvements?: string[];
-      improved_answer?: string;
       next_focus?: string;
       label?: string;
+      source?: string;
     };
-    ai_feedback_error?: string;
     notes?: {
       similarity_raw?: number;
+      concept_coverage?: number;
       keyword_coverage?: number;
       ideal_snippet?: string | null;
       confidence?: "low" | "medium" | "high";
@@ -103,30 +113,18 @@ interface ApiSubmitAnswerResponse {
   };
 }
 
-interface ApiGenerateAIFeedbackResponse {
-  answer_id: number;
-  ai_feedback?: {
-    summary?: string;
-    strengths?: string[];
-    weaknesses?: string[];
-    improvements?: string[];
-    improved_answer?: string;
-    next_focus?: string;
-    label?: string;
-  } | null;
-  ai_feedback_error?: string | null;
-  ai_feedback_source?: AIFeedbackSource | null;
-}
-
 interface ApiHistoryResponse {
   items: Array<{
     answer_id: number;
     question_id: number;
     role: ApiRole;
     level: CandidateLevel;
-    difficulty: Question["difficulty"];
-    prompt: string;
-    answer_text: string;
+      difficulty: Question["difficulty"];
+      topic?: string | null;
+      company?: string | null;
+      companies?: string[];
+      prompt: string;
+      answer_text: string;
     created_at: string;
     overall: number;
     scores: {
@@ -137,6 +135,21 @@ interface ApiHistoryResponse {
     };
     feedback?: ApiSubmitAnswerResponse["feedback"];
   }>;
+}
+
+interface ApiFeedbackChatThreadResponse {
+  thread_id: number;
+  answer_id: number;
+  ai_available: boolean;
+  messages: FeedbackChatMessage[];
+}
+
+interface ApiCreateFeedbackChatMessageResponse {
+  thread_id: number;
+  answer_id: number;
+  ai_available: boolean;
+  user_message: FeedbackChatMessage;
+  assistant_message: FeedbackChatMessage;
 }
 
 function toApiRole(role: Role): ApiRole {
@@ -188,7 +201,26 @@ function formatFeedback(payload?: ApiSubmitAnswerResponse["feedback"]): string {
   return parts.join(" ");
 }
 
+function normalizeInstantFeedback(
+  payload?: ApiSubmitAnswerResponse["feedback"] extends infer T
+    ? T extends { instant_feedback?: infer U }
+      ? U
+      : never
+    : never,
+): ScoreResult["instant_feedback"] | undefined {
+  if (!payload?.summary) return undefined;
+
+  return {
+    summary: payload.summary,
+    improvements: payload.improvements ?? [],
+    next_focus: payload.next_focus ?? "",
+    label: payload.label,
+    source: payload.source,
+  };
+}
+
 function normalizeScore(payload: ApiSubmitAnswerResponse): ScoreResult {
+  const missingConcepts = payload.feedback?.missing_concepts ?? payload.feedback?.missing_keywords ?? [];
   return {
     answerId: payload.answer_id,
     overall: payload.overall,
@@ -196,42 +228,13 @@ function normalizeScore(payload: ApiSubmitAnswerResponse): ScoreResult {
     clarity: payload.scores.clarity ?? payload.overall,
     completeness: payload.scores.completeness ?? payload.overall,
     structure: payload.scores.structure ?? payload.overall,
-    missing_concepts: payload.feedback?.missing_keywords ?? [],
+    missing_concepts: missingConcepts,
     strengths: payload.feedback?.strengths ?? [],
     weaknesses: payload.feedback?.weaknesses ?? [],
     feedback: formatFeedback(payload.feedback),
-    ai_feedback_source: payload.feedback?.ai_feedback_source,
-    ai_feedback_pending: payload.feedback?.ai_feedback_pending,
-    ai_feedback: payload.feedback?.ai_feedback?.summary
-      ? {
-          summary: payload.feedback.ai_feedback.summary,
-          strengths: payload.feedback.ai_feedback.strengths ?? [],
-          weaknesses: payload.feedback.ai_feedback.weaknesses ?? [],
-          improvements: payload.feedback.ai_feedback.improvements ?? [],
-          improved_answer: payload.feedback.ai_feedback.improved_answer ?? "",
-          next_focus: payload.feedback.ai_feedback.next_focus ?? "",
-          label: payload.feedback.ai_feedback.label,
-        }
-      : undefined,
-    ai_feedback_error: payload.feedback?.ai_feedback_error,
+    instant_feedback: normalizeInstantFeedback(payload.feedback?.instant_feedback),
     score_confidence: payload.feedback?.notes?.confidence,
     scoring_degraded: payload.feedback?.notes?.degraded,
-  };
-}
-
-function normalizeAiFeedback(
-  payload?: ApiGenerateAIFeedbackResponse["ai_feedback"],
-): ScoreResult["ai_feedback"] | undefined {
-  if (!payload?.summary) return undefined;
-
-  return {
-    summary: payload.summary,
-    strengths: payload.strengths ?? [],
-    weaknesses: payload.weaknesses ?? [],
-    improvements: payload.improvements ?? [],
-    improved_answer: payload.improved_answer ?? "",
-    next_focus: payload.next_focus ?? "",
-    label: payload.label,
   };
 }
 
@@ -339,6 +342,9 @@ export async function getQuestions(role: Role, level: CandidateLevel): Promise<Q
     id: item.id,
     role: fromApiRole(item.role),
     level: item.level,
+    topic: item.topic,
+    company: item.company,
+    companies: item.companies ?? (item.company ? [item.company] : []),
     text: item.prompt,
     rubric: [],
     difficulty: item.difficulty ?? getDifficulty(item.level, index),
@@ -387,6 +393,9 @@ export async function getHistory(): Promise<AnswerRecord[]> {
         id: item.question_id,
         role,
         level: item.level,
+        topic: item.topic,
+        company: item.company,
+        companies: item.companies ?? (item.company ? [item.company] : []),
         text: item.prompt,
         rubric: [],
         difficulty: item.difficulty,
@@ -399,24 +408,11 @@ export async function getHistory(): Promise<AnswerRecord[]> {
         clarity: item.scores.clarity ?? item.overall,
         completeness: item.scores.completeness ?? item.overall,
         structure: item.scores.structure ?? item.overall,
-        missing_concepts: item.feedback?.missing_keywords ?? [],
+        missing_concepts: item.feedback?.missing_concepts ?? item.feedback?.missing_keywords ?? [],
         strengths: item.feedback?.strengths ?? [],
         weaknesses: item.feedback?.weaknesses ?? [],
         feedback: formatFeedback(item.feedback),
-        ai_feedback_source: item.feedback?.ai_feedback_source,
-        ai_feedback_pending: item.feedback?.ai_feedback_pending,
-        ai_feedback: item.feedback?.ai_feedback?.summary
-          ? {
-              summary: item.feedback.ai_feedback.summary,
-              strengths: item.feedback.ai_feedback.strengths ?? [],
-              weaknesses: item.feedback.ai_feedback.weaknesses ?? [],
-              improvements: item.feedback.ai_feedback.improvements ?? [],
-              improved_answer: item.feedback.ai_feedback.improved_answer ?? "",
-              next_focus: item.feedback.ai_feedback.next_focus ?? "",
-              label: item.feedback.ai_feedback.label,
-            }
-          : undefined,
-        ai_feedback_error: item.feedback?.ai_feedback_error,
+        instant_feedback: normalizeInstantFeedback(item.feedback?.instant_feedback),
         score_confidence: item.feedback?.notes?.confidence,
         scoring_degraded: item.feedback?.notes?.degraded,
       },
@@ -424,18 +420,16 @@ export async function getHistory(): Promise<AnswerRecord[]> {
   });
 }
 
-export async function generateAIFeedback(answerId: number): Promise<{
-  ai_feedback?: ScoreResult["ai_feedback"];
-  ai_feedback_error?: string;
-  ai_feedback_source?: AIFeedbackSource;
-}> {
-  const data = await request<ApiGenerateAIFeedbackResponse>(`/scoring/${answerId}/ai-feedback`, {
-    method: "POST",
-  });
+export async function getFeedbackChatThread(answerId: number): Promise<FeedbackChatThread> {
+  return request<ApiFeedbackChatThreadResponse>(`/feedback-chat/answers/${answerId}`);
+}
 
-  return {
-    ai_feedback: normalizeAiFeedback(data.ai_feedback),
-    ai_feedback_error: data.ai_feedback_error ?? undefined,
-    ai_feedback_source: data.ai_feedback_source ?? undefined,
-  };
+export async function sendFeedbackChatMessage(
+  answerId: number,
+  content: string,
+): Promise<ApiCreateFeedbackChatMessageResponse> {
+  return request<ApiCreateFeedbackChatMessageResponse>(`/feedback-chat/answers/${answerId}/messages`, {
+    method: "POST",
+    body: JSON.stringify({ content }),
+  });
 }

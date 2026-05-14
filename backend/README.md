@@ -7,7 +7,7 @@ The backend is a FastAPI service that supports:
 - User authentication (register/login) with JWT  
 - Question retrieval from PostgreSQL  
 - Answer submission + automatic scoring  
-- Ollama-based AI coaching feedback on submitted answers
+- Ollama-based coach chat for submitted answers
 - User history (past answers + scores)  
 - Database schema migrations via Alembic  
 
@@ -23,7 +23,7 @@ This backend is designed to be the **source of truth** for users, questions, ans
 - **Migrations:** Alembic  
 - **Auth:** JWT (HS256) + bcrypt password hashing  
 - **Scoring:** sentence-transformers embeddings + cosine similarity + keyword coverage  
-- **AI feedback:** Ollama local LLM coaching layer  
+- **AI coach chat:** Ollama local LLM coaching layer  
 
 ---
 
@@ -45,7 +45,7 @@ backend/
 │   ├── scoring.py           # Pydantic request/response types for scoring
 │   └── history.py           # Pydantic request/response types for history
 ├── ml/
-│   └── scorer.py            # compute_scores(): embeddings + keywords scoring logic
+│   └── scorer.py            # compute_scores(): semantic similarity + concept coverage scoring logic
 ├── migrations/              # Alembic migration scripts
 ├── data/
 │   └── questions.json       # Seed data for initial questions + rubric
@@ -69,11 +69,23 @@ JWT_SECRET=CHANGE_ME_TO_A_LONG_RANDOM_STRING
 JWT_ALGORITHM=HS256
 ACCESS_TOKEN_EXPIRE_MINUTES=10080
 
-# Ollama AI feedback
+# Ollama coach chat
 OLLAMA_URL=http://127.0.0.1:11434/api/generate
-OLLAMA_MODEL=llama3.1:8b
-AI_FEEDBACK_ENABLED=true
-AI_FEEDBACK_TIMEOUT_SECONDS=90
+AI_COACH_CHAT_MODEL=llama3.2:3b
+AI_COACH_CHAT_ENABLED=true
+AI_COACH_TIMEOUT_SECONDS=30
+AI_COACH_CHAT_MAX_TOKENS=180
+AI_COACH_PROMPT_IDEAL_CHARS=220
+AI_CHAT_NUM_CTX=768
+AI_CHAT_PROMPT_ANSWER_CHARS=420
+AI_CHAT_PROMPT_HISTORY_CHARS=180
+
+# Optional question generation overrides
+QUESTION_GENERATION_MODEL=llama3.1:8b
+QUESTION_GENERATION_TIMEOUT_SECONDS=90
+QUESTION_GENERATION_MAX_TOKENS=1800
+QUESTION_GENERATION_MAX_ATTEMPTS=8
+QUESTION_GENERATION_DUPLICATE_OVERLAP=0.8
 ```
 
 ### Notes
@@ -110,13 +122,19 @@ python -m backend.seed_questions
 uvicorn backend.main:app --reload --port 8000
 ```
 
-### 5. Start Ollama for AI feedback
+### 5. Start Ollama for coach chat
 
 ```bash
 ollama serve
 ```
 
-If needed:
+If needed for coach chat:
+
+```bash
+ollama pull llama3.2:3b
+```
+
+If you plan to regenerate the question bank with the default question-generation model:
 
 ```bash
 ollama pull llama3.1:8b
@@ -191,8 +209,8 @@ Example `backend/data/questions.json` entry:
   "prompt": "Explain the difference between a process and a thread.",
   "rubric": {
     "ideal_answer": "A process has its own address space and resources; threads share memory within a process and are lighter weight.",
-    "keywords": ["address space", "shared memory", "context switch", "lightweight"],
-    "dimension_keywords": {
+    "concepts": ["address space", "shared memory", "context switch", "lightweight"],
+    "dimension_concepts": {
       "technical_depth": ["address space", "context switch"],
       "clarity": ["difference", "example"],
       "completeness": ["address space", "shared memory", "context switch"],
@@ -205,11 +223,11 @@ Example `backend/data/questions.json` entry:
 ### Minimum required keys
 
 - `ideal_answer` (string)  
-- `keywords` (list of strings)  
+- `concepts` (list of strings)  
 
 ### Optional
 
-- `dimension_keywords` (dict of lists)  
+- `dimension_concepts` (dict of lists)  
 
 ---
 
@@ -273,10 +291,10 @@ compute_scores(answer_text, rubric)
 - Computes cosine similarity  
 - Mapped into a 0–1 range  
 
-#### 2. Keyword coverage
+#### 2. Concept coverage
 
-- Measures what fraction of `rubric["keywords"]` appear in the answer  
-- Simple tokenization (lowercase word boundaries)  
+- Measures semantic coverage of `rubric["concepts"]`
+- Exact wording is not required; paraphrases can still receive credit
 
 ### Outputs
 
@@ -286,7 +304,7 @@ Numeric scoring remains deterministic, but written coaching feedback is generate
 
 Current flow:
 
-1. `compute_scores()` creates numeric scores and keyword-gap feedback.
+1. `compute_scores()` creates numeric scores and concept-gap feedback.
 2. `backend/feedback_agent.py` sends the question, answer, rubric, and score breakdown to Ollama.
 3. Ollama returns structured coaching feedback:
    - summary
@@ -308,8 +326,8 @@ If Ollama is unavailable, scoring still works and the request does not fail. Onl
 - `feedback` dict:
   - strengths  
   - weaknesses  
-  - missing_keywords  
-  - notes (similarity & keyword coverage)
+  - missing_concepts  
+  - notes (similarity & concept coverage)
 
 ---
 
@@ -391,7 +409,7 @@ alembic current
 - sentence-transformers may download model on first run  
 - Confirm dependencies installed  
 - Check server logs for traceback  
-- Confirm rubric contains `ideal_answer` and `keywords`  
+- Confirm rubric contains `ideal_answer` and `concepts`  
 
 ### Seed questions not showing
 
