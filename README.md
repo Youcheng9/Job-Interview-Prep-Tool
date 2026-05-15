@@ -1,5 +1,8 @@
-**Every Deliverable Documents are located in `Deliverables` directory**
-
+**Every Deliverable Document is located in the `Deliverables` directory**
+Team Members:
+- Youcheng Taing (Youcheng9)
+- Freeman Yiu (Coolguy4123)
+  
 # InterviewPrep
 
 InterviewPrep is a full-stack interview practice app with:
