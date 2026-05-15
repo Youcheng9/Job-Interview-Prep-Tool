@@ -21,3 +21,4 @@
 - Relase Notes
 - Build & Deploy Instructions
 - Software Design Pattern txt file
+- Project Charter
