@@ -1,3 +1,5 @@
+**Every Deliverable Documents are located in `Deliverables` directory**
+
 # InterviewPrep
 
 InterviewPrep is a full-stack interview practice app with:
