@@ -18,4 +18,6 @@
     - Backend Test Case Document
     - Test Results Summary Document
 - Business Plan
+- Relase Notes
+- Build & Deploy Instructions
 - Software Design Pattern txt file
