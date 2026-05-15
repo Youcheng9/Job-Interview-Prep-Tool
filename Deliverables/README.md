@@ -1,0 +1,21 @@
+# Includes respective documents and diagrams for InterviewAce Deliverables
+- Functional Requirements Spec
+    - Use Case Diagram
+    - Activity Diagram
+    - Domain Object Model (DOM)
+- Technical/Design Spec
+    - Context Diagram
+    - Architecture Layout Diagram
+    - Component Diagram
+    - Class Hierarchy & Relationship Diagram
+    - Sequence Diagram
+- Test Case Spec
+    - Test Strategy/Approach Document
+    - Test Plan Document
+    - Frontend Traceability Matrix
+    - Frontend Test Case Document
+    - Backend Traceability Matrix
+    - Backend Test Case Document
+    - Test Results Summary Document
+- Business Plan
+- Software Design Pattern txt file
