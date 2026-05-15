@@ -157,7 +157,6 @@ function HistoryQuestionItem({
           width: "100%",
           background: "transparent",
           border: "none",
-          padding: 0,
           textAlign: "left",
           cursor: "pointer",
         }}

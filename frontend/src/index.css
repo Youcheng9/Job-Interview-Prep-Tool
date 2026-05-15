@@ -469,7 +469,7 @@ h1, h2, h3, h4, h5 {
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 12px;
   align-items: center;
-  padding: 18px;
+  padding: 22px;
   border: 0;
   background: transparent;
   color: var(--text);
@@ -528,6 +528,7 @@ h1, h2, h3, h4, h5 {
   display: flex;
   align-items: center;
   gap: 10px;
+  padding-left: 8px;
 }
 
 .progress-question-expand-button {
@@ -537,7 +538,7 @@ h1, h2, h3, h4, h5 {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 0 18px;
+  padding: 0 22px;
   border: 0;
   border-top: 1px solid var(--border);
   background:
@@ -632,22 +633,28 @@ h1, h2, h3, h4, h5 {
 .progress-detail-section {
   display: grid;
   gap: 10px;
+  padding: 22px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent 100%), var(--surface2);
 }
 
 .progress-answer-text {
   color: var(--muted);
-  font-size: 1rem;
-  line-height: 1.72;
+  font-size: 1.05rem;
+  line-height: 1.82;
   white-space: pre-wrap;
 }
 
 .progress-answer-text-strong {
   color: var(--text);
-  padding: 14px 16px;
+  padding: 18px 20px;
   border: 1px solid var(--border);
   border-left: 2px solid var(--acid);
   border-radius: 6px;
   background: var(--surface2);
+  font-size: 1.08rem;
+  line-height: 1.9;
 }
 
 .progress-score-grid,
@@ -690,7 +697,7 @@ h1, h2, h3, h4, h5 {
 }
 
 .progress-result-modal {
-  width: min(980px, calc(100vw - 32px));
+  width: min(1120px, calc(100vw - 32px));
   max-height: min(860px, calc(100vh - 32px));
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
@@ -703,7 +710,7 @@ h1, h2, h3, h4, h5 {
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 18px;
   align-items: start;
-  padding: 24px;
+  padding: 28px;
   border-top: 3px solid var(--acid);
   border-bottom: 1px solid var(--border);
   background: linear-gradient(180deg, var(--panel-highlight), transparent 100%), var(--surface);
@@ -712,8 +719,8 @@ h1, h2, h3, h4, h5 {
 .progress-result-modal-title {
   margin-top: 8px;
   color: var(--text);
-  font-size: clamp(1.22rem, 1.08rem + 0.54vw, 1.58rem);
-  line-height: 1.35;
+  font-size: clamp(1.3rem, 1.12rem + 0.62vw, 1.72rem);
+  line-height: 1.42;
 }
 
 .progress-result-modal-score {
@@ -752,7 +759,7 @@ h1, h2, h3, h4, h5 {
 .progress-result-modal-body {
   min-height: 0;
   overflow-y: auto;
-  padding: 24px;
+  padding: 32px;
 }
 
 .progress-column-empty {
@@ -3248,6 +3255,20 @@ html[data-theme="light"] .authed-meta-chip strong {
 
   .progress-filter-section {
     grid-template-columns: 1fr;
+  }
+
+  .progress-result-modal-body {
+    padding: 18px;
+  }
+
+  .progress-detail-section {
+    padding: 16px;
+  }
+
+  .progress-answer-text,
+  .progress-answer-text-strong {
+    font-size: 1rem;
+    line-height: 1.72;
   }
 }
 
